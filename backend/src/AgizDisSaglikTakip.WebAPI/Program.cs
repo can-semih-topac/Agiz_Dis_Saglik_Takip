@@ -1,4 +1,5 @@
 using System.Text;
+using AgizDisSaglikTakip.Business;
 using AgizDisSaglikTakip.Core;
 using AgizDisSaglikTakip.DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -15,6 +16,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDataAccessServices(builder.Configuration);
 builder.Services.AddCoreServices(builder.Configuration);
+builder.Services.AddBusinessServices();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

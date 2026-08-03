@@ -1,3 +1,4 @@
+using AgizDisSaglikTakip.Core.Utilities.Email;
 using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
 using AgizDisSaglikTakip.Core.Utilities.Security.Jwt;
 using Microsoft.Extensions.Configuration;
@@ -21,6 +22,17 @@ public static class ServiceCollectionExtensions
 
         var aesKey = configuration["Encryption:AesKey"]!;
         services.AddSingleton<IEncryptionService>(new AesEncryptionService(aesKey));
+
+        var emailSettings = new EmailSettings
+        {
+            SmtpHost = configuration["Email:SmtpHost"]!,
+            SmtpPort = int.Parse(configuration["Email:SmtpPort"]!),
+            SenderEmail = configuration["Email:SenderEmail"]!,
+            SenderName = configuration["Email:SenderName"]!,
+            SenderPassword = configuration["Email:SenderPassword"]!
+        };
+        services.AddSingleton(emailSettings);
+        services.AddScoped<IEmailService, SmtpEmailService>();
 
         return services;
     }
