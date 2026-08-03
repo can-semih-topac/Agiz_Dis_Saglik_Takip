@@ -7,12 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.20" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AgizDisSaglikTakip.Business\AgizDisSaglikTakip.Business.csproj" />
     <ProjectReference Include="..\AgizDisSaglikTakip.Core\AgizDisSaglikTakip.Core.csproj" />
+    <ProjectReference Include="..\AgizDisSaglikTakip.DataAccess\AgizDisSaglikTakip.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>
