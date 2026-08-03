@@ -1,0 +1,28 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.userosscache
+*.sln.docstates
+
+# Node / Angular (frontend eklenince kullanılacak)
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+
+# Ortama özel gizli dosyalar (JWT/AES anahtarları user-secrets ile yönetilecek)
+*.env
+
+# Yüklenen görseller (dosya sistemine kaydedilen içerik, repoya girmemeli)
+uploads/
+
+# OS
+Thumbs.db
+.DS_Store
