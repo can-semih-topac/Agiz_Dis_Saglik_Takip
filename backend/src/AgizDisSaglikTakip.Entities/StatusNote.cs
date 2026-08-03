@@ -1,0 +1,12 @@
+namespace AgizDisSaglikTakip.Entities;
+
+public class StatusNote
+{
+    public int Id { get; set; }
+    public int UserId { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public string? ImagePath { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public User User { get; set; } = null!;
+}
