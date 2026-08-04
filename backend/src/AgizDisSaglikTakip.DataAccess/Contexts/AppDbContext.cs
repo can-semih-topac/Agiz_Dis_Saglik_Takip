@@ -58,6 +58,19 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Suggestion>(entity =>
         {
             entity.Property(s => s.Text).HasMaxLength(500).IsRequired();
+
+            entity.HasData(
+                new Suggestion { Id = 1, Text = "Dişlerinizi günde en az iki kez, sabah ve akşam fırçalayın." },
+                new Suggestion { Id = 2, Text = "Diş ipini her gün kullanarak diş aralarındaki plağı temizleyin." },
+                new Suggestion { Id = 3, Text = "Şekerli ve asitli içecekleri azaltarak dişlerinizi çürükten koruyun." },
+                new Suggestion { Id = 4, Text = "Diş fırçanızı her 3 ayda bir, kılları yıprandığında yenileyin." },
+                new Suggestion { Id = 5, Text = "Ağız gargarası kullanarak ağız kokusunu ve bakteri oluşumunu azaltabilirsiniz." },
+                new Suggestion { Id = 6, Text = "Diş hekiminizi yılda en az iki kez düzenli kontrol için ziyaret edin." },
+                new Suggestion { Id = 7, Text = "Sert kıllı yerine yumuşak kıllı diş fırçası tercih edin." },
+                new Suggestion { Id = 8, Text = "Asitli gıdalardan sonra dişlerinizi hemen değil, 30 dakika bekleyip fırçalayın." },
+                new Suggestion { Id = 9, Text = "Bol su içerek ağzınızın kurumasını önleyin, tükürük diş sağlığını korur." },
+                new Suggestion { Id = 10, Text = "Tırnak yeme ve kalem çiğneme gibi alışkanlıklardan kaçının, dişlerinize zarar verir." }
+            );
         });
     }
 }

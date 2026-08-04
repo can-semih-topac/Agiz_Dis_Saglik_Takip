@@ -21,6 +21,8 @@ builder.Services.AddBusinessServices();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // Varsayılanda ASP.NET Core "sub" gibi kısa claim adlarını uzun URI'lere eşliyor; bunu kapatıp token'a ne yazdıysak Controller'da onu okuyoruz.
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
