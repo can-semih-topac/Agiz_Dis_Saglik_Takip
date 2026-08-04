@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthManager>();
         services.AddScoped<IUserService, UserManager>();
         services.AddScoped<ISuggestionService, SuggestionManager>();
+        services.AddScoped<IGoalService, GoalManager>();
 
         return services;
     }
