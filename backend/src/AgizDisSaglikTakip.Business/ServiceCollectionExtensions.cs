@@ -9,6 +9,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBusinessServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthManager>();
+        services.AddScoped<IUserService, UserManager>();
+        services.AddScoped<ISuggestionService, SuggestionManager>();
+        services.AddScoped<IGoalService, GoalManager>();
+        services.AddScoped<IGoalStatusService, GoalStatusManager>();
 
         return services;
     }
