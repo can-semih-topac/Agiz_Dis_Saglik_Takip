@@ -7,6 +7,7 @@ using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
 using AgizDisSaglikTakip.Core.Utilities.Security.Jwt;
 using AgizDisSaglikTakip.DataAccess.Abstract;
 using AgizDisSaglikTakip.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace AgizDisSaglikTakip.Business.Concrete;
 
@@ -16,20 +17,23 @@ public class AuthManager : IAuthService
     private readonly IEncryptionService _encryptionService;
     private readonly ITokenService _tokenService;
     private readonly IEmailService _emailService;
+    private readonly ILogger<AuthManager> _logger;
 
     public AuthManager(
         IUserRepository userRepository,
         IEncryptionService encryptionService,
         ITokenService tokenService,
-        IEmailService emailService)
+        IEmailService emailService,
+        ILogger<AuthManager> logger)
     {
         _userRepository = userRepository;
         _encryptionService = encryptionService;
         _tokenService = tokenService;
         _emailService = emailService;
+        _logger = logger;
     }
 
-    public async Task<ServiceResult> RegisterAsync(RegisterDto dto)
+    public async Task<ServiceResult> RegisterAsync(RegisterDto dto) //Kayıt olma
     {
         if (!AuthBusinessRules.IsValidEmailFormat(dto.Email))
             return ServiceResult.Fail("Geçersiz e-posta formatı.");
@@ -65,15 +69,16 @@ public class AuthManager : IAuthService
                 "Kaydınız Başarıyla Oluşturuldu",
                 BuildWelcomeEmailHtml(user.FullName));
         }
-        catch
+        catch (Exception ex)
         {
-            // Mail sunucusu geçici olarak erişilemez olsa bile kayıt işlemi geçerli kalmalı.
+            // Mail sunucusu geçici olarak erişilemez olsa bile kayıt işlemi geçerli kalmalı ama sebebi görebilmek için logluyoruz.
+            _logger.LogError(ex, "Kayıt sonrası bilgilendirme maili gönderilemedi. Kullanıcı: {Email}", user.Email);
         }
 
         return ServiceResult.Ok("Kayıt başarılı.");
     }
 
-    public async Task<ServiceResult<LoginResultDto>> LoginAsync(LoginDto dto)
+    public async Task<ServiceResult<LoginResultDto>> LoginAsync(LoginDto dto) //Giriş yapma
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
@@ -95,7 +100,7 @@ public class AuthManager : IAuthService
         return ServiceResult<LoginResultDto>.Ok(result, "Giriş başarılı.");
     }
 
-    public async Task<ServiceResult> VerifyEmailForPasswordResetAsync(string email)
+    public async Task<ServiceResult> VerifyEmailForPasswordResetAsync(string email) //Şifre sıfırlama için e-posta doğrulama
     {
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
@@ -104,7 +109,7 @@ public class AuthManager : IAuthService
         return ServiceResult.Ok();
     }
 
-    public async Task<ServiceResult> ResetPasswordAsync(ResetPasswordDto dto)
+    public async Task<ServiceResult> ResetPasswordAsync(ResetPasswordDto dto) //Şifre sıfırlama 
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
@@ -122,7 +127,7 @@ public class AuthManager : IAuthService
         return ServiceResult.Ok("Parola güncellendi.");
     }
 
-    private static string BuildWelcomeEmailHtml(string fullName)
+    private static string BuildWelcomeEmailHtml(string fullName) // Hoşgeldin maili oluşturmak için HTML şablonu
     {
         return $"""
             <html>
