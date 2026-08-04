@@ -3,6 +3,7 @@ using AgizDisSaglikTakip.Business;
 using AgizDisSaglikTakip.Core;
 using AgizDisSaglikTakip.DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,8 +15,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Web API şablonunda MVC'nin aksine varsayılan olarak wwwroot klasörü oluşturulmuyor;
+// WebRootPath boş gelirse elle hesaplayıp klasörü oluşturuyoruz.
+if (string.IsNullOrEmpty(builder.Environment.WebRootPath))
+{
+    builder.Environment.WebRootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+}
+Directory.CreateDirectory(builder.Environment.WebRootPath);
+
 builder.Services.AddDataAccessServices(builder.Configuration);
-builder.Services.AddCoreServices(builder.Configuration);
+builder.Services.AddCoreServices(builder.Configuration, builder.Environment.WebRootPath);
 builder.Services.AddBusinessServices();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -48,6 +57,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.Environment.WebRootFileProvider = new PhysicalFileProvider(app.Environment.WebRootPath);
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,0 +1,42 @@
+using AgizDisSaglikTakip.Business.Abstract;
+using AgizDisSaglikTakip.Business.DTOs.StatusNote;
+using AgizDisSaglikTakip.WebAPI.Extensions;
+using AgizDisSaglikTakip.WebAPI.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AgizDisSaglikTakip.WebAPI.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class StatusNoteController : ControllerBase
+{
+    private readonly IStatusNoteService _statusNoteService;
+
+    public StatusNoteController(IStatusNoteService statusNoteService)
+    {
+        _statusNoteService = statusNoteService;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateStatusNote([FromForm] CreateStatusNoteRequest request)
+    {
+        var dto = new CreateStatusNoteDto
+        {
+            Description = request.Description ?? string.Empty,
+            ImageStream = request.Image?.OpenReadStream(),
+            ImageExtension = request.Image != null ? Path.GetExtension(request.Image.FileName) : null
+        };
+
+        var result = await _statusNoteService.CreateStatusNoteAsync(this.GetUserId(), dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpGet("last7days")]
+    public async Task<IActionResult> GetLast7Days()
+    {
+        var result = await _statusNoteService.GetLast7DaysAsync(this.GetUserId());
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+}

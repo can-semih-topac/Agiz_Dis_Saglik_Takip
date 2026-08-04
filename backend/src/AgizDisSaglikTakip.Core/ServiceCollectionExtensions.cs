@@ -1,4 +1,5 @@
 using AgizDisSaglikTakip.Core.Utilities.Email;
+using AgizDisSaglikTakip.Core.Utilities.FileStorage;
 using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
 using AgizDisSaglikTakip.Core.Utilities.Security.Jwt;
 using Microsoft.Extensions.Configuration;
@@ -8,7 +9,7 @@ namespace AgizDisSaglikTakip.Core;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddCoreServices(this IServiceCollection services, IConfiguration configuration, string webRootPath)
     {
         var jwtSettings = new JwtSettings
         {
@@ -33,6 +34,14 @@ public static class ServiceCollectionExtensions
         };
         services.AddSingleton(emailSettings);
         services.AddScoped<IEmailService, SmtpEmailService>();
+
+        var fileStorageSettings = new FileStorageSettings
+        {
+            UploadFolderPath = Path.Combine(webRootPath, "uploads", "status-notes"),
+            UploadUrlPath = "/uploads/status-notes"
+        };
+        services.AddSingleton(fileStorageSettings);
+        services.AddSingleton<IFileStorageService, LocalFileStorageService>();
 
         return services;
     }
