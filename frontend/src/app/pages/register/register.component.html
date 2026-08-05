@@ -1,0 +1,46 @@
+<h2>Kayıt Ol</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <div>
+    <label for="email">E-posta</label>
+    <input id="email" type="email" formControlName="email" />
+    @if (form.get('email')?.invalid && form.get('email')?.touched) {
+      <span class="error">Geçerli bir e-posta gir.</span>
+    }
+  </div>
+
+  <div>
+    <label for="password">Parola</label>
+    <input id="password" type="password" formControlName="password" />
+    @if (form.get('password')?.invalid && form.get('password')?.touched) {
+      <span class="error">En az 8 karakter, büyük/küçük harf ve rakam içermeli.</span>
+    }
+  </div>
+
+  <div>
+    <label for="passwordConfirm">Parola (tekrar)</label>
+    <input id="passwordConfirm" type="password" formControlName="passwordConfirm" />
+  </div>
+
+  <div>
+    <label for="fullName">Ad Soyad</label>
+    <input id="fullName" type="text" formControlName="fullName" />
+  </div>
+
+  <div>
+    <label for="birthDate">Doğum Tarihi</label>
+    <input id="birthDate" type="date" formControlName="birthDate" />
+  </div>
+
+  <button type="submit" [disabled]="isSubmitting">
+    {{ isSubmitting ? 'Gönderiliyor...' : 'Kayıt Ol' }}
+  </button>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+</form>

@@ -47,6 +47,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+// Angular dev server (localhost:4200) farklı bir origin olduğu için tarayıcı
+// bunu açıkça izin vermedikçe backend'e istek atmayı engelliyor (CORS).
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDev", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -60,6 +72,8 @@ app.UseHttpsRedirection();
 
 app.Environment.WebRootFileProvider = new PhysicalFileProvider(app.Environment.WebRootPath);
 app.UseStaticFiles();
+
+app.UseCors("AllowAngularDev");
 
 app.UseAuthentication();
 app.UseAuthorization();
