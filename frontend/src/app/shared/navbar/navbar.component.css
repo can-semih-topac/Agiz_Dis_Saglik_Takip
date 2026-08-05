@@ -1,0 +1,55 @@
+.navbar {
+  /* Ebeveyn (app-root) ortalanmış ve dar olsa da bu şerit tüm viewport genişliğine yayılsın diye. */
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  background: #0f766e;
+  color: #fff;
+  padding: 0.85rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  margin-bottom: 1.5rem;
+}
+
+.navbar-greeting {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.navbar-actions a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.navbar-actions a:hover {
+  text-decoration: underline;
+}
+
+.navbar-avatar {
+  font-size: 1.5rem;
+  line-height: 1;
+  text-decoration: none !important;
+}
+
+.navbar-actions button {
+  background: #b91c1c;
+  margin: 0;
+}
+
+.navbar-actions button:hover {
+  background: #991b1b;
+}

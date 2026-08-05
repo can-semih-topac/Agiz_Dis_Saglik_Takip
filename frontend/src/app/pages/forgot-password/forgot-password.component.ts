@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -14,6 +15,10 @@ export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+
+  constructor(title: Title) {
+    title.setTitle('Parolamı Unuttum | ADS');
+  }
 
   // Form gereği: önce sadece email doğrulanır, kayıtlıysa parola alanları açılır.
   step: 'email' | 'reset' = 'email';

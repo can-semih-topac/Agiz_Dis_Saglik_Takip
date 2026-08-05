@@ -1,25 +1,26 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { Title } from '@angular/platform-browser';
 import { GoalStatusService } from '../../core/services/goal-status.service';
 import { SuggestionService } from '../../core/services/suggestion.service';
 import { GoalStatusDto } from '../../core/models/goal-status.models';
+import { NavbarComponent } from '../../shared/navbar/navbar.component';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [NavbarComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 export class HomeComponent implements OnInit {
-  private authService = inject(AuthService);
   private goalStatusService = inject(GoalStatusService);
   private suggestionService = inject(SuggestionService);
-  private router = inject(Router);
 
-  fullName = this.authService.getSession()?.fullName ?? '';
   last7Days: GoalStatusDto[] = [];
   suggestionText = '';
+
+  constructor(title: Title) {
+    title.setTitle('Ana Sayfa | ADS');
+  }
 
   ngOnInit(): void {
     this.loadLast7Days();
@@ -45,10 +46,5 @@ export class HomeComponent implements OnInit {
         }
       }
     });
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
   }
 }

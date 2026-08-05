@@ -10,10 +10,12 @@ import { SuggestionService } from '../../core/services/suggestion.service';
 import { GoalDto, PeriodUnit, Importance, CreateGoalDto } from '../../core/models/goal.models';
 import { GoalStatusDto, CreateGoalStatusDto } from '../../core/models/goal-status.models';
 import { StatusNoteDto } from '../../core/models/status-note.models';
+import { NavbarComponent } from '../../shared/navbar/navbar.component';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-health',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, NavbarComponent],
   templateUrl: './health.component.html',
   styleUrl: './health.component.css'
 })
@@ -23,6 +25,10 @@ export class HealthComponent implements OnInit {
   private goalStatusService = inject(GoalStatusService);
   private statusNoteService = inject(StatusNoteService);
   private suggestionService = inject(SuggestionService);
+
+  constructor(title: Title) {
+    title.setTitle('Ağız ve Diş Sağlığı | ADS');
+  }
 
   // Görsellerin yolu backend'den "/uploads/..." olarak geliyor, başına backend adresini eklememiz lazım.
   apiOrigin = environment.apiBaseUrl.replace('/api', '');

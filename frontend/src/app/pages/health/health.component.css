@@ -1,3 +1,30 @@
+/* Solda liste, sağda form — geniş ekranda yan yana, dar ekranda alt alta. */
+.two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+.col-list,
+.col-form {
+  margin-top: 0;
+}
+
+.col-form form {
+  max-width: none;
+}
+
+/* Bu listeler kendi sütunları içinde alt alta dursun, global ul grid'ini burada iptal ediyoruz. */
+.stack-list {
+  display: block;
+}
+
+.stack-list li {
+  margin-bottom: 0.5rem;
+}
+
 .tab-inactive {
   background: #e5e7eb;
   color: #374151;

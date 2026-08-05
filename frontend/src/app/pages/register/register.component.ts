@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { RegisterDto } from '../../core/models/auth.models';
 
@@ -14,6 +15,10 @@ import { RegisterDto } from '../../core/models/auth.models';
 export class RegisterComponent { // kayıt formu ve submit işlemleri için component
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+
+  constructor(title: Title) {
+    title.setTitle('Kayıt Ol | ADS');
+  }
 
   isSubmitting = false;
   errorMessage = '';

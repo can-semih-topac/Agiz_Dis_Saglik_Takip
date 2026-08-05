@@ -1,4 +1,6 @@
-<a routerLink="/home">← Ana Sayfa</a>
+<app-navbar pageTitle="Ağız ve Diş Sağlığı"></app-navbar>
+
+<a routerLink="/home" class="back-link">← Ana Sayfaya Dön</a>
 <h2>Ağız ve Diş Sağlığı</h2>
 
 <div>
@@ -7,127 +9,137 @@
 </div>
 
 @if (activeTab === 'durum') {
-  <section>
-    <h3>Son 7 Günün Hedef Verileri</h3>
-    @if (last7DaysStatus.length === 0) {
-      <p>Kayıt yok.</p>
-    } @else {
-      <ul>
-        @for (item of last7DaysStatus; track item.id) {
-          <li>{{ item.goalTitle }} — {{ item.activityDate }} {{ item.activityTime }} ({{ item.durationMinutes }} dk) — {{ item.isApplied ? 'Uygulandı' : 'Uygulanmadı' }}</li>
-        }
-      </ul>
-    }
-
-    <h4>Durum Kaydı Ekle</h4>
-    <form [formGroup]="statusForm" (ngSubmit)="submitStatus()">
-      <div>
-        <label for="statusGoal">Hedef</label>
-        <select id="statusGoal" formControlName="goalId">
-          <option [ngValue]="null">Seçiniz</option>
-          @for (g of goals; track g.id) {
-            <option [ngValue]="g.id">{{ g.title }}</option>
+  <div class="two-col">
+    <section class="col-list">
+      <h3>Son 7 Günün Hedef Verileri</h3>
+      @if (last7DaysStatus.length === 0) {
+        <p>Kayıt yok.</p>
+      } @else {
+        <ul class="stack-list">
+          @for (item of last7DaysStatus; track item.id) {
+            <li>{{ item.goalTitle }} — {{ item.activityDate }} {{ item.activityTime }} ({{ item.durationMinutes }} dk) — {{ item.isApplied ? 'Uygulandı' : 'Uygulanmadı' }}</li>
           }
-        </select>
-      </div>
-      <div>
-        <label for="activityDate">Tarih</label>
-        <input id="activityDate" type="date" formControlName="activityDate" />
-      </div>
-      <div>
-        <label for="activityTime">Saat</label>
-        <input id="activityTime" type="time" formControlName="activityTime" />
-      </div>
-      <div>
-        <label for="durationMinutes">Süre (dk)</label>
-        <input id="durationMinutes" type="number" formControlName="durationMinutes" />
-      </div>
-      <div>
-        <label><input type="checkbox" formControlName="isApplied" /> Uygulandı</label>
-      </div>
-      <div>
-        <label for="noteDescription">Açıklama (opsiyonel not)</label>
-        <textarea id="noteDescription" formControlName="noteDescription"></textarea>
-      </div>
-      <div>
-        <label for="noteImage">Görsel (.jpg/.png, opsiyonel)</label>
-        <input id="noteImage" type="file" accept=".jpg,.jpeg,.png" (change)="onImageSelected($event)" />
-      </div>
-      <button type="submit">Kaydet</button>
-      @if (statusError) { <p class="error">{{ statusError }}</p> }
-      @if (statusSuccess) { <p class="success">{{ statusSuccess }}</p> }
-    </form>
+        </ul>
+      }
+    </section>
 
-    @if (last7DaysNotes.length > 0) {
-      <h4>Son 7 Günün Notları</h4>
-      <ul>
-        @for (n of last7DaysNotes; track n.id) {
-          <li>
-            {{ n.description }}
-            @if (n.imagePath) {
-              <br /><img [src]="apiOrigin + n.imagePath" width="150" />
+    <section class="col-form">
+      <h3>Durum Kaydı Ekle</h3>
+      <form [formGroup]="statusForm" (ngSubmit)="submitStatus()">
+        <div>
+          <label for="statusGoal">Hedef</label>
+          <select id="statusGoal" formControlName="goalId">
+            <option [ngValue]="null">Seçiniz</option>
+            @for (g of goals; track g.id) {
+              <option [ngValue]="g.id">{{ g.title }}</option>
             }
-          </li>
-        }
-      </ul>
-    }
+          </select>
+        </div>
+        <div>
+          <label for="activityDate">Tarih</label>
+          <input id="activityDate" type="date" formControlName="activityDate" />
+        </div>
+        <div>
+          <label for="activityTime">Saat</label>
+          <input id="activityTime" type="time" formControlName="activityTime" />
+        </div>
+        <div>
+          <label for="durationMinutes">Süre (dk)</label>
+          <input id="durationMinutes" type="number" formControlName="durationMinutes" />
+        </div>
+        <div>
+          <label><input type="checkbox" formControlName="isApplied" /> Uygulandı</label>
+        </div>
+        <div>
+          <label for="noteDescription">Açıklama (opsiyonel not)</label>
+          <textarea id="noteDescription" formControlName="noteDescription"></textarea>
+        </div>
+        <div>
+          <label for="noteImage">Görsel (.jpg/.png, opsiyonel)</label>
+          <input id="noteImage" type="file" accept=".jpg,.jpeg,.png" (change)="onImageSelected($event)" />
+        </div>
+        <button type="submit">Kaydet</button>
+        @if (statusError) { <p class="error">{{ statusError }}</p> }
+        @if (statusSuccess) { <p class="success">{{ statusSuccess }}</p> }
+      </form>
+    </section>
 
-    <h4>Öneri <button (click)="loadSuggestion()">Yeni Öneri</button></h4>
-    <p>{{ suggestionText }}</p>
-  </section>
+    <section class="col-list">
+      @if (last7DaysNotes.length > 0) {
+        <h3>Son 7 Günün Notları</h3>
+        <ul class="stack-list">
+          @for (n of last7DaysNotes; track n.id) {
+            <li>
+              {{ n.description }}
+              @if (n.imagePath) {
+                <br /><img [src]="apiOrigin + n.imagePath" width="150" />
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      <h3>Öneri <button (click)="loadSuggestion()">Yeni Öneri</button></h3>
+      <p>{{ suggestionText }}</p>
+    </section>
+  </div>
 }
 
 @if (activeTab === 'hedef') {
-  <section>
-    <h3>Hedeflerim</h3>
-    @if (goals.length === 0) {
-      <p>Henüz hedef yok.</p>
-    } @else {
-      <ul>
-        @for (g of goals; track g.id) {
-          <li>
-            <strong>{{ g.title }}</strong> — {{ g.description }}
-            <button (click)="deleteGoal(g)">Sil</button>
-          </li>
-        }
-      </ul>
-    }
+  <div class="two-col">
+    <section class="col-list">
+      <h3>Hedeflerim</h3>
+      @if (goals.length === 0) {
+        <p>Henüz hedef yok.</p>
+      } @else {
+        <ul class="stack-list">
+          @for (g of goals; track g.id) {
+            <li>
+              <strong>{{ g.title }}</strong> — {{ g.description }}
+              <button (click)="deleteGoal(g)">Sil</button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
 
-    <h4>Yeni Hedef</h4>
-    <form [formGroup]="goalForm" (ngSubmit)="createGoal()">
-      <div>
-        <label for="title">Başlık</label>
-        <input id="title" type="text" formControlName="title" />
-      </div>
-      <div>
-        <label for="description">Açıklama</label>
-        <textarea id="description" formControlName="description"></textarea>
-      </div>
-      <div>
-        <label for="periodUnit">Periyot Birimi</label>
-        <select id="periodUnit" formControlName="periodUnit">
-          @for (p of periodUnits; track p.value) {
-            <option [ngValue]="p.value">{{ p.label }}</option>
-          }
-        </select>
-      </div>
-      <div>
-        <label for="periodFrequency">Sıklık</label>
-        <input id="periodFrequency" type="number" formControlName="periodFrequency" />
-      </div>
-      <div>
-        <label for="importance">Önem Derecesi</label>
-        <select id="importance" formControlName="importance">
-          @for (i of importanceLevels; track i.value) {
-            <option [ngValue]="i.value">{{ i.label }}</option>
-          }
-        </select>
-      </div>
-      <button type="submit">Ekle</button>
-      @if (goalError) { <p class="error">{{ goalError }}</p> }
-      @if (goalSuccess) { <p class="success">{{ goalSuccess }}</p> }
-    </form>
-  </section>
+    <section class="col-form">
+      <h3>Yeni Hedef</h3>
+      <form [formGroup]="goalForm" (ngSubmit)="createGoal()">
+        <div>
+          <label for="title">Başlık</label>
+          <input id="title" type="text" formControlName="title" />
+        </div>
+        <div>
+          <label for="description">Açıklama</label>
+          <textarea id="description" formControlName="description"></textarea>
+        </div>
+        <div>
+          <label for="periodUnit">Periyot Birimi</label>
+          <select id="periodUnit" formControlName="periodUnit">
+            @for (p of periodUnits; track p.value) {
+              <option [ngValue]="p.value">{{ p.label }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label for="periodFrequency">Sıklık</label>
+          <input id="periodFrequency" type="number" formControlName="periodFrequency" />
+        </div>
+        <div>
+          <label for="importance">Önem Derecesi</label>
+          <select id="importance" formControlName="importance">
+            @for (i of importanceLevels; track i.value) {
+              <option [ngValue]="i.value">{{ i.label }}</option>
+            }
+          </select>
+        </div>
+        <button type="submit">Ekle</button>
+        @if (goalError) { <p class="error">{{ goalError }}</p> }
+        @if (goalSuccess) { <p class="success">{{ goalSuccess }}</p> }
+      </form>
+    </section>
+  </div>
 }
 
 @if (pendingDeleteGoal) {

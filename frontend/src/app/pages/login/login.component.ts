@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { LoginDto } from '../../core/models/auth.models';
 
@@ -15,6 +16,10 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+
+  constructor(title: Title) {
+    title.setTitle('Giriş Yap | ADS');
+  }
 
   isSubmitting = false;
   errorMessage = '';

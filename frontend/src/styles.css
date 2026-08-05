@@ -12,9 +12,21 @@ body {
 
 app-root {
   display: block;
-  max-width: 720px;
+  max-width: 1800px;
   margin: 0 auto;
-  padding: 2rem 1.25rem 4rem;
+  padding: 0 1.5rem 4rem;
+}
+
+.back-link {
+  display: inline-block;
+  color: #0f766e;
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
 }
 
 h2 {
@@ -58,11 +70,30 @@ form {
   margin: 1rem 0;
 }
 
+/* Geniş ekranlarda form alanları boş yer bırakmasın, sığdığı kadarı yan yana dizilsin. */
+form {
+  max-width: 640px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0 1rem;
+  align-content: start;
+}
+
+form > button,
+form > p.error,
+form > p.success {
+  grid-column: 1 / -1;
+}
+
 form > div {
   margin-bottom: 0.9rem;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+}
+
+form > div:has(textarea) {
+  grid-column: 1 / -1;
 }
 
 label {
@@ -125,6 +156,11 @@ button:disabled {
 ul {
   list-style: none;
   padding: 0;
+  /* Boş yer bırakmadan sığan kadar öğe yan yana dizilsin. */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.6rem;
+  align-items: start;
 }
 
 li {

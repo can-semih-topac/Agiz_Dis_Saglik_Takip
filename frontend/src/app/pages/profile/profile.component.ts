@@ -2,18 +2,24 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { UserService } from '../../core/services/user.service';
 import { UpdateProfileDto } from '../../core/models/user.models';
+import { NavbarComponent } from '../../shared/navbar/navbar.component';
 
 @Component({
   selector: 'app-profile',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, NavbarComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
+
+  constructor(title: Title) {
+    title.setTitle('Profil | ADS');
+  }
 
   isSubmitting = false;
   errorMessage = '';
