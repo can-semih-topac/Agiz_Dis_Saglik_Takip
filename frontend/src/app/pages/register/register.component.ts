@@ -18,6 +18,7 @@ export class RegisterComponent { // kayıt formu ve submit işlemleri için comp
   isSubmitting = false;
   errorMessage = '';
   successMessage = '';
+  maxDate = new Date().toISOString().split('T')[0]; // takvimde gelecek tarih seçilemesin
 
   // Parola kuralı (min 8 karakter + büyük/küçük harf + rakam) backend'deki
   // AuthBusinessRules.IsValidPassword ile aynı — kullanıcı sunucuya sormadan anında uyarı görsün diye.

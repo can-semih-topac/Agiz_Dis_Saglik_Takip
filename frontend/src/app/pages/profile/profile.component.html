@@ -5,21 +5,33 @@
   <div>
     <label for="email">E-posta</label>
     <input id="email" type="email" formControlName="email" />
+    @if (form.get('email')?.invalid && form.get('email')?.touched) {
+      <span class="error">Geçerli bir e-posta gir.</span>
+    }
   </div>
 
   <div>
     <label for="fullName">Ad Soyad</label>
     <input id="fullName" type="text" formControlName="fullName" />
+    @if (form.get('fullName')?.invalid && form.get('fullName')?.touched) {
+      <span class="error">Bu alan zorunlu.</span>
+    }
   </div>
 
   <div>
     <label for="birthDate">Doğum Tarihi</label>
-    <input id="birthDate" type="date" formControlName="birthDate" />
+    <input id="birthDate" type="date" formControlName="birthDate" [max]="maxDate" />
+    @if (form.get('birthDate')?.invalid && form.get('birthDate')?.touched) {
+      <span class="error">Bu alan zorunlu.</span>
+    }
   </div>
 
   <div>
     <label for="newPassword">Yeni Parola (boş bırakılırsa değişmez)</label>
     <input id="newPassword" type="password" formControlName="newPassword" />
+    @if (form.get('newPassword')?.invalid && form.get('newPassword')?.touched) {
+      <span class="error">En az 8 karakter, büyük/küçük harf ve rakam içermeli.</span>
+    }
   </div>
 
   <div>

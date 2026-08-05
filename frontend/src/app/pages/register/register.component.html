@@ -20,16 +20,25 @@
   <div>
     <label for="passwordConfirm">Parola (tekrar)</label>
     <input id="passwordConfirm" type="password" formControlName="passwordConfirm" />
+    @if (form.get('passwordConfirm')?.invalid && form.get('passwordConfirm')?.touched) {
+      <span class="error">Bu alan zorunlu.</span>
+    }
   </div>
 
   <div>
     <label for="fullName">Ad Soyad</label>
     <input id="fullName" type="text" formControlName="fullName" />
+    @if (form.get('fullName')?.invalid && form.get('fullName')?.touched) {
+      <span class="error">Bu alan zorunlu.</span>
+    }
   </div>
 
   <div>
     <label for="birthDate">Doğum Tarihi</label>
-    <input id="birthDate" type="date" formControlName="birthDate" />
+    <input id="birthDate" type="date" formControlName="birthDate" [max]="maxDate" />
+    @if (form.get('birthDate')?.invalid && form.get('birthDate')?.touched) {
+      <span class="error">Bu alan zorunlu.</span>
+    }
   </div>
 
   <button type="submit" [disabled]="isSubmitting">

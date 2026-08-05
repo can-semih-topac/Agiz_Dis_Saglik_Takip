@@ -2,8 +2,8 @@
 <h2>Ağız ve Diş Sağlığı</h2>
 
 <div>
-  <button (click)="setTab('durum')" [disabled]="activeTab === 'durum'">Durum</button>
-  <button (click)="setTab('hedef')" [disabled]="activeTab === 'hedef'">Hedef</button>
+  <button (click)="setTab('durum')" [class.tab-inactive]="activeTab !== 'durum'">Durum</button>
+  <button (click)="setTab('hedef')" [class.tab-inactive]="activeTab !== 'hedef'">Hedef</button>
 </div>
 
 @if (activeTab === 'durum') {
@@ -20,7 +20,7 @@
     }
 
     <h4>Durum Kaydı Ekle</h4>
-    <form [formGroup]="statusForm" (ngSubmit)="createStatus()">
+    <form [formGroup]="statusForm" (ngSubmit)="submitStatus()">
       <div>
         <label for="statusGoal">Hedef</label>
         <select id="statusGoal" formControlName="goalId">
@@ -45,24 +45,17 @@
       <div>
         <label><input type="checkbox" formControlName="isApplied" /> Uygulandı</label>
       </div>
-      <button type="submit">Kaydet</button>
-      @if (statusError) { <p class="error">{{ statusError }}</p> }
-      @if (statusSuccess) { <p class="success">{{ statusSuccess }}</p> }
-    </form>
-
-    <h4>Açıklama + Görsel Not Ekle</h4>
-    <form [formGroup]="noteForm" (ngSubmit)="createNote()">
       <div>
-        <label for="noteDescription">Açıklama</label>
-        <textarea id="noteDescription" formControlName="description"></textarea>
+        <label for="noteDescription">Açıklama (opsiyonel not)</label>
+        <textarea id="noteDescription" formControlName="noteDescription"></textarea>
       </div>
       <div>
         <label for="noteImage">Görsel (.jpg/.png, opsiyonel)</label>
         <input id="noteImage" type="file" accept=".jpg,.jpeg,.png" (change)="onImageSelected($event)" />
       </div>
       <button type="submit">Kaydet</button>
-      @if (noteError) { <p class="error">{{ noteError }}</p> }
-      @if (noteSuccess) { <p class="success">{{ noteSuccess }}</p> }
+      @if (statusError) { <p class="error">{{ statusError }}</p> }
+      @if (statusSuccess) { <p class="success">{{ statusSuccess }}</p> }
     </form>
 
     @if (last7DaysNotes.length > 0) {
@@ -79,7 +72,7 @@
       </ul>
     }
 
-    <h4>Öneri</h4>
+    <h4>Öneri <button (click)="loadSuggestion()">Yeni Öneri</button></h4>
     <p>{{ suggestionText }}</p>
   </section>
 }
@@ -135,4 +128,15 @@
       @if (goalSuccess) { <p class="success">{{ goalSuccess }}</p> }
     </form>
   </section>
+}
+
+@if (pendingDeleteGoal) {
+  <div class="modal-backdrop">
+    <div class="modal-box">
+      <h4>Silme Onayı</h4>
+      <p>{{ confirmMessage }}</p>
+      <button (click)="confirmDelete()">Tamam</button>
+      <button class="modal-cancel" (click)="cancelDelete()">İptal</button>
+    </div>
+  </div>
 }

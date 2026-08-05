@@ -1,12 +1,12 @@
 <h2>Hoş geldin, {{ fullName }}!</h2>
-<button (click)="logout()">Çıkış Yap</button>
+<button class="logout-btn" (click)="logout()">Çıkış Yap</button>
 
 <nav>
   <a routerLink="/profile">Profil</a> |
   <a routerLink="/health">Ağız ve Diş Sağlığı</a>
 </nav>
 
-<h3>Son 7 Günün Verileri</h3>
+<h3>Son 7 Günün Verileri <button (click)="loadLast7Days()">Yenile</button></h3>
 @if (last7Days.length === 0) {
   <p>Son 7 günde kayıt yok.</p>
 } @else {

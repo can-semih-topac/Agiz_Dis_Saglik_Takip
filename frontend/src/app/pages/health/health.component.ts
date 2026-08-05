@@ -39,8 +39,10 @@ export class HealthComponent implements OnInit {
   goalSuccess = '';
   statusError = '';
   statusSuccess = '';
-  noteError = '';
-  noteSuccess = '';
+
+  // Tarayıcının çirkin confirm() penceresi yerine kendi modalımızı gösteriyoruz.
+  pendingDeleteGoal: GoalDto | null = null;
+  confirmMessage = '';
 
   periodUnits = [
     { value: PeriodUnit.Gun, label: 'Gün' },
@@ -62,16 +64,15 @@ export class HealthComponent implements OnInit {
     importance: [Importance.Orta, Validators.required]
   });
 
+  // Durum kaydı + not tek formda birleşti: goal/tarih/saat/süre zorunlu,
+  // açıklama+görsel opsiyonel — doluysa not olarak da ayrıca kaydedilecek.
   statusForm = this.fb.group({
     goalId: [null as number | null, Validators.required],
     activityDate: ['', Validators.required],
     activityTime: ['', Validators.required],
     durationMinutes: [0, [Validators.required, Validators.min(0)]],
-    isApplied: [true]
-  });
-
-  noteForm = this.fb.group({
-    description: ['', Validators.required]
+    isApplied: [true],
+    noteDescription: ['']
   });
 
   ngOnInit(): void {
@@ -142,10 +143,8 @@ export class HealthComponent implements OnInit {
     this.goalService.deleteGoal(goal.id, false).subscribe({
       next: (result) => {
         if (result.data === true) {
-          const confirmed = confirm(result.message ?? 'Bu hedefe ait durum kayıtları var. Silmek istediğinize emin misiniz?');
-          if (confirmed) {
-            this.goalService.deleteGoal(goal.id, true).subscribe({ next: () => this.loadGoals() });
-          }
+          this.confirmMessage = result.message ?? 'Bu hedefe ait durum kayıtları var. Silmek istediğinize emin misiniz?';
+          this.pendingDeleteGoal = goal;
         } else {
           this.loadGoals();
         }
@@ -156,12 +155,33 @@ export class HealthComponent implements OnInit {
     });
   }
 
+  confirmDelete(): void {
+    if (!this.pendingDeleteGoal) return;
+    this.goalService.deleteGoal(this.pendingDeleteGoal.id, true).subscribe({
+      next: () => {
+        this.pendingDeleteGoal = null;
+        this.loadGoals();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.goalError = err.error?.message ?? 'Silme başarısız.';
+        this.pendingDeleteGoal = null;
+      }
+    });
+  }
+
+  cancelDelete(): void {
+    this.pendingDeleteGoal = null;
+  }
+
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.selectedImage = input.files?.[0] ?? null;
   }
 
-  createStatus(): void {
+  // Durum kaydı zorunlu alanları + (doluysa) açıklama/görsel notunu tek butonla,
+  // arka arkaya iki ayrı backend çağrısıyla kaydeder (GoalStatus ve StatusNote,
+  // şemada birbirinden bağımsız iki tablo — ama kullanıcıya tek işlem gibi görünür).
+  submitStatus(): void {
     if (this.statusForm.invalid) {
       this.statusForm.markAllAsTouched();
       return;
@@ -169,22 +189,26 @@ export class HealthComponent implements OnInit {
     this.statusError = '';
     this.statusSuccess = '';
 
+    // <input type="time"> saniyesiz "HH:mm" gönderiyor ama backend'deki TimeOnly
+    // JSON çözümleyicisi saniye istiyor ("HH:mm:ss") — eksikse burada tamamlıyoruz.
+    const rawTime = this.statusForm.value.activityTime!;
+    const activityTime = rawTime.length === 5 ? `${rawTime}:00` : rawTime;
+
     const dto: CreateGoalStatusDto = {
       goalId: this.statusForm.value.goalId!,
       activityDate: this.statusForm.value.activityDate!,
-      activityTime: this.statusForm.value.activityTime!,
+      activityTime,
       durationMinutes: this.statusForm.value.durationMinutes!,
       isApplied: this.statusForm.value.isApplied!
     };
 
     this.goalStatusService.createGoalStatus(dto).subscribe({
       next: (result) => {
-        if (result.success) {
-          this.statusSuccess = result.message ?? 'Durum kaydedildi.';
-          this.loadLast7Days();
-        } else {
+        if (!result.success) {
           this.statusError = result.message ?? 'Kayıt başarısız.';
+          return;
         }
+        this.saveNoteIfPresent();
       },
       error: (err: HttpErrorResponse) => {
         this.statusError = err.error?.message ?? 'Sunucuya ulaşılamadı.';
@@ -192,28 +216,33 @@ export class HealthComponent implements OnInit {
     });
   }
 
-  createNote(): void {
-    if (this.noteForm.invalid) {
-      this.noteForm.markAllAsTouched();
+  private saveNoteIfPresent(): void {
+    const description = this.statusForm.value.noteDescription?.trim();
+
+    if (!description) {
+      this.statusSuccess = 'Durum kaydedildi.';
+      this.resetAfterSave();
       return;
     }
-    this.noteError = '';
-    this.noteSuccess = '';
 
-    this.statusNoteService.createStatusNote(this.noteForm.value.description!, this.selectedImage).subscribe({
+    this.statusNoteService.createStatusNote(description, this.selectedImage).subscribe({
       next: (result) => {
-        if (result.success) {
-          this.noteSuccess = result.message ?? 'Not kaydedildi.';
-          this.noteForm.reset();
-          this.selectedImage = null;
-          this.loadLast7Days();
-        } else {
-          this.noteError = result.message ?? 'Kayıt başarısız.';
-        }
+        this.statusSuccess = result.success
+          ? 'Durum ve not kaydedildi.'
+          : `Durum kaydedildi, ama not kaydedilemedi: ${result.message}`;
+        this.resetAfterSave();
       },
       error: (err: HttpErrorResponse) => {
-        this.noteError = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+        this.statusSuccess = 'Durum kaydedildi, ama not kaydedilemedi.';
+        console.error(err);
+        this.resetAfterSave();
       }
     });
+  }
+
+  private resetAfterSave(): void {
+    this.statusForm.patchValue({ noteDescription: '' });
+    this.selectedImage = null;
+    this.loadLast7Days();
   }
 }

@@ -22,15 +22,19 @@ export class HomeComponent implements OnInit {
   suggestionText = '';
 
   ngOnInit(): void {
+    this.loadLast7Days();
+    this.loadSuggestion();
+  }
+
+  loadLast7Days(): void {
     this.goalStatusService.getLast7Days().subscribe({
       next: (result) => {
         if (result.success) {
           this.last7Days = result.data;
         }
-      }
+      },
+      error: (err) => console.error('Son 7 gün verisi alınamadı', err)
     });
-
-    this.loadSuggestion();
   }
 
   loadSuggestion(): void {

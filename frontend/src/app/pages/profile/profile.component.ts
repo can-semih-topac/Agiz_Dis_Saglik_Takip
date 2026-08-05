@@ -18,12 +18,15 @@ export class ProfileComponent implements OnInit {
   isSubmitting = false;
   errorMessage = '';
   successMessage = '';
+  maxDate = new Date().toISOString().split('T')[0]; // takvimde gelecek tarih seçilemesin
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     fullName: ['', Validators.required],
     birthDate: ['', Validators.required],
-    newPassword: [''],
+    // Boş bırakılabilir (parola değişmesin diye) — Angular'ın minLength/pattern validator'ları
+    // boş değeri zaten geçerli sayıyor, sadece dolu girilirse kurala bakıyor.
+    newPassword: ['', [Validators.minLength(8), Validators.pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/)]],
     newPasswordConfirm: ['']
   });
 
