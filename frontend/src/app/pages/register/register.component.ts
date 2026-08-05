@@ -1,11 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { RegisterDto } from '../../core/models/auth.models';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
@@ -55,9 +57,12 @@ export class RegisterComponent { // kayıt formu ve submit işlemleri için comp
           this.errorMessage = result.message ?? 'Kayıt başarısız.';
         }
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.isSubmitting = false;
-        this.errorMessage = 'Sunucuya ulaşılamadı.';
+        // Backend, iş kuralı ihlallerinde (400 Bad Request) ServiceResult gövdesiyle cevap veriyor.
+        // HttpClient bunu "next" değil "error" sayıyor ama gövdede backend'in gerçek mesajı var —
+        // status 0 ise gerçekten sunucuya hiç ulaşılamamış demektir, o zaman gövde de yok.
+        this.errorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
       }
     });
   }

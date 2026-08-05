@@ -8,3 +8,32 @@ export interface RegisterDto {
   fullName: string;
   birthDate: string; // "YYYY-MM-DD" formatında ISO tarih metni
 }
+
+export interface LoginDto {
+  email: string;
+  password: string;
+}
+
+// Backend'deki LoginResultDto'nun karşılığı.
+export interface LoginResultDto {
+  token: string;
+  email: string;
+  fullName: string;
+}
+
+// localStorage'a bu şekilde kaydedeceğiz — token + ekranlarda göstereceğimiz kullanıcı bilgisi bir arada.
+export interface AuthSession {
+  token: string;
+  email: string;
+  fullName: string;
+}
+
+export interface VerifyEmailDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  email: string;
+  newPassword: string;
+  newPasswordConfirm: string;
+}

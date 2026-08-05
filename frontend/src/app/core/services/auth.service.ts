@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { RegisterDto } from '../models/auth.models';
+import { AuthSession, LoginDto, LoginResultDto, RegisterDto, ResetPasswordDto, VerifyEmailDto } from '../models/auth.models';
 import { ServiceResult } from '../models/service-result';
 
 @Injectable({
@@ -11,8 +11,44 @@ import { ServiceResult } from '../models/service-result';
 export class AuthService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiBaseUrl}/auth`;
+  private readonly storageKey = 'auth_session';
 
   register(dto: RegisterDto): Observable<ServiceResult> {
     return this.http.post<ServiceResult>(`${this.baseUrl}/register`, dto);
+  }
+
+  login(dto: LoginDto): Observable<ServiceResult<LoginResultDto>> {
+    return this.http.post<ServiceResult<LoginResultDto>>(`${this.baseUrl}/login`, dto);
+  }
+
+  verifyEmail(dto: VerifyEmailDto): Observable<ServiceResult> {
+    return this.http.post<ServiceResult>(`${this.baseUrl}/forgot-password/verify`, dto);
+  }
+
+  resetPassword(dto: ResetPasswordDto): Observable<ServiceResult> {
+    return this.http.post<ServiceResult>(`${this.baseUrl}/forgot-password/reset`, dto);
+  }
+
+  // Giriş başarılı olunca component bunu çağırıp token'ı kalıcı hale getirecek.
+  saveSession(result: LoginResultDto): void {
+    const session: AuthSession = { token: result.token, email: result.email, fullName: result.fullName };
+    localStorage.setItem(this.storageKey, JSON.stringify(session));
+  }
+
+  getSession(): AuthSession | null {
+    const raw = localStorage.getItem(this.storageKey);
+    return raw ? JSON.parse(raw) : null;
+  }
+
+  getToken(): string | null {
+    return this.getSession()?.token ?? null;
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+
+  logout(): void {
+    localStorage.removeItem(this.storageKey);
   }
 }

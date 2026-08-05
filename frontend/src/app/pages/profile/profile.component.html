@@ -1,0 +1,41 @@
+<a routerLink="/home">← Ana Sayfa</a>
+<h2>Profil</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <div>
+    <label for="email">E-posta</label>
+    <input id="email" type="email" formControlName="email" />
+  </div>
+
+  <div>
+    <label for="fullName">Ad Soyad</label>
+    <input id="fullName" type="text" formControlName="fullName" />
+  </div>
+
+  <div>
+    <label for="birthDate">Doğum Tarihi</label>
+    <input id="birthDate" type="date" formControlName="birthDate" />
+  </div>
+
+  <div>
+    <label for="newPassword">Yeni Parola (boş bırakılırsa değişmez)</label>
+    <input id="newPassword" type="password" formControlName="newPassword" />
+  </div>
+
+  <div>
+    <label for="newPasswordConfirm">Yeni Parola (tekrar)</label>
+    <input id="newPasswordConfirm" type="password" formControlName="newPasswordConfirm" />
+  </div>
+
+  <button type="submit" [disabled]="isSubmitting">
+    {{ isSubmitting ? 'Kaydediliyor...' : 'Kaydet' }}
+  </button>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+</form>

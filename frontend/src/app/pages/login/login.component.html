@@ -1,4 +1,4 @@
-<h2>Kayıt Ol</h2>
+<h2>Giriş Yap</h2>
 
 <form [formGroup]="form" (ngSubmit)="submit()">
   <div>
@@ -13,27 +13,12 @@
     <label for="password">Parola</label>
     <input id="password" type="password" formControlName="password" />
     @if (form.get('password')?.invalid && form.get('password')?.touched) {
-      <span class="error">En az 8 karakter, büyük/küçük harf ve rakam içermeli.</span>
+      <span class="error">Parola gerekli.</span>
     }
   </div>
 
-  <div>
-    <label for="passwordConfirm">Parola (tekrar)</label>
-    <input id="passwordConfirm" type="password" formControlName="passwordConfirm" />
-  </div>
-
-  <div>
-    <label for="fullName">Ad Soyad</label>
-    <input id="fullName" type="text" formControlName="fullName" />
-  </div>
-
-  <div>
-    <label for="birthDate">Doğum Tarihi</label>
-    <input id="birthDate" type="date" formControlName="birthDate" />
-  </div>
-
   <button type="submit" [disabled]="isSubmitting">
-    {{ isSubmitting ? 'Gönderiliyor...' : 'Kayıt Ol' }}
+    {{ isSubmitting ? 'Gönderiliyor...' : 'Giriş Yap' }}
   </button>
 
   @if (errorMessage) {
@@ -45,4 +30,4 @@
   }
 </form>
 
-<p><a routerLink="/login">Zaten hesabın var mı? Giriş Yap</a></p>
+<p><a routerLink="/register">Kayıt Ol</a> | <a routerLink="/forgot-password">Parolamı Unuttum</a></p>
