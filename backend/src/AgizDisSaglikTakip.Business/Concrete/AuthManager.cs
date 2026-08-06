@@ -47,6 +47,9 @@ public class AuthManager : IAuthService
         if (dto.BirthDate > DateOnly.FromDateTime(DateTime.Today))
             return ServiceResult.Fail("Doğum tarihi gelecekte olamaz.");
 
+        if (!AuthBusinessRules.IsValidPhoneNumber(dto.PhoneNumber))
+            return ServiceResult.Fail("Telefon numarası 10 veya 11 haneli, sadece rakamlardan oluşmalı.");
+
         var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
         if (existingUser != null)
             return ServiceResult.Fail("Bu e-posta adresi zaten kayıtlı.");
@@ -57,6 +60,7 @@ public class AuthManager : IAuthService
             PasswordEncrypted = _encryptionService.Encrypt(dto.Password),
             FullName = dto.FullName,
             BirthDate = dto.BirthDate,
+            PhoneNumber = dto.PhoneNumber,
             CreatedAt = DateTime.Now
         };
 

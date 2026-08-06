@@ -28,11 +28,12 @@ export class RegisterComponent { // kayıt formu ve submit işlemleri için comp
   // Parola kuralı (min 8 karakter + büyük/küçük harf + rakam) backend'deki
   // AuthBusinessRules.IsValidPassword ile aynı — kullanıcı sunucuya sormadan anında uyarı görsün diye.
   form = this.fb.group({
+    fullName: ['', Validators.required],
+    birthDate: ['', Validators.required],
+    phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10,11}$/)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/)]],
-    passwordConfirm: ['', Validators.required],
-    fullName: ['', Validators.required],
-    birthDate: ['', Validators.required]
+    passwordConfirm: ['', Validators.required]
   });
 
   submit(): void {
@@ -46,7 +47,8 @@ export class RegisterComponent { // kayıt formu ve submit işlemleri için comp
       password: this.form.value.password!,
       passwordConfirm: this.form.value.passwordConfirm!,
       fullName: this.form.value.fullName!,
-      birthDate: this.form.value.birthDate!
+      birthDate: this.form.value.birthDate!,
+      phoneNumber: this.form.value.phoneNumber!
     };
 
     this.isSubmitting = true;

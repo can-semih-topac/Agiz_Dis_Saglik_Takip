@@ -7,4 +7,5 @@ public class RegisterDto
     public string PasswordConfirm { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
     public DateOnly BirthDate { get; set; }
+    public string PhoneNumber { get; set; } = string.Empty;
 }

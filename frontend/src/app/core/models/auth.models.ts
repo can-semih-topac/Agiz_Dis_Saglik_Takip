@@ -7,6 +7,7 @@ export interface RegisterDto {
   passwordConfirm: string;
   fullName: string;
   birthDate: string; // "YYYY-MM-DD" formatında ISO tarih metni
+  phoneNumber: string;
 }
 
 export interface LoginDto {
