@@ -33,8 +33,14 @@ export interface VerifyEmailDto {
   email: string;
 }
 
+export interface VerifyResetCodeDto {
+  email: string;
+  code: string;
+}
+
 export interface ResetPasswordDto {
   email: string;
+  code: string;
   newPassword: string;
   newPasswordConfirm: string;
 }

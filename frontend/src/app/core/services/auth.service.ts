@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthSession, LoginDto, LoginResultDto, RegisterDto, ResetPasswordDto, VerifyEmailDto } from '../models/auth.models';
+import { AuthSession, LoginDto, LoginResultDto, RegisterDto, ResetPasswordDto, VerifyEmailDto, VerifyResetCodeDto } from '../models/auth.models';
 import { ServiceResult } from '../models/service-result';
 
 @Injectable({
@@ -21,8 +21,12 @@ export class AuthService {
     return this.http.post<ServiceResult<LoginResultDto>>(`${this.baseUrl}/login`, dto);
   }
 
-  verifyEmail(dto: VerifyEmailDto): Observable<ServiceResult> {
-    return this.http.post<ServiceResult>(`${this.baseUrl}/forgot-password/verify`, dto);
+  requestResetCode(dto: VerifyEmailDto): Observable<ServiceResult> {
+    return this.http.post<ServiceResult>(`${this.baseUrl}/forgot-password/request-code`, dto);
+  }
+
+  verifyResetCode(dto: VerifyResetCodeDto): Observable<ServiceResult> {
+    return this.http.post<ServiceResult>(`${this.baseUrl}/forgot-password/verify-code`, dto);
   }
 
   resetPassword(dto: ResetPasswordDto): Observable<ServiceResult> {

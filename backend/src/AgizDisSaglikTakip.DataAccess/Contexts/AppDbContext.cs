@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
             entity.Property(u => u.FullName).HasMaxLength(150).IsRequired();
             // Mevcut kayıtlarda (migration öncesi) bu alan yoktu, boş metin varsayılanıyla dolduruluyor.
             entity.Property(u => u.PhoneNumber).HasMaxLength(15).IsRequired().HasDefaultValue(string.Empty);
+            entity.Property(u => u.PasswordResetCode).HasMaxLength(6);
         });
 
         modelBuilder.Entity<Goal>(entity =>

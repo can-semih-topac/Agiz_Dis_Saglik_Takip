@@ -7,6 +7,9 @@ public interface IAuthService
 {
     Task<ServiceResult> RegisterAsync(RegisterDto dto);
     Task<ServiceResult<LoginResultDto>> LoginAsync(LoginDto dto);
-    Task<ServiceResult> VerifyEmailForPasswordResetAsync(string email);
+
+    // Parola hatırlatma 3 adımlı: kod gönder -> kodu doğrula -> yeni parolayı kaydet.
+    Task<ServiceResult> RequestPasswordResetCodeAsync(string email);
+    Task<ServiceResult> VerifyPasswordResetCodeAsync(VerifyResetCodeDto dto);
     Task<ServiceResult> ResetPasswordAsync(ResetPasswordDto dto);
 }

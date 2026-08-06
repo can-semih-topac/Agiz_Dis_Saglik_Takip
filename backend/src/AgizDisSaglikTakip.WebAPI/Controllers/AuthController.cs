@@ -29,10 +29,17 @@ public class AuthController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
-    [HttpPost("forgot-password/verify")]
-    public async Task<IActionResult> VerifyEmail(VerifyEmailDto dto)
+    [HttpPost("forgot-password/request-code")]
+    public async Task<IActionResult> RequestResetCode(VerifyEmailDto dto)
     {
-        var result = await _authService.VerifyEmailForPasswordResetAsync(dto.Email);
+        var result = await _authService.RequestPasswordResetCodeAsync(dto.Email);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpPost("forgot-password/verify-code")]
+    public async Task<IActionResult> VerifyResetCode(VerifyResetCodeDto dto)
+    {
+        var result = await _authService.VerifyPasswordResetCodeAsync(dto);
         return result.Success ? Ok(result) : BadRequest(result);
     }
 

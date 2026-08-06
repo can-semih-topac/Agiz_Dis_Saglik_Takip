@@ -20,17 +20,23 @@ export class ForgotPasswordComponent {
     title.setTitle('Parolamı Unuttum | ADS');
   }
 
-  // Form gereği: önce sadece email doğrulanır, kayıtlıysa parola alanları açılır.
-  step: 'email' | 'reset' = 'email';
+  // 3 adım: email doğrula (kod gönder) -> kodu doğrula -> yeni parola.
+  step: 'email' | 'code' | 'reset' = 'email';
   verifiedEmail = '';
+  verifiedCode = '';
 
   isSubmitting = false;
   emailSubmitted = false;
+  codeSubmitted = false;
   resetSubmitted = false;
   errorMessage = '';
 
   emailForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]]
+  });
+
+  codeForm = this.fb.group({
+    code: ['', [Validators.required, Validators.pattern(/^[0-9]{6}$/)]]
   });
 
   resetForm = this.fb.group({
@@ -49,14 +55,42 @@ export class ForgotPasswordComponent {
     this.errorMessage = '';
     const email = this.emailForm.value.email!;
 
-    this.authService.verifyEmail({ email }).subscribe({
+    this.authService.requestResetCode({ email }).subscribe({
       next: (result) => {
         this.isSubmitting = false;
         if (result.success) {
           this.verifiedEmail = email;
-          this.step = 'reset';
+          this.step = 'code';
         } else {
           this.errorMessage = result.message ?? 'Kullanıcı bulunamadı.';
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isSubmitting = false;
+        this.errorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
+  }
+
+  submitCode(): void {
+    this.codeSubmitted = true;
+
+    if (this.codeForm.invalid) {
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.errorMessage = '';
+    const code = this.codeForm.value.code!;
+
+    this.authService.verifyResetCode({ email: this.verifiedEmail, code }).subscribe({
+      next: (result) => {
+        this.isSubmitting = false;
+        if (result.success) {
+          this.verifiedCode = code;
+          this.step = 'reset';
+        } else {
+          this.errorMessage = result.message ?? 'Kod hatalı ya da süresi dolmuş.';
         }
       },
       error: (err: HttpErrorResponse) => {
@@ -78,6 +112,7 @@ export class ForgotPasswordComponent {
 
     this.authService.resetPassword({
       email: this.verifiedEmail,
+      code: this.verifiedCode,
       newPassword: this.resetForm.value.newPassword!,
       newPasswordConfirm: this.resetForm.value.newPasswordConfirm!
     }).subscribe({

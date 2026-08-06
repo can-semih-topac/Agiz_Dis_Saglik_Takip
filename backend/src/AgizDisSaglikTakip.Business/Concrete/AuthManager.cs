@@ -33,7 +33,8 @@ public class AuthManager : IAuthService
         _logger = logger;
     }
 
-    public async Task<ServiceResult> RegisterAsync(RegisterDto dto) //Kayıt olma
+    //Kayıt olma
+    public async Task<ServiceResult> RegisterAsync(RegisterDto dto) 
     {
         if (!AuthBusinessRules.IsValidEmailFormat(dto.Email))
             return ServiceResult.Fail("Geçersiz e-posta formatı.");
@@ -71,7 +72,7 @@ public class AuthManager : IAuthService
             await _emailService.SendHtmlEmailAsync(
                 user.Email,
                 "Kaydınız Başarıyla Oluşturuldu",
-                BuildWelcomeEmailHtml(user.FullName));
+                AuthEmailTemplates.WelcomeEmail(user.FullName));
         }
         catch (Exception ex)
         {
@@ -82,7 +83,8 @@ public class AuthManager : IAuthService
         return ServiceResult.Ok("Kayıt başarılı.");
     }
 
-    public async Task<ServiceResult<LoginResultDto>> LoginAsync(LoginDto dto) //Giriş yapma
+    //Giriş yapma
+    public async Task<ServiceResult<LoginResultDto>> LoginAsync(LoginDto dto)
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
@@ -104,20 +106,59 @@ public class AuthManager : IAuthService
         return ServiceResult<LoginResultDto>.Ok(result, "Giriş başarılı.");
     }
 
-    public async Task<ServiceResult> VerifyEmailForPasswordResetAsync(string email) //Şifre sıfırlama için e-posta doğrulama
+    // Adım 1: 
+    // Email kayıtlıysa 6 haneli bir kod üretip 10 dakika geçerlilikle DB'ye yazıyoruz ve mailliyoruz
+    public async Task<ServiceResult> RequestPasswordResetCodeAsync(string email)
     {
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
             return ServiceResult.Fail("Kullanıcı bulunamadı.");
 
-        return ServiceResult.Ok();
+        var code = Random.Shared.Next(100000, 1000000).ToString();
+        user.PasswordResetCode = code;
+        user.PasswordResetCodeExpiresAt = DateTime.Now.AddMinutes(10);
+        await _userRepository.UpdateAsync(user);
+
+        try
+        {
+            await _emailService.SendHtmlEmailAsync(
+                user.Email,
+                "Parola Sıfırlama Kodu",
+                AuthEmailTemplates.ResetCodeEmail(user.FullName, code));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Parola sıfırlama kodu gönderilemedi. Kullanıcı: {Email}", user.Email);
+            return ServiceResult.Fail("Kod gönderilemedi, lütfen daha sonra tekrar deneyin.");
+        }
+
+        return ServiceResult.Ok("Doğrulama kodu e-posta adresinize gönderildi.");
     }
 
-    public async Task<ServiceResult> ResetPasswordAsync(ResetPasswordDto dto) //Şifre sıfırlama 
+    // Adım 2: 
+    // Kod doğrulama (ResetPasswordAsync'te tekrar yapılıyor, bu adım sadece kullanıcı deneyimi için)
+    public async Task<ServiceResult> VerifyPasswordResetCodeAsync(VerifyResetCodeDto dto)
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
             return ServiceResult.Fail("Kullanıcı bulunamadı.");
+
+        if (!IsResetCodeValid(user, dto.Code))
+            return ServiceResult.Fail("Kod hatalı ya da süresi dolmuş.");
+
+        return ServiceResult.Ok("Kod doğrulandı.");
+    }
+
+    // Adım 3:
+    // Kod BURADA da tekrar kontrol ediliyor — Adım 2'yi atlayıp doğrudan bu endpoint'e istek atılsa bile kodsuz/yanlış kodla parola değiştirilemesin diye.
+    public async Task<ServiceResult> ResetPasswordAsync(ResetPasswordDto dto)
+    {
+        var user = await _userRepository.GetByEmailAsync(dto.Email);
+        if (user == null)
+            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+
+        if (!IsResetCodeValid(user, dto.Code))
+            return ServiceResult.Fail("Kod hatalı ya da süresi dolmuş.");
 
         if (!AuthBusinessRules.IsValidPassword(dto.NewPassword))
             return ServiceResult.Fail("Parola en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
@@ -126,21 +167,35 @@ public class AuthManager : IAuthService
             return ServiceResult.Fail("Parolalar eşleşmiyor.");
 
         user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword);
+        // Kod tek kullanımlık — başarılı sıfırlamadan sonra geçersizleştiriyoruz.
+        user.PasswordResetCode = null;
+        user.PasswordResetCodeExpiresAt = null;
         await _userRepository.UpdateAsync(user);
+
+        try
+        {
+            await _emailService.SendHtmlEmailAsync(
+                user.Email,
+                "Parolanız Değiştirildi",
+                AuthEmailTemplates.PasswordChangedEmail(user.FullName));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Parola değişikliği bildirim maili gönderilemedi. Kullanıcı: {Email}", user.Email);
+        }
 
         return ServiceResult.Ok("Parola güncellendi.");
     }
 
-    private static string BuildWelcomeEmailHtml(string fullName) // Hoşgeldin maili oluşturmak için HTML şablonu
+    // Kodun geçerliliğini kontrol eder
+    private static bool IsResetCodeValid(User user, string code)
     {
-        return $"""
-            <html>
-                <body style="font-family: Arial, sans-serif;">
-                    <h2>Hoş geldin, {fullName}!</h2>
-                    <p>Ağız ve Diş Sağlığı Takip Uygulaması'na kaydın başarıyla oluşturuldu.</p>
-                    <p>Artık hedeflerini belirleyip günlük alışkanlıklarını takip edebilirsin.</p>
-                </body>
-            </html>
-            """;
+        if (string.IsNullOrEmpty(user.PasswordResetCode) || user.PasswordResetCodeExpiresAt == null)
+            return false;
+
+        if (user.PasswordResetCodeExpiresAt < DateTime.Now)
+            return false;
+
+        return user.PasswordResetCode == code;
     }
 }

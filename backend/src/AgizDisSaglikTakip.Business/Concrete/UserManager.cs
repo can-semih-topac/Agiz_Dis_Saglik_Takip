@@ -1,9 +1,11 @@
 using AgizDisSaglikTakip.Business.Abstract;
 using AgizDisSaglikTakip.Business.DTOs.User;
 using AgizDisSaglikTakip.Business.Rules;
+using AgizDisSaglikTakip.Core.Utilities.Email;
 using AgizDisSaglikTakip.Core.Utilities.Results;
 using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
 using AgizDisSaglikTakip.DataAccess.Abstract;
+using Microsoft.Extensions.Logging;
 
 namespace AgizDisSaglikTakip.Business.Concrete;
 
@@ -11,11 +13,19 @@ public class UserManager : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IEncryptionService _encryptionService;
+    private readonly IEmailService _emailService;
+    private readonly ILogger<UserManager> _logger;
 
-    public UserManager(IUserRepository userRepository, IEncryptionService encryptionService)
+    public UserManager(
+        IUserRepository userRepository,
+        IEncryptionService encryptionService,
+        IEmailService emailService,
+        ILogger<UserManager> logger)
     {
         _userRepository = userRepository;
         _encryptionService = encryptionService;
+        _emailService = emailService;
+        _logger = logger;
     }
 
     public async Task<ServiceResult<UserProfileDto>> GetProfileAsync(int userId)
@@ -53,15 +63,17 @@ public class UserManager : IUserService
                 return ServiceResult.Fail("Bu e-posta adresi başka bir kullanıcıya ait.");
         }
 
-        if (!string.IsNullOrEmpty(dto.NewPassword))
+        var passwordChanged = !string.IsNullOrEmpty(dto.NewPassword);
+
+        if (passwordChanged)
         {
-            if (!AuthBusinessRules.IsValidPassword(dto.NewPassword))
+            if (!AuthBusinessRules.IsValidPassword(dto.NewPassword!))
                 return ServiceResult.Fail("Parola en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
 
             if (dto.NewPassword != dto.NewPasswordConfirm)
                 return ServiceResult.Fail("Parolalar eşleşmiyor.");
 
-            user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword);
+            user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword!);
         }
 
         user.Email = dto.Email;
@@ -69,6 +81,21 @@ public class UserManager : IUserService
         user.BirthDate = dto.BirthDate;
 
         await _userRepository.UpdateAsync(user);
+
+        if (passwordChanged)
+        {
+            try
+            {
+                await _emailService.SendHtmlEmailAsync(
+                    user.Email,
+                    "Parolanız Değiştirildi",
+                    AuthEmailTemplates.PasswordChangedEmail(user.FullName));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Parola değişikliği bildirim maili gönderilemedi. Kullanıcı: {Email}", user.Email);
+            }
+        }
 
         return ServiceResult.Ok("Profil güncellendi.");
     }

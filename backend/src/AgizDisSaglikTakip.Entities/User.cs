@@ -10,6 +10,10 @@ public class User
     public string PhoneNumber { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 
+    // Parola hatırlatma akışı için — kod üretilince dolar, kullanılınca/süresi geçince temizlenir.
+    public string? PasswordResetCode { get; set; }
+    public DateTime? PasswordResetCodeExpiresAt { get; set; }
+
     public ICollection<Goal> Goals { get; set; } = new List<Goal>();
     public ICollection<StatusNote> StatusNotes { get; set; } = new List<StatusNote>();
 }
