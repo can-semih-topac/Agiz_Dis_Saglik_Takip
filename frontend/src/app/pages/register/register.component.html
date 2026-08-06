@@ -20,7 +20,24 @@
 
   <div>
     <label for="phoneNumber">Telefon Numarası</label>
-    <input id="phoneNumber" type="tel" formControlName="phoneNumber" placeholder="0532 123 45 67" (blur)="normalizePhoneNumber()" />
+    <div class="phone-input-row">
+      <span class="country-badge-wrapper">
+        <button type="button" class="country-badge" (click)="toggleCountryInfo()">🇹🇷 +90</button>
+        @if (showCountryInfo) {
+          <span class="info-note">Şu an için sadece Türkiye telefon numaraları kabul ediyoruz.</span>
+        }
+      </span>
+      <input
+        id="phoneNumber"
+        type="tel"
+        formControlName="phoneNumber"
+        placeholder="0532 123 45 67"
+        (blur)="normalizePhoneNumber()"
+        (input)="onPhoneInput()" />
+    </div>
+    @if (phoneInvalidCharWarning) {
+      <span class="warning">Telefon numarası sadece sayılardan oluşmalı.</span>
+    }
     @if (form.get('phoneNumber')?.invalid && submitted) {
       <span class="error">10 veya 11 haneli, sadece rakam.</span>
     }

@@ -210,6 +210,65 @@ li {
   margin-top: 0.4rem;
 }
 
+.warning {
+  color: #9a3412;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+}
+
+/* Bildirim gibi: rozetin SOLUNDA, mutlak konumlu, akışı etkilemeden yüzer. */
+.info-note {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 0.6rem);
+  transform: translateY(-50%);
+  width: max-content;
+  max-width: 240px;
+  color: #374151;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  z-index: 30;
+}
+
+.phone-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.phone-input-row input {
+  flex: 1;
+}
+
+.country-badge-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.country-badge {
+  background: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.country-badge:hover {
+  background: #e5e7eb;
+}
+
 section {
   margin-top: 1rem;
 }

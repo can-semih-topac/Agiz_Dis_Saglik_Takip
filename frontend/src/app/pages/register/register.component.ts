@@ -26,6 +26,9 @@ export class RegisterComponent { // kayıt formu ve submit işlemleri için comp
   successMessage = '';
   maxDate = new Date().toISOString().split('T')[0]; // takvimde gelecek tarih seçilemesin
 
+  showCountryInfo = false; // bayrak rozetine tıklanınca "sadece Türkiye" notu
+  phoneInvalidCharWarning = false; // rakam dışı bir şey yazılmaya çalışılınca turuncu uyarı
+
   // Parola kuralı (min 8 karakter + büyük/küçük harf + rakam) backend'deki
   // AuthBusinessRules.IsValidPassword ile aynı — kullanıcı sunucuya sormadan anında uyarı görsün diye.
   form = this.fb.group({
@@ -38,18 +41,59 @@ export class RegisterComponent { // kayıt formu ve submit işlemleri için comp
   });
 
   // Kullanıcı "90532...", "532..." ya da "0532..." yazsın — alandan çıkınca hepsini
-  // "0532..." (11 haneli, başında 0) formatına çevirip hem gösteriyor hem de bu haliyle gönderiyoruz.
+  // "0532..." formatına çeviriyoruz. Uzunluğa değil, sadece öneke (prefix) bakıyoruz —
+  // böylece "90532" ya da "546" gibi eksik/kısa girişlerde de doğru çalışır.
   normalizePhoneNumber(): void {
     let digits = (this.form.value.phoneNumber ?? '').replace(/\D/g, '');
 
-    if (digits.length === 12 && digits.startsWith('90')) {
+    if (digits.startsWith('90')) {
       digits = digits.slice(2);
     }
-    if (digits.length === 10 && digits.startsWith('5')) {
+    if (digits.length > 0 && !digits.startsWith('0')) {
       digits = '0' + digits;
     }
 
     this.form.patchValue({ phoneNumber: digits });
+  }
+
+  // Rakam dışı bir karakter (harf, nokta vb.) yazılırsa anında temizler ve uyarı gösterir.
+  // Ayrıca başlangıç önekine göre izin verilen azami uzunluğu da burada uyguluyoruz:
+  // "5" ile başlıyorsa 10, "0" ile başlıyorsa 11, "90" ile başlıyorsa 12 hane.
+  onPhoneInput(): void {
+    const raw = this.form.value.phoneNumber ?? '';
+    let digitsOnly = raw.replace(/[^0-9]/g, '');
+
+    this.phoneInvalidCharWarning = raw !== digitsOnly;
+
+    let maxLen = 11;
+    if (digitsOnly.startsWith('90')) {
+      maxLen = 12;
+    } else if (digitsOnly.startsWith('0')) {
+      maxLen = 11;
+    } else if (digitsOnly.startsWith('5')) {
+      maxLen = 10;
+    }
+
+    if (digitsOnly.length > maxLen) {
+      digitsOnly = digitsOnly.slice(0, maxLen);
+    }
+
+    if (raw !== digitsOnly) {
+      this.form.patchValue({ phoneNumber: digitsOnly });
+    }
+  }
+
+  private countryInfoTimeout?: ReturnType<typeof setTimeout>;
+
+  // Rozete tıklanınca bildirim gibi 3 saniyeliğine görünüp kendiliğinden kapanır.
+  toggleCountryInfo(): void {
+    this.showCountryInfo = true;
+    if (this.countryInfoTimeout) {
+      clearTimeout(this.countryInfoTimeout);
+    }
+    this.countryInfoTimeout = setTimeout(() => {
+      this.showCountryInfo = false;
+    }, 3000);
   }
 
   submit(): void {
