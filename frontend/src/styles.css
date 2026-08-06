@@ -17,6 +17,23 @@ app-root {
   padding: 0 1.5rem 4rem;
 }
 
+/* Kayıt/Giriş/Parola Hatırlatma gibi tek başına duran (navbar'sız) sayfalar
+   için: form kartını sayfanın hem yatayda hem dikeyde ortasına al. */
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 85vh;
+  text-align: center;
+}
+
+.auth-page form {
+  margin: 1rem 0;
+  width: 100%;
+  text-align: left;
+}
+
 .back-link {
   display: inline-block;
   color: #0f766e;

@@ -78,6 +78,7 @@ app.UseCors("AllowAngularDev");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/", () => Results.Content("<h1>Backend çalışıyor</h1>", "text/html; charset=utf-8"));
 app.MapControllers();
 
 app.Run();
