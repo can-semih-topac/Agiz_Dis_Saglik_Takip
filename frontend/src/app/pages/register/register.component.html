@@ -5,7 +5,7 @@
   <div>
     <label for="fullName">Ad Soyad</label>
     <input id="fullName" type="text" formControlName="fullName" />
-    @if (form.get('fullName')?.invalid && form.get('fullName')?.touched) {
+    @if (form.get('fullName')?.invalid && submitted) {
       <span class="error">Bu alan zorunlu.</span>
     }
   </div>
@@ -13,15 +13,15 @@
   <div>
     <label for="birthDate">Doğum Tarihi</label>
     <input id="birthDate" type="date" formControlName="birthDate" [max]="maxDate" />
-    @if (form.get('birthDate')?.invalid && form.get('birthDate')?.touched) {
+    @if (form.get('birthDate')?.invalid && submitted) {
       <span class="error">Bu alan zorunlu.</span>
     }
   </div>
 
   <div>
     <label for="phoneNumber">Telefon Numarası</label>
-    <input id="phoneNumber" type="tel" formControlName="phoneNumber" placeholder="05XXXXXXXXX" />
-    @if (form.get('phoneNumber')?.invalid && form.get('phoneNumber')?.touched) {
+    <input id="phoneNumber" type="tel" formControlName="phoneNumber" placeholder="0532 123 45 67" (blur)="normalizePhoneNumber()" />
+    @if (form.get('phoneNumber')?.invalid && submitted) {
       <span class="error">10 veya 11 haneli, sadece rakam.</span>
     }
   </div>
@@ -29,7 +29,7 @@
   <div>
     <label for="email">E-posta</label>
     <input id="email" type="email" formControlName="email" />
-    @if (form.get('email')?.invalid && form.get('email')?.touched) {
+    @if (form.get('email')?.invalid && submitted) {
       <span class="error">Geçerli bir e-posta gir.</span>
     }
   </div>
@@ -37,7 +37,7 @@
   <div>
     <label for="password">Parola</label>
     <input id="password" type="password" formControlName="password" />
-    @if (form.get('password')?.invalid && form.get('password')?.touched) {
+    @if (form.get('password')?.invalid && submitted) {
       <span class="error">En az 8 karakter, büyük/küçük harf ve rakam içermeli.</span>
     }
   </div>
@@ -45,7 +45,7 @@
   <div>
     <label for="passwordConfirm">Parola (tekrar)</label>
     <input id="passwordConfirm" type="password" formControlName="passwordConfirm" />
-    @if (form.get('passwordConfirm')?.invalid && form.get('passwordConfirm')?.touched) {
+    @if (form.get('passwordConfirm')?.invalid && submitted) {
       <span class="error">Bu alan zorunlu.</span>
     }
   </div>
@@ -53,6 +53,10 @@
   <button type="submit" [disabled]="isSubmitting">
     {{ isSubmitting ? 'Gönderiliyor...' : 'Kayıt Ol' }}
   </button>
+
+  @if (submitted && form.invalid) {
+    <p class="error">Lütfen zorunlu alanları doldurun.</p>
+  }
 
   @if (errorMessage) {
     <p class="error">{{ errorMessage }}</p>

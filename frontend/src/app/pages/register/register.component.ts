@@ -21,6 +21,7 @@ export class RegisterComponent { // kayıt formu ve submit işlemleri için comp
   }
 
   isSubmitting = false;
+  submitted = false; // hata mesajları alana dokununca değil, "Kayıt Ol"a basılınca gösterilsin diye
   errorMessage = '';
   successMessage = '';
   maxDate = new Date().toISOString().split('T')[0]; // takvimde gelecek tarih seçilemesin
@@ -36,9 +37,25 @@ export class RegisterComponent { // kayıt formu ve submit işlemleri için comp
     passwordConfirm: ['', Validators.required]
   });
 
+  // Kullanıcı "90532...", "532..." ya da "0532..." yazsın — alandan çıkınca hepsini
+  // "0532..." (11 haneli, başında 0) formatına çevirip hem gösteriyor hem de bu haliyle gönderiyoruz.
+  normalizePhoneNumber(): void {
+    let digits = (this.form.value.phoneNumber ?? '').replace(/\D/g, '');
+
+    if (digits.length === 12 && digits.startsWith('90')) {
+      digits = digits.slice(2);
+    }
+    if (digits.length === 10 && digits.startsWith('5')) {
+      digits = '0' + digits;
+    }
+
+    this.form.patchValue({ phoneNumber: digits });
+  }
+
   submit(): void {
+    this.submitted = true;
+
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
       return;
     }
 
@@ -61,6 +78,7 @@ export class RegisterComponent { // kayıt formu ve submit işlemleri için comp
         if (result.success) {
           this.successMessage = result.message ?? 'Kayıt başarılı.';
           this.form.reset();
+          this.submitted = false;
         } else {
           this.errorMessage = result.message ?? 'Kayıt başarısız.';
         }

@@ -22,6 +22,7 @@ export class LoginComponent {
   }
 
   isSubmitting = false;
+  submitted = false;
   errorMessage = '';
   successMessage = '';
 
@@ -31,8 +32,9 @@ export class LoginComponent {
   });
 
   submit(): void {
+    this.submitted = true;
+
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
       return;
     }
 

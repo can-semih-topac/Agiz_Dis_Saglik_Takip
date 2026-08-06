@@ -5,7 +5,7 @@
   <div>
     <label for="email">E-posta</label>
     <input id="email" type="email" formControlName="email" />
-    @if (form.get('email')?.invalid && form.get('email')?.touched) {
+    @if (form.get('email')?.invalid && submitted) {
       <span class="error">Geçerli bir e-posta gir.</span>
     }
   </div>
@@ -13,7 +13,7 @@
   <div>
     <label for="password">Parola</label>
     <input id="password" type="password" formControlName="password" />
-    @if (form.get('password')?.invalid && form.get('password')?.touched) {
+    @if (form.get('password')?.invalid && submitted) {
       <span class="error">Parola gerekli.</span>
     }
   </div>
@@ -21,6 +21,10 @@
   <button type="submit" [disabled]="isSubmitting">
     {{ isSubmitting ? 'Gönderiliyor...' : 'Giriş Yap' }}
   </button>
+
+  @if (submitted && form.invalid) {
+    <p class="error">Lütfen zorunlu alanları doldurun.</p>
+  }
 
   @if (errorMessage) {
     <p class="error">{{ errorMessage }}</p>

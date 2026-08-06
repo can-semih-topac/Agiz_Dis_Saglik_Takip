@@ -25,6 +25,8 @@ export class ForgotPasswordComponent {
   verifiedEmail = '';
 
   isSubmitting = false;
+  emailSubmitted = false;
+  resetSubmitted = false;
   errorMessage = '';
 
   emailForm = this.fb.group({
@@ -37,8 +39,9 @@ export class ForgotPasswordComponent {
   });
 
   submitEmail(): void {
+    this.emailSubmitted = true;
+
     if (this.emailForm.invalid) {
-      this.emailForm.markAllAsTouched();
       return;
     }
 
@@ -64,8 +67,9 @@ export class ForgotPasswordComponent {
   }
 
   submitReset(): void {
+    this.resetSubmitted = true;
+
     if (this.resetForm.invalid) {
-      this.resetForm.markAllAsTouched();
       return;
     }
 
