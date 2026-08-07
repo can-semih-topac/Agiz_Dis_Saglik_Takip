@@ -35,10 +35,6 @@
   font-weight: 600;
 }
 
-.navbar-actions a:hover {
-  text-decoration: underline;
-}
-
 .navbar-avatar {
   font-size: 1.5rem;
   line-height: 1;
@@ -54,18 +50,28 @@
   background: #991b1b;
 }
 
-.contact-btn {
+/* Yeşil şerit üzerindeki ikincil eylemler (Ağız ve Diş Sağlığı, Bize Ulaşın) —
+   link olanı da buton gibi görünsün diye ortak stil. */
+.navbar-btn {
+  display: inline-flex;
+  align-items: center;
   background: rgba(255, 255, 255, 0.15) !important;
   border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  color: #fff;
   padding: 0.4rem 0.9rem;
   font-size: 0.9rem;
+  font-weight: 600;
   white-space: nowrap;
+  cursor: pointer;
+  margin: 0;
 }
 
-.contact-btn:hover {
+.navbar-btn:hover {
   background: rgba(255, 255, 255, 0.28) !important;
+  text-decoration: none;
 }
 
-.contact-btn-icon {
-  margin-right: 0.25rem;
+.navbar-btn-icon {
+  margin-right: 0.35rem;
 }

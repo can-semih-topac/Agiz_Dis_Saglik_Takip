@@ -23,20 +23,25 @@
   font-size: 1.05rem;
 }
 
-.contact-btn {
+/* Oturum içi navbar'daki ikincil eylem butonlarıyla aynı görünüm. */
+.navbar-btn {
+  display: inline-flex;
+  align-items: center;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
   color: #fff;
   margin: 0;
   padding: 0.4rem 0.9rem;
   font-size: 0.9rem;
+  font-weight: 600;
   white-space: nowrap;
 }
 
-.contact-btn:hover:not(:disabled) {
+.navbar-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.28);
 }
 
-.contact-btn-icon {
-  margin-right: 0.25rem;
+.navbar-btn-icon {
+  margin-right: 0.35rem;
 }
