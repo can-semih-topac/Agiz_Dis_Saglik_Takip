@@ -38,4 +38,11 @@ public class UserController : ControllerBase
         var result = await _userService.ChangePasswordAsync(this.GetUserId(), dto);
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    [HttpDelete("account")]
+    public async Task<IActionResult> DeleteAccount()
+    {
+        var result = await _userService.DeleteAccountAsync(this.GetUserId());
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
 }

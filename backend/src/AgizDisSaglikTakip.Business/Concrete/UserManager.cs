@@ -55,7 +55,7 @@ public class UserManager : IUserService
         if (!AuthBusinessRules.IsValidEmailFormat(dto.Email))
             return ServiceResult.Fail("Geçersiz e-posta formatı.");
 
-        if (dto.BirthDate > DateOnly.FromDateTime(DateTime.Today))
+        if (dto.BirthDate.HasValue && dto.BirthDate.Value > DateOnly.FromDateTime(DateTime.Today))
             return ServiceResult.Fail("Doğum tarihi gelecekte olamaz.");
 
         if (!AuthBusinessRules.IsValidPhoneNumber(dto.PhoneNumber))
@@ -119,5 +119,17 @@ public class UserManager : IUserService
         }
 
         return ServiceResult.Ok("Parola güncellendi.");
+    }
+
+    // Kalıcı (hard) silme — yumuşak silme ileride eklenecek.
+    public async Task<ServiceResult> DeleteAccountAsync(int userId)
+    {
+        var user = await _userRepository.GetAsync(u => u.Id == userId);
+        if (user == null)
+            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+
+        await _userRepository.DeleteAsync(user);
+
+        return ServiceResult.Ok("Hesap silindi.");
     }
 }

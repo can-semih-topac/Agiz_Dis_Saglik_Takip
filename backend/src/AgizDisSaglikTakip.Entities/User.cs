@@ -7,7 +7,8 @@ public class User
     // Google ile oluşturulan hesaplarda kullanıcı henüz kendi şifresini belirlemediği için boş olabilir.
     public string? PasswordEncrypted { get; set; }
     public string FullName { get; set; } = string.Empty;
-    public DateOnly BirthDate { get; set; }
+    // Google ile oluşturulan hesaplarda kullanıcı henüz belirtmediği için boş olabilir.
+    public DateOnly? BirthDate { get; set; }
     public string PhoneNumber { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 

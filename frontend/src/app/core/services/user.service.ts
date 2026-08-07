@@ -21,4 +21,8 @@ export class UserService {
   changePassword(dto: ChangePasswordDto): Observable<ServiceResult> {
     return this.http.put<ServiceResult>(`${this.baseUrl}/change-password`, dto);
   }
+
+  deleteAccount(): Observable<ServiceResult> {
+    return this.http.delete<ServiceResult>(`${this.baseUrl}/account`);
+  }
 }

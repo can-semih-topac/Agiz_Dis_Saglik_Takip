@@ -134,7 +134,7 @@ public class AuthManager : IAuthService
                 Email = googleUser.Email,
                 FullName = googleUser.FullName,
                 PhoneNumber = string.Empty,
-                BirthDate = DateOnly.FromDateTime(DateTime.Today),
+                BirthDate = null,
                 PasswordEncrypted = null,
                 CreatedAt = DateTime.Now
             };

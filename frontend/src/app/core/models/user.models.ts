@@ -1,14 +1,15 @@
 export interface UserProfileDto {
   email: string;
   fullName: string;
-  birthDate: string;
+  birthDate: string | null;
   phoneNumber: string;
+  hasPassword: boolean;
 }
 
 export interface UpdateProfileDto {
   email: string;
   fullName: string;
-  birthDate: string;
+  birthDate: string | null;
   phoneNumber: string;
 }
 

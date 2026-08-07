@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { AfterViewInit, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { LoginDto } from '../../core/models/auth.models';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +13,7 @@ import { LoginDto } from '../../core/models/auth.models';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent {
+export class LoginComponent implements AfterViewInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -59,6 +60,48 @@ export class LoginComponent {
       },
       error: (err: HttpErrorResponse) => {
         this.isSubmitting = false;
+        this.errorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.renderGoogleButton();
+  }
+
+  // https://accounts.google.com/gsi/client script'i "async" yüklendiği için sayfa
+  // hazır olduğunda henüz gelmemiş olabilir — gelene kadar kısa aralıklarla tekrar deniyoruz.
+  private renderGoogleButton(): void {
+    const google = (window as any).google;
+    if (!google?.accounts?.id) {
+      setTimeout(() => this.renderGoogleButton(), 100);
+      return;
+    }
+
+    google.accounts.id.initialize({
+      client_id: environment.googleClientId,
+      callback: (response: { credential: string }) => this.handleGoogleCredential(response.credential)
+    });
+
+    google.accounts.id.renderButton(
+      document.getElementById('google-signin-button'),
+      { theme: 'outline', size: 'large', text: 'continue_with', width: 320 }
+    );
+  }
+
+  private handleGoogleCredential(idToken: string): void {
+    this.errorMessage = '';
+
+    this.authService.googleLogin({ idToken }).subscribe({
+      next: (result) => {
+        if (result.success && result.data) {
+          this.authService.saveSession(result.data);
+          this.router.navigate(['/home']);
+        } else {
+          this.errorMessage = result.message ?? 'Google ile giriş başarısız.';
+        }
+      },
+      error: (err: HttpErrorResponse) => {
         this.errorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
       }
     });

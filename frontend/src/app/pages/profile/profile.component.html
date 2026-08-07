@@ -35,7 +35,7 @@
     @if (editingField !== 'birthDate') {
       <div class="profile-row-view">
         <span class="profile-label">Doğum Tarihi</span>
-        <span class="profile-value">{{ originalProfile.birthDate }}</span>
+        <span class="profile-value">{{ originalProfile.birthDate || 'Belirtilmemiş' }}</span>
         <button type="button" class="edit-icon-btn" (click)="startEdit('birthDate')" aria-label="Doğum tarihini düzenle">✎</button>
       </div>
     } @else {
@@ -160,4 +160,24 @@
     </form>
   }
 </div>
+
+<div class="danger-zone">
+  <button type="button" class="delete-account-btn" (click)="requestDeleteAccount()">Hesabı Sil</button>
 </div>
+</div>
+
+@if (pendingDeleteAccount) {
+  <div class="modal-backdrop">
+    <div class="modal-box modal-box-danger">
+      <h4>Hesabı Sil</h4>
+      <p>Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
+      @if (deleteErrorMessage) {
+        <p class="error">{{ deleteErrorMessage }}</p>
+      }
+      <button type="button" class="delete-confirm-btn" [disabled]="deleteSubmitting" (click)="confirmDeleteAccount()">
+        {{ deleteSubmitting ? 'Siliniyor...' : 'Evet, Hesabımı Sil' }}
+      </button>
+      <button type="button" class="modal-cancel" (click)="cancelDeleteAccount()">Vazgeç</button>
+    </div>
+  </div>
+}

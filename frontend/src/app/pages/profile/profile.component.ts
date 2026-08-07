@@ -1,9 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { UserService } from '../../core/services/user.service';
+import { AuthService } from '../../core/services/auth.service';
 import { ChangePasswordDto, UpdateProfileDto } from '../../core/models/user.models';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
 
@@ -18,6 +19,8 @@ type ProfileField = 'fullName' | 'birthDate' | 'phoneNumber' | 'email';
 export class ProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   constructor(title: Title) {
     title.setTitle('Profil | ADS');
@@ -38,6 +41,10 @@ export class ProfileComponent implements OnInit {
   passwordSubmitted = false;
   passwordErrorMessage = '';
   passwordSuccessMessage = '';
+
+  pendingDeleteAccount = false;
+  deleteSubmitting = false;
+  deleteErrorMessage = '';
 
   fieldForm = this.fb.group({
     fullName: ['', Validators.required],
@@ -193,6 +200,36 @@ export class ProfileComponent implements OnInit {
       error: (err: HttpErrorResponse) => {
         this.passwordSubmitting = false;
         this.passwordErrorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
+  }
+
+  requestDeleteAccount(): void {
+    this.deleteErrorMessage = '';
+    this.pendingDeleteAccount = true;
+  }
+
+  cancelDeleteAccount(): void {
+    this.pendingDeleteAccount = false;
+  }
+
+  confirmDeleteAccount(): void {
+    this.deleteSubmitting = true;
+    this.deleteErrorMessage = '';
+
+    this.userService.deleteAccount().subscribe({
+      next: (result) => {
+        if (result.success) {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        } else {
+          this.deleteSubmitting = false;
+          this.deleteErrorMessage = result.message ?? 'Hesap silinemedi.';
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.deleteSubmitting = false;
+        this.deleteErrorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
       }
     });
   }

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthSession, LoginDto, LoginResultDto, RegisterDto, ResetPasswordDto, VerifyEmailDto, VerifyResetCodeDto } from '../models/auth.models';
+import { AuthSession, GoogleLoginDto, LoginDto, LoginResultDto, RegisterDto, ResetPasswordDto, VerifyEmailDto, VerifyResetCodeDto } from '../models/auth.models';
 import { ServiceResult } from '../models/service-result';
 
 @Injectable({
@@ -19,6 +19,10 @@ export class AuthService {
 
   login(dto: LoginDto): Observable<ServiceResult<LoginResultDto>> {
     return this.http.post<ServiceResult<LoginResultDto>>(`${this.baseUrl}/login`, dto);
+  }
+
+  googleLogin(dto: GoogleLoginDto): Observable<ServiceResult<LoginResultDto>> {
+    return this.http.post<ServiceResult<LoginResultDto>>(`${this.baseUrl}/google`, dto);
   }
 
   requestResetCode(dto: VerifyEmailDto): Observable<ServiceResult> {

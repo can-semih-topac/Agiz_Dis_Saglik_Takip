@@ -15,6 +15,10 @@ export interface LoginDto {
   password: string;
 }
 
+export interface GoogleLoginDto {
+  idToken: string;
+}
+
 // Backend'deki LoginResultDto'nun karşılığı.
 export interface LoginResultDto {
   token: string;

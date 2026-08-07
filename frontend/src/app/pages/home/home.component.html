@@ -1,5 +1,44 @@
 <app-navbar></app-navbar>
 
+@if (showPasswordBanner) {
+  <div class="password-banner">
+    @if (!showPasswordForm) {
+      <p>🔒 Güvenliğinizi artırmak için lütfen bir parola belirleyin.</p>
+      <button type="button" (click)="openPasswordForm()">Parola Belirle</button>
+    } @else {
+      <form class="password-banner-form" [formGroup]="passwordForm" (ngSubmit)="submitPassword()">
+        <div>
+          <label for="bannerNewPassword">Yeni Parola</label>
+          <input id="bannerNewPassword" type="password" formControlName="newPassword" />
+          @if (passwordForm.get('newPassword')?.invalid && passwordSubmitted) {
+            <span class="error">En az 8 karakter, büyük/küçük harf ve rakam içermeli.</span>
+          }
+        </div>
+        <div>
+          <label for="bannerNewPasswordConfirm">Yeni Parola (tekrar)</label>
+          <input id="bannerNewPasswordConfirm" type="password" formControlName="newPasswordConfirm" />
+          @if (passwordForm.get('newPasswordConfirm')?.invalid && passwordSubmitted) {
+            <span class="error">Bu alan zorunlu.</span>
+          }
+        </div>
+        <button type="submit" [disabled]="passwordSubmitting">
+          {{ passwordSubmitting ? 'Kaydediliyor...' : 'Kaydet' }}
+        </button>
+        @if (passwordSubmitted && passwordForm.invalid) {
+          <p class="error">Lütfen zorunlu alanları doldurun.</p>
+        }
+        @if (passwordErrorMessage) {
+          <p class="error">{{ passwordErrorMessage }}</p>
+        }
+      </form>
+    }
+  </div>
+}
+
+@if (passwordSuccessMessage) {
+  <p class="success">{{ passwordSuccessMessage }}</p>
+}
+
 <h3>Son 7 Günün Verileri <button (click)="loadLast7Days()">Yenile</button></h3>
 @if (last7Days.length === 0) {
   <p>Son 7 günde kayıt yok.</p>
