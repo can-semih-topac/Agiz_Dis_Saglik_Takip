@@ -1,4 +1,6 @@
 <div class="auth-page">
+<app-auth-navbar></app-auth-navbar>
+<div class="auth-content">
 <h2>Giriş Yap</h2>
 
 <form [formGroup]="form" (ngSubmit)="submit()">
@@ -40,4 +42,5 @@
 
 <p><a routerLink="/register">Kayıt Ol</a></p>
 <p><a routerLink="/forgot-password">Şifremi Unuttum</a></p>
+</div>
 </div>

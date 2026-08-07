@@ -5,10 +5,11 @@ import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { RegisterDto } from '../../core/models/auth.models';
+import { AuthNavbarComponent } from '../../shared/auth-navbar/auth-navbar.component';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, AuthNavbarComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })

@@ -6,10 +6,11 @@ import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { LoginDto } from '../../core/models/auth.models';
 import { environment } from '../../../environments/environment';
+import { AuthNavbarComponent } from '../../shared/auth-navbar/auth-navbar.component';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, AuthNavbarComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })

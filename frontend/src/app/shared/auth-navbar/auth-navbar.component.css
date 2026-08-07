@@ -1,0 +1,23 @@
+.auth-navbar {
+  /* Ebeveyn (.auth-page) ortalanmış/dar olsa da bu şerit tüm viewport genişliğine yayılsın diye. */
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  /* Giriş Yap butonuyla aynı koyu yeşil, ama yarı saydam — arkadaki desen hafifçe görünsün. */
+  background: rgba(15, 118, 110, 0.82);
+  color: #fff;
+  padding: 0.85rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.auth-navbar-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+}

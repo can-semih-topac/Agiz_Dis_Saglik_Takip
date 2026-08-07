@@ -17,14 +17,29 @@ app-root {
   padding: 0 1.5rem 4rem;
 }
 
-/* Kayıt/Giriş/Şifre Hatırlatma gibi tek başına duran (navbar'sız) sayfalar
-   için: form kartını sayfanın hem yatayda hem dikeyde ortasına al. */
+/* Kayıt/Giriş/Şifre Hatırlatma sayfaları — üstte AuthNavbarComponent, altında
+   form kartı hem yatayda hem dikeyde ortalı. */
 .auth-page {
+  display: flex;
+  flex-direction: column;
+  /* app-root'un alt boşluğu (padding-bottom: 4rem) burada da geçerli olduğu için
+     100vh yerine bunu çıkarıyoruz — aksi halde toplam yükseklik viewport'u aşıp
+     dikey (ve onun tetiklediği yatay) kaydırma çubuğu çıkarıyordu. */
+  min-height: calc(100vh - 4rem);
+  /* WhatsApp arka planındaki gibi soluk, tekrarlanan sağlık ikonlu bir doku —
+     SVG küçük (birkaç KB) ve statik bir dosya, sayfa açılışını yavaşlatmaz.
+     Navbar bu alanın İÇİNDE (ilk çocuk) durduğu için desen navbar'ın da arkasında görünür. */
+  background-image: url('/patterns/login-pattern.svg');
+  background-repeat: repeat;
+  background-position: center;
+}
+
+.auth-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 85vh;
   text-align: center;
 }
 
