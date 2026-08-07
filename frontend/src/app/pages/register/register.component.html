@@ -52,7 +52,7 @@
   </div>
 
   <div>
-    <label for="password">Parola</label>
+    <label for="password">Şifre</label>
     <input id="password" type="password" formControlName="password" />
     @if (form.get('password')?.invalid && submitted) {
       <span class="error">En az 8 karakter, büyük/küçük harf ve rakam içermeli.</span>
@@ -60,7 +60,7 @@
   </div>
 
   <div>
-    <label for="passwordConfirm">Parola (tekrar)</label>
+    <label for="passwordConfirm">Şifre (tekrar)</label>
     <input id="passwordConfirm" type="password" formControlName="passwordConfirm" />
     @if (form.get('passwordConfirm')?.invalid && submitted) {
       <span class="error">Bu alan zorunlu.</span>

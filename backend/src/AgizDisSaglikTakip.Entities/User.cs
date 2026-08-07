@@ -12,7 +12,7 @@ public class User
     public string PhoneNumber { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 
-    // Parola hatırlatma akışı için — kod üretilince dolar, kullanılınca/süresi geçince temizlenir.
+    // Şifre hatırlatma akışı için — kod üretilince dolar, kullanılınca/süresi geçince temizlenir.
     public string? PasswordResetCode { get; set; }
     public DateTime? PasswordResetCodeExpiresAt { get; set; }
 

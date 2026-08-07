@@ -79,29 +79,29 @@ public class UserManager : IUserService
     }
 
     // Profil sayfasındaki "Şifreyi Değiştir" bölümü — UpdateProfileAsync'ten ayrı tutuluyor
-    // çünkü burada mevcut parolanın doğrulanması gerekiyor (profildeki diğer alanlar için gerekmiyor).
+    // çünkü burada mevcut şifrenin doğrulanması gerekiyor (profildeki diğer alanlar için gerekmiyor).
     public async Task<ServiceResult> ChangePasswordAsync(int userId, ChangePasswordDto dto)
     {
         var user = await _userRepository.GetAsync(u => u.Id == userId);
         if (user == null)
             return ServiceResult.Fail("Kullanıcı bulunamadı.");
 
-        // Google ile oluşturulmuş hesaplarda henüz parola yok — bu durumda eski parola istemeden
-        // doğrudan yeni parolayı kaydediyoruz (ilk kez parola belirleme).
+        // Google ile oluşturulmuş hesaplarda henüz şifre yok — bu durumda eski şifre istemeden
+        // doğrudan yeni şifreyi kaydediyoruz (ilk kez şifre belirleme).
         var hasExistingPassword = !string.IsNullOrEmpty(user.PasswordEncrypted);
 
         if (hasExistingPassword)
         {
             var currentPassword = _encryptionService.Decrypt(user.PasswordEncrypted!);
             if (currentPassword != dto.OldPassword)
-                return ServiceResult.Fail("Mevcut parola yanlış.");
+                return ServiceResult.Fail("Mevcut şifre yanlış.");
         }
 
         if (!AuthBusinessRules.IsValidPassword(dto.NewPassword))
-            return ServiceResult.Fail("Parola en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
+            return ServiceResult.Fail("Şifre en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
 
         if (dto.NewPassword != dto.NewPasswordConfirm)
-            return ServiceResult.Fail("Parolalar eşleşmiyor.");
+            return ServiceResult.Fail("Şifreler eşleşmiyor.");
 
         user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword);
         await _userRepository.UpdateAsync(user);
@@ -110,15 +110,15 @@ public class UserManager : IUserService
         {
             await _emailService.SendHtmlEmailAsync(
                 user.Email,
-                "Parolanız Değiştirildi",
+                "Şifreniz Değiştirildi",
                 AuthEmailTemplates.PasswordChangedEmail(user.FullName));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Parola değişikliği bildirim maili gönderilemedi. Kullanıcı: {Email}", user.Email);
+            _logger.LogError(ex, "Şifre değişikliği bildirim maili gönderilemedi. Kullanıcı: {Email}", user.Email);
         }
 
-        return ServiceResult.Ok("Parola güncellendi.");
+        return ServiceResult.Ok("Şifre güncellendi.");
     }
 
     // Kalıcı (hard) silme — yumuşak silme ileride eklenecek.

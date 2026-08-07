@@ -11,10 +11,10 @@
   </div>
 
   <div>
-    <label for="password">Parola</label>
+    <label for="password">Şifre</label>
     <input id="password" type="password" formControlName="password" />
     @if (form.get('password')?.invalid && submitted) {
-      <span class="error">Parola gerekli.</span>
+      <span class="error">Şifre gerekli.</span>
     }
   </div>
 
@@ -39,5 +39,5 @@
 <div id="google-signin-button" class="google-signin-button"></div>
 
 <p><a routerLink="/register">Kayıt Ol</a></p>
-<p><a routerLink="/forgot-password">Parolamı Unuttum</a></p>
+<p><a routerLink="/forgot-password">Şifremi Unuttum</a></p>
 </div>

@@ -17,14 +17,14 @@ export class ForgotPasswordComponent {
   private router = inject(Router);
 
   constructor(title: Title) {
-    title.setTitle('Parolamı Unuttum | ADS');
+    title.setTitle('Şifremi Unuttum | ADS');
   }
 
   // Bu sayfaya profildeki "Şifremi unuttum" linkiyle, oturum açıkken de gelinebiliyor.
   // O durumda oturumu bozmadan "Ana Sayfaya Dön" gösteriyoruz, "Giriş sayfasına dön" değil.
   isLoggedIn = this.authService.isLoggedIn();
 
-  // 3 adım: email doğrula (kod gönder) -> kodu doğrula -> yeni parola.
+  // 3 adım: email doğrula (kod gönder) -> kodu doğrula -> yeni şifre.
   step: 'email' | 'code' | 'reset' = 'email';
   verifiedEmail = '';
   verifiedCode = '';
@@ -126,7 +126,7 @@ export class ForgotPasswordComponent {
           // Oturum zaten açıksa (profil sayfasından gelindiyse) tekrar login'e değil, ana sayfaya dön.
           this.router.navigate([this.isLoggedIn ? '/home' : '/login']);
         } else {
-          this.errorMessage = result.message ?? 'Parola güncellenemedi.';
+          this.errorMessage = result.message ?? 'Şifre güncellenemedi.';
         }
       },
       error: (err: HttpErrorResponse) => {

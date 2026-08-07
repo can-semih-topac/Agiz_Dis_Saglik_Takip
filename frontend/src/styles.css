@@ -17,7 +17,7 @@ app-root {
   padding: 0 1.5rem 4rem;
 }
 
-/* Kayıt/Giriş/Parola Hatırlatma gibi tek başına duran (navbar'sız) sayfalar
+/* Kayıt/Giriş/Şifre Hatırlatma gibi tek başına duran (navbar'sız) sayfalar
    için: form kartını sayfanın hem yatayda hem dikeyde ortasına al. */
 .auth-page {
   display: flex;

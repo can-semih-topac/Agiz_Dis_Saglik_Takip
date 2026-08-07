@@ -115,34 +115,38 @@
 
 <div class="password-card">
   <button type="button" class="password-toggle-btn" (click)="togglePasswordSection()">
-    Şifreyi Değiştir {{ showPasswordSection ? '▲' : '▼' }}
+    {{ hasPassword ? 'Şifreyi Değiştir' : 'Şifre Belirle' }} {{ showPasswordSection ? '▲' : '▼' }}
   </button>
 
   @if (showPasswordSection) {
     <form class="password-form" [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()">
+      @if (hasPassword) {
+        <div>
+          <label for="oldPassword">Mevcut Şifre</label>
+          <input id="oldPassword" type="password" formControlName="oldPassword" />
+          @if (passwordForm.get('oldPassword')?.invalid && passwordSubmitted) {
+            <span class="error">Bu alan zorunlu.</span>
+          }
+        </div>
+      }
       <div>
-        <label for="oldPassword">Mevcut Parola</label>
-        <input id="oldPassword" type="password" formControlName="oldPassword" />
-        @if (passwordForm.get('oldPassword')?.invalid && passwordSubmitted) {
-          <span class="error">Bu alan zorunlu.</span>
-        }
-      </div>
-      <div>
-        <label for="newPassword">Yeni Parola</label>
+        <label for="newPassword">Yeni Şifre</label>
         <input id="newPassword" type="password" formControlName="newPassword" />
         @if (passwordForm.get('newPassword')?.invalid && passwordSubmitted) {
           <span class="error">En az 8 karakter, büyük/küçük harf ve rakam içermeli.</span>
         }
       </div>
       <div>
-        <label for="newPasswordConfirm">Yeni Parola (tekrar)</label>
+        <label for="newPasswordConfirm">Yeni Şifre (tekrar)</label>
         <input id="newPasswordConfirm" type="password" formControlName="newPasswordConfirm" />
         @if (passwordForm.get('newPasswordConfirm')?.invalid && passwordSubmitted) {
           <span class="error">Bu alan zorunlu.</span>
         }
       </div>
 
-      <a routerLink="/forgot-password" class="forgot-password-link">Şifremi unuttum</a>
+      @if (hasPassword) {
+        <a routerLink="/forgot-password" class="forgot-password-link">Şifremi unuttum</a>
+      }
 
       <button type="submit" [disabled]="passwordSubmitting">
         {{ passwordSubmitting ? 'Güncelleniyor...' : 'Onayla' }}

@@ -44,10 +44,10 @@ public class AuthManager : IAuthService
             return ServiceResult.Fail("Geçersiz e-posta formatı.");
 
         if (!AuthBusinessRules.IsValidPassword(dto.Password))
-            return ServiceResult.Fail("Parola en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
+            return ServiceResult.Fail("Şifre en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
 
         if (dto.Password != dto.PasswordConfirm)
-            return ServiceResult.Fail("Parolalar eşleşmiyor.");
+            return ServiceResult.Fail("Şifreler eşleşmiyor.");
 
         if (dto.BirthDate > DateOnly.FromDateTime(DateTime.Today))
             return ServiceResult.Fail("Doğum tarihi gelecekte olamaz.");
@@ -96,11 +96,11 @@ public class AuthManager : IAuthService
 
         // Google ile oluşturulmuş ve henüz şifre belirlememiş hesaplarda PasswordEncrypted boştur.
         if (string.IsNullOrEmpty(user.PasswordEncrypted))
-            return ServiceResult<LoginResultDto>.Fail("Bu hesap Google ile oluşturulmuş. Google ile giriş yapabilir ya da 'Parolamı Unuttum' ile bir parola belirleyebilirsiniz.");
+            return ServiceResult<LoginResultDto>.Fail("Bu hesap Google ile oluşturulmuş. Google ile giriş yapabilir ya da 'Şifremi Unuttum' ile bir şifre belirleyebilirsiniz.");
 
         var decryptedPassword = _encryptionService.Decrypt(user.PasswordEncrypted);
         if (decryptedPassword != dto.Password)
-            return ServiceResult<LoginResultDto>.Fail("Parola yanlış.");
+            return ServiceResult<LoginResultDto>.Fail("Şifre yanlış.");
 
         var token = _tokenService.CreateToken(user.Id, user.Email);
 
@@ -115,7 +115,7 @@ public class AuthManager : IAuthService
     }
 
     // Google ile giriş: ID token doğrulanır, aynı e-postalı kullanıcı varsa ona giriş yapılır
-    // (elle kayıt olmuş biri de olabilir — parolasına dokunulmaz), yoksa otomatik kayıt oluşturulur.
+    // (elle kayıt olmuş biri de olabilir — şifresine dokunulmaz), yoksa otomatik kayıt oluşturulur.
     public async Task<ServiceResult<LoginResultDto>> GoogleLoginAsync(GoogleLoginDto dto)
     {
         var googleUser = await _googleAuthValidator.ValidateAsync(dto.IdToken);
@@ -183,12 +183,12 @@ public class AuthManager : IAuthService
         {
             await _emailService.SendHtmlEmailAsync(
                 user.Email,
-                "Parola Sıfırlama Kodu",
+                "Şifre Sıfırlama Kodu",
                 AuthEmailTemplates.ResetCodeEmail(user.FullName, code));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Parola sıfırlama kodu gönderilemedi. Kullanıcı: {Email}", user.Email);
+            _logger.LogError(ex, "Şifre sıfırlama kodu gönderilemedi. Kullanıcı: {Email}", user.Email);
             return ServiceResult.Fail("Kod gönderilemedi, lütfen daha sonra tekrar deneyin.");
         }
 
@@ -210,7 +210,7 @@ public class AuthManager : IAuthService
     }
 
     // Adım 3:
-    // Kod BURADA da tekrar kontrol ediliyor — Adım 2'yi atlayıp doğrudan bu endpoint'e istek atılsa bile kodsuz/yanlış kodla parola değiştirilemesin diye.
+    // Kod BURADA da tekrar kontrol ediliyor — Adım 2'yi atlayıp doğrudan bu endpoint'e istek atılsa bile kodsuz/yanlış kodla şifre değiştirilemesin diye.
     public async Task<ServiceResult> ResetPasswordAsync(ResetPasswordDto dto)
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
@@ -221,10 +221,10 @@ public class AuthManager : IAuthService
             return ServiceResult.Fail("Kod hatalı ya da süresi dolmuş.");
 
         if (!AuthBusinessRules.IsValidPassword(dto.NewPassword))
-            return ServiceResult.Fail("Parola en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
+            return ServiceResult.Fail("Şifre en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
 
         if (dto.NewPassword != dto.NewPasswordConfirm)
-            return ServiceResult.Fail("Parolalar eşleşmiyor.");
+            return ServiceResult.Fail("Şifreler eşleşmiyor.");
 
         user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword);
         // Kod tek kullanımlık — başarılı sıfırlamadan sonra geçersizleştiriyoruz.
@@ -236,15 +236,15 @@ public class AuthManager : IAuthService
         {
             await _emailService.SendHtmlEmailAsync(
                 user.Email,
-                "Parolanız Değiştirildi",
+                "Şifreniz Değiştirildi",
                 AuthEmailTemplates.PasswordChangedEmail(user.FullName));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Parola değişikliği bildirim maili gönderilemedi. Kullanıcı: {Email}", user.Email);
+            _logger.LogError(ex, "Şifre değişikliği bildirim maili gönderilemedi. Kullanıcı: {Email}", user.Email);
         }
 
-        return ServiceResult.Ok("Parola güncellendi.");
+        return ServiceResult.Ok("Şifre güncellendi.");
     }
 
     // Kodun geçerliliğini kontrol eder

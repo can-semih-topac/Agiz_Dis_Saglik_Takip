@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -21,6 +21,7 @@ export class ProfileComponent implements OnInit {
   private userService = inject(UserService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   constructor(title: Title) {
     title.setTitle('Profil | ADS');
@@ -36,6 +37,8 @@ export class ProfileComponent implements OnInit {
   fieldErrorMessage = '';
   phoneInvalidCharWarning = false;
 
+  // Google ile oluşturulup henüz şifre belirlememiş hesaplarda "Mevcut Şifre" alanı gizlenir.
+  hasPassword = true;
   showPasswordSection = false;
   passwordSubmitting = false;
   passwordSubmitted = false;
@@ -60,6 +63,12 @@ export class ProfileComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Ana sayfadaki "Şifre Belirle" bildirimi buraya bu query param ile yönlendiriyor —
+    // kullanıcı sayfaya gelir gelmez şifre bölümü açık gelsin diye.
+    if (this.route.snapshot.queryParamMap.get('openPassword')) {
+      this.showPasswordSection = true;
+    }
+
     this.userService.getProfile().subscribe({
       next: (result) => {
         if (result.success) {
@@ -70,9 +79,21 @@ export class ProfileComponent implements OnInit {
             email: result.data.email
           };
           this.fieldForm.patchValue(this.originalProfile);
+          this.hasPassword = result.data.hasPassword;
+          this.updateOldPasswordValidator();
         }
       }
     });
+  }
+
+  private updateOldPasswordValidator(): void {
+    const control = this.passwordForm.get('oldPassword')!;
+    if (this.hasPassword) {
+      control.setValidators(Validators.required);
+    } else {
+      control.clearValidators();
+    }
+    control.updateValueAndValidity();
   }
 
   startEdit(field: ProfileField): void {
@@ -190,11 +211,11 @@ export class ProfileComponent implements OnInit {
       next: (result) => {
         this.passwordSubmitting = false;
         if (result.success) {
-          this.passwordSuccessMessage = result.message ?? 'Parola güncellendi.';
+          this.passwordSuccessMessage = result.message ?? 'Şifre güncellendi.';
           this.passwordForm.reset();
           this.passwordSubmitted = false;
         } else {
-          this.passwordErrorMessage = result.message ?? 'Parola güncellenemedi.';
+          this.passwordErrorMessage = result.message ?? 'Şifre güncellenemedi.';
         }
       },
       error: (err: HttpErrorResponse) => {

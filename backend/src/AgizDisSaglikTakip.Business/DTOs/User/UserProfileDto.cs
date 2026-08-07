@@ -6,6 +6,6 @@ public class UserProfileDto
     public string FullName { get; set; } = string.Empty;
     public DateOnly? BirthDate { get; set; }
     public string PhoneNumber { get; set; } = string.Empty;
-    // Google ile oluşturulup henüz parola belirlememiş hesaplarda false olur.
+    // Google ile oluşturulup henüz şifre belirlememiş hesaplarda false olur.
     public bool HasPassword { get; set; }
 }
