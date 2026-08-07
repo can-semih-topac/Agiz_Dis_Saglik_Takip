@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGoalService, GoalManager>();
         services.AddScoped<IGoalStatusService, GoalStatusManager>();
         services.AddScoped<IStatusNoteService, StatusNoteManager>();
+        services.AddScoped<IContactService, ContactManager>();
 
         return services;
     }

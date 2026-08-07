@@ -51,6 +51,16 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(fileStorageSettings);
         services.AddSingleton<IFileStorageService, LocalFileStorageService>();
 
+        // Ayrı klasör (uploads/contact-messages) — status-note görselleriyle karışmasın diye
+        // kendi FileStorageSettings'iyle doğrudan new'lenip kaydediliyor (DI'ın tek FileStorageSettings
+        // singleton'ını ikinciyle çakıştırmamak için).
+        var contactFileStorageSettings = new FileStorageSettings
+        {
+            UploadFolderPath = Path.Combine(webRootPath, "uploads", "contact-messages"),
+            UploadUrlPath = "/uploads/contact-messages"
+        };
+        services.AddSingleton<IContactFileStorageService>(new ContactFileStorageService(contactFileStorageSettings));
+
         return services;
     }
 }

@@ -53,3 +53,19 @@
 .navbar-actions button:hover {
   background: #991b1b;
 }
+
+.contact-btn {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.contact-btn:hover {
+  background: rgba(255, 255, 255, 0.28) !important;
+}
+
+.contact-btn-icon {
+  margin-right: 0.25rem;
+}

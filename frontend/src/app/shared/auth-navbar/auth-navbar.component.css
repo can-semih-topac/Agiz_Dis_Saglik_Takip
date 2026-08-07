@@ -8,7 +8,8 @@
 
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
 
   /* Giriş Yap butonuyla aynı koyu yeşil, ama yarı saydam — arkadaki desen hafifçe görünsün. */
   background: rgba(15, 118, 110, 0.82);
@@ -20,4 +21,22 @@
 .auth-navbar-title {
   font-weight: 700;
   font-size: 1.05rem;
+}
+
+.contact-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  margin: 0;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.contact-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.contact-btn-icon {
+  margin-right: 0.25rem;
 }

@@ -1,10 +1,11 @@
 import { Component, Input, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ContactModalComponent } from '../contact-modal/contact-modal.component';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink],
+  imports: [RouterLink, ContactModalComponent],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
@@ -17,6 +18,9 @@ export class NavbarComponent {
   @Input() pageTitle = '';
 
   fullName = this.authService.getSession()?.fullName ?? '';
+  email = this.authService.getSession()?.email ?? '';
+
+  showContactModal = false;
 
   get displayTitle(): string {
     return this.pageTitle || `Hoş geldin, ${this.fullName}!`;

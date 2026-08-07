@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGoalStatusRepository, EfGoalStatusRepository>();
         services.AddScoped<IStatusNoteRepository, EfStatusNoteRepository>();
         services.AddScoped<ISuggestionRepository, EfSuggestionRepository>();
+        services.AddScoped<IContactMessageRepository, EfContactMessageRepository>();
 
         return services;
     }

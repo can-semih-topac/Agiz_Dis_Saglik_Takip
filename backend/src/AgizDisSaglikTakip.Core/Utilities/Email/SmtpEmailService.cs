@@ -15,11 +15,26 @@ public class SmtpEmailService : IEmailService
 
     public async Task SendHtmlEmailAsync(string toEmail, string subject, string htmlBody)
     {
+        await SendAsync(new EmailMessage { ToEmail = toEmail, Subject = subject, HtmlBody = htmlBody });
+    }
+
+    public async Task SendAsync(EmailMessage email)
+    {
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(_settings.SenderName, _settings.SenderEmail));
-        message.To.Add(MailboxAddress.Parse(toEmail));
-        message.Subject = subject;
-        message.Body = new TextPart("html") { Text = htmlBody };
+        message.To.Add(MailboxAddress.Parse(email.ToEmail));
+        if (!string.IsNullOrEmpty(email.ReplyToEmail))
+        {
+            message.ReplyTo.Add(MailboxAddress.Parse(email.ReplyToEmail));
+        }
+        message.Subject = email.Subject;
+
+        var builder = new BodyBuilder { HtmlBody = email.HtmlBody };
+        if (email.AttachmentBytes != null && email.AttachmentFileName != null)
+        {
+            builder.Attachments.Add(email.AttachmentFileName, email.AttachmentBytes);
+        }
+        message.Body = builder.ToMessageBody();
 
         using var client = new SmtpClient();
         await client.ConnectAsync(_settings.SmtpHost, _settings.SmtpPort, SecureSocketOptions.StartTls);

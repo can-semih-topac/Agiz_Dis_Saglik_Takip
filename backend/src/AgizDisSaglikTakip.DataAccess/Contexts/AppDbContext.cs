@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<GoalStatus> GoalStatuses => Set<GoalStatus>();
     public DbSet<StatusNote> StatusNotes => Set<StatusNote>();
     public DbSet<Suggestion> Suggestions => Set<Suggestion>();
+    public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +57,14 @@ public class AppDbContext : DbContext
                   .WithMany(u => u.StatusNotes)
                   .HasForeignKey(sn => sn.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ContactMessage>(entity =>
+        {
+            entity.Property(c => c.FullName).HasMaxLength(150).IsRequired();
+            entity.Property(c => c.Email).HasMaxLength(256).IsRequired();
+            entity.Property(c => c.Message).HasMaxLength(2000).IsRequired();
+            entity.Property(c => c.ImagePath).HasMaxLength(500);
         });
 
         modelBuilder.Entity<Suggestion>(entity =>
