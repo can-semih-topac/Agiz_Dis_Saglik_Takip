@@ -1,7 +1,7 @@
 .contact-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.55);
+  background: var(--backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,24 +12,24 @@
 
 .contact-box {
   position: relative;
-  background: #fff;
+  background: var(--surface);
   border-radius: 12px;
   padding: 1.75rem 2rem 1.25rem;
   width: 100%;
   max-width: 560px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px var(--shadow-strong);
   text-align: left;
 }
 
 .contact-box h3 {
   margin: 0;
-  color: #0f766e;
+  color: var(--heading);
 }
 
 .contact-intro {
   margin: 0.35rem 0 1rem;
   font-size: 0.9rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .contact-close-btn {
@@ -37,7 +37,7 @@
   top: 0.75rem;
   right: 0.75rem;
   background: transparent;
-  color: #6b7280;
+  color: var(--text-muted);
   border: none;
   font-size: 1.1rem;
   line-height: 1;
@@ -47,7 +47,7 @@
 }
 
 .contact-close-btn:hover {
-  color: #111827;
+  color: var(--text);
   background: transparent;
 }
 
@@ -71,6 +71,6 @@
 .contact-direct {
   margin: 1rem 0 0;
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-muted);
   text-align: center;
 }

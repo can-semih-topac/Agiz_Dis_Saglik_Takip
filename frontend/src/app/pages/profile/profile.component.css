@@ -9,8 +9,8 @@
 
 .profile-card,
 .password-card {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1.1rem 1.4rem;
 }
@@ -26,7 +26,7 @@
 
 .profile-row {
   padding: 0.7rem 0;
-  border-bottom: 1px solid #f0f1f3;
+  border-bottom: 1px solid var(--border);
 }
 
 .profile-row:last-of-type {
@@ -43,19 +43,19 @@
   min-width: 140px;
   font-weight: 600;
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .profile-value {
   flex: 1;
   font-size: 1rem;
-  color: #111827;
+  color: var(--text);
 }
 
 .edit-icon-btn {
   background: transparent;
   border: none;
-  color: #0f766e;
+  color: var(--heading);
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
@@ -64,7 +64,8 @@
 }
 
 .edit-icon-btn:hover {
-  color: #0d5f58;
+  color: var(--heading-alt);
+  background: transparent;
 }
 
 /* Alan düzenleme formu, sayfadaki genel `form` kart/grid stilini miras almasın —
@@ -89,18 +90,18 @@
 }
 
 .btn-secondary {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--surface-alt);
+  color: var(--label);
 }
 
-.btn-secondary:hover {
-  background: #d1d5db;
+.btn-secondary:hover:not(:disabled) {
+  background: var(--surface-alt-hover);
 }
 
 .password-toggle-btn {
   width: 100%;
   background: transparent;
-  color: #0f766e;
+  color: var(--heading);
   border: none;
   text-align: left;
   font-weight: 600;
@@ -108,6 +109,12 @@
   padding: 0.2rem 0;
   margin: 0;
   cursor: pointer;
+}
+
+/* Genel button:hover kuralı bunu yeşile boyamasın — bu bir metin/akordeon başlığı. */
+.password-toggle-btn:hover:not(:disabled) {
+  background: transparent;
+  color: var(--heading-alt);
 }
 
 .password-form {
@@ -138,19 +145,19 @@
 }
 
 .delete-account-btn {
-  background: #fff;
-  color: #b91c1c;
-  border: 1px solid #b91c1c;
+  background: var(--surface);
+  color: var(--danger);
+  border: 1px solid var(--danger);
 }
 
-.delete-account-btn:hover {
-  background: #fef2f2;
+.delete-account-btn:hover:not(:disabled) {
+  background: var(--error-bg);
 }
 
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.55);
+  background: var(--backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -158,36 +165,36 @@
 }
 
 .modal-box {
-  background: #fff;
+  background: var(--surface);
   border-radius: 10px;
   padding: 1.5rem;
   max-width: 380px;
   width: 90%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px var(--shadow-strong);
 }
 
 .modal-box-danger {
-  border: 2px solid #b91c1c;
+  border: 2px solid var(--danger);
 }
 
 .modal-box h4 {
   margin-top: 0;
-  color: #b91c1c;
+  color: var(--error-text);
 }
 
 .delete-confirm-btn {
-  background: #b91c1c;
+  background: var(--danger);
   margin-right: 0.5rem;
 }
 
-.delete-confirm-btn:hover {
-  background: #991b1b;
+.delete-confirm-btn:hover:not(:disabled) {
+  background: var(--danger-hover);
 }
 
 .modal-cancel {
-  background: #6b7280;
+  background: var(--text-muted);
 }
 
-.modal-cancel:hover {
-  background: #4b5563;
+.modal-cancel:hover:not(:disabled) {
+  background: var(--label);
 }

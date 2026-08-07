@@ -15,12 +15,18 @@
   background: rgba(15, 118, 110, 0.82);
   color: #fff;
   padding: 0.85rem 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px var(--shadow-soft);
 }
 
 .auth-navbar-title {
   font-weight: 700;
   font-size: 1.05rem;
+}
+
+.auth-navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 /* Oturum içi navbar'daki ikincil eylem butonlarıyla aynı görünüm. */

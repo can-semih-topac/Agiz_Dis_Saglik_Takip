@@ -1,0 +1,31 @@
+<app-navbar pageTitle="Ayarlar"></app-navbar>
+
+<div class="settings-page">
+  <a routerLink="/home" class="back-link">← Ana Sayfaya Dön</a>
+  <h2>Ayarlar</h2>
+
+  <div class="settings-card">
+    <h4>Görünüm</h4>
+    <p class="settings-hint">Uygulamanın renk temasını seçin.</p>
+
+    <div class="theme-options">
+      @for (option of themeOptions; track option.value) {
+        <button
+          type="button"
+          class="theme-option"
+          [class.is-selected]="preference() === option.value"
+          (click)="selectTheme(option.value)">
+          <span class="theme-option-icon">{{ option.icon }}</span>
+          <span class="theme-option-label">{{ option.label }}</span>
+          <span class="theme-option-desc">{{ option.description }}</span>
+        </button>
+      }
+    </div>
+
+    @if (preference() === 'auto') {
+      <p class="settings-hint settings-hint-active">
+        Şu an cihazınızın tercihi uygulanıyor: {{ resolved() === 'dark' ? 'Koyu Tema' : 'Açık Tema' }}
+      </p>
+    }
+  </div>
+</div>

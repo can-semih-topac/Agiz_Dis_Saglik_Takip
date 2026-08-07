@@ -11,10 +11,10 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.75rem;
-  background: #0f766e;
+  background: var(--primary);
   color: #fff;
   padding: 0.85rem 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px var(--shadow-soft);
   margin-bottom: 1.5rem;
 }
 
@@ -42,12 +42,12 @@
 }
 
 .navbar-actions button {
-  background: #b91c1c;
+  background: var(--danger);
   margin: 0;
 }
 
 .navbar-actions button:hover {
-  background: #991b1b;
+  background: var(--danger-hover);
 }
 
 /* Yeşil şerit üzerindeki ikincil eylemler (Ağız ve Diş Sağlığı, Bize Ulaşın) —

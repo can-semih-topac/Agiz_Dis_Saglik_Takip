@@ -1,3 +1,90 @@
+/* Tüm renkler burada tanımlı — koyu tema aşağıdaki [data-theme="dark"] bloğunda
+   sadece bu değişkenleri değiştiriyor, bileşen CSS'lerine dokunmaya gerek kalmıyor.
+   data-theme özniteliğini ThemeService (ve index.html'deki ön yükleme betiği) yazıyor. */
+:root {
+  --bg: #f4f7f6;
+  --text: #1f2937;
+  --text-muted: #6b7280;
+  --surface: #ffffff;
+  --surface-alt: #f3f4f6;
+  --surface-alt-hover: #e5e7eb;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --label: #374151;
+
+  --primary: #0f766e;
+  --primary-hover: #0d5f58;
+  --heading: #0f766e;
+  --heading-alt: #115e59;
+  --heading-alt-2: #134e4a;
+  --rule: #ccfbf1;
+  --focus-border: #14b8a6;
+  --focus-ring: rgba(20, 184, 166, 0.15);
+
+  --error-text: #b91c1c;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --success-text: #166534;
+  --success-bg: #f0fdf4;
+  --success-border: #bbf7d0;
+  --warning-text: #9a3412;
+  --warning-bg: #fff7ed;
+  --warning-border: #fed7aa;
+
+  --danger: #b91c1c;
+  --danger-hover: #991b1b;
+  --disabled: #9ca3af;
+
+  --shadow-soft: rgba(0, 0, 0, 0.12);
+  --shadow-strong: rgba(0, 0, 0, 0.25);
+  --backdrop: rgba(15, 23, 42, 0.55);
+
+  --auth-pattern: url('/patterns/login-pattern.svg');
+}
+
+:root[data-theme="dark"] {
+  /* color-scheme: tarayıcının kendi çizdiği öğeler (tarih seçici, kaydırma çubuğu,
+     dosya seçme butonu) de koyu görünsün diye — bunlar CSS ile boyanamıyor. */
+  color-scheme: dark;
+
+  --bg: #0f172a;
+  --text: #e5e7eb;
+  --text-muted: #9ca3af;
+  --surface: #1e293b;
+  --surface-alt: #334155;
+  --surface-alt-hover: #475569;
+  --border: #334155;
+  --border-strong: #475569;
+  --label: #cbd5e1;
+
+  --primary: #0f766e;
+  --primary-hover: #115e59;
+  --heading: #5eead4;
+  --heading-alt: #2dd4bf;
+  --heading-alt-2: #99f6e4;
+  --rule: #134e4a;
+
+  --error-text: #fca5a5;
+  --error-bg: #3f1414;
+  --error-border: #7f1d1d;
+  --success-text: #86efac;
+  --success-bg: #0d2818;
+  --success-border: #166534;
+  --warning-text: #fdba74;
+  --warning-bg: #3a220c;
+  --warning-border: #9a3412;
+
+  --danger: #b91c1c;
+  --danger-hover: #991b1b;
+  --disabled: #4b5563;
+
+  --shadow-soft: rgba(0, 0, 0, 0.45);
+  --shadow-strong: rgba(0, 0, 0, 0.6);
+  --backdrop: rgba(2, 6, 23, 0.7);
+
+  --auth-pattern: url('/patterns/login-pattern-dark.svg');
+}
+
 * {
   box-sizing: border-box;
 }
@@ -5,8 +92,8 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background: #f4f7f6;
-  color: #1f2937;
+  background: var(--bg);
+  color: var(--text);
   line-height: 1.5;
 }
 
@@ -29,7 +116,7 @@ app-root {
   /* WhatsApp arka planındaki gibi soluk, tekrarlanan sağlık ikonlu bir doku —
      SVG küçük (birkaç KB) ve statik bir dosya, sayfa açılışını yavaşlatmaz.
      Navbar bu alanın İÇİNDE (ilk çocuk) durduğu için desen navbar'ın da arkasında görünür. */
-  background-image: url('/patterns/login-pattern.svg');
+  background-image: var(--auth-pattern);
   background-repeat: repeat;
   background-position: center;
 }
@@ -51,7 +138,7 @@ app-root {
 
 .back-link {
   display: inline-block;
-  color: #0f766e;
+  color: var(--heading);
   text-decoration: none;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -62,19 +149,19 @@ app-root {
 }
 
 h2 {
-  color: #0f766e;
+  color: var(--heading);
   margin-bottom: 1rem;
 }
 
 h3 {
-  color: #115e59;
+  color: var(--heading-alt);
   margin-top: 2rem;
-  border-bottom: 2px solid #ccfbf1;
+  border-bottom: 2px solid var(--rule);
   padding-bottom: 0.4rem;
 }
 
 h4 {
-  color: #134e4a;
+  color: var(--heading-alt-2);
   margin-top: 1.25rem;
 }
 
@@ -84,7 +171,7 @@ nav {
 
 nav a,
 p a {
-  color: #0f766e;
+  color: var(--heading);
   text-decoration: none;
   font-weight: 600;
 }
@@ -95,8 +182,8 @@ p a:hover {
 }
 
 form {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1.25rem;
   margin: 1rem 0;
@@ -131,7 +218,7 @@ form > div:has(textarea) {
 label {
   font-weight: 600;
   font-size: 0.9rem;
-  color: #374151;
+  color: var(--label);
 }
 
 input[type="text"],
@@ -145,19 +232,20 @@ input[type="file"],
 select,
 textarea {
   padding: 0.55rem 0.7rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   font-size: 1rem;
   font-family: inherit;
-  background: #fff;
+  background: var(--surface);
+  color: var(--text);
 }
 
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #14b8a6;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+  border-color: var(--focus-border);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 textarea {
@@ -166,7 +254,7 @@ textarea {
 }
 
 button {
-  background: #0f766e;
+  background: var(--primary);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -178,11 +266,11 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background: #0d5f58;
+  background: var(--primary-hover);
 }
 
 button:disabled {
-  background: #9ca3af;
+  background: var(--disabled);
   cursor: not-allowed;
 }
 
@@ -197,17 +285,17 @@ ul {
 }
 
 li {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.7rem 0.9rem;
   margin-bottom: 0.5rem;
 }
 
 .error {
-  color: #b91c1c;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  color: var(--error-text);
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   display: block;
@@ -216,9 +304,9 @@ li {
 }
 
 .success {
-  color: #166534;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  color: var(--success-text);
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   display: block;
@@ -226,9 +314,9 @@ li {
 }
 
 .warning {
-  color: #9a3412;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
+  color: var(--warning-text);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
   padding: 0.4rem 0.65rem;
   border-radius: 6px;
   display: block;
@@ -244,10 +332,10 @@ li {
   transform: translateY(-50%);
   width: max-content;
   max-width: 240px;
-  color: #374151;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  color: var(--label);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 4px 12px var(--shadow-soft);
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -269,9 +357,9 @@ li {
 }
 
 .country-badge {
-  background: #f3f4f6;
-  color: #1f2937;
-  border: 1px solid #d1d5db;
+  background: var(--surface-alt);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   padding: 0.55rem 0.7rem;
   font-size: 0.95rem;
@@ -281,7 +369,7 @@ li {
 }
 
 .country-badge:hover {
-  background: #e5e7eb;
+  background: var(--surface-alt-hover);
 }
 
 section {
