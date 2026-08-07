@@ -4,8 +4,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { UserService } from '../../core/services/user.service';
-import { UpdateProfileDto } from '../../core/models/user.models';
+import { ChangePasswordDto, UpdateProfileDto } from '../../core/models/user.models';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
+
+type ProfileField = 'fullName' | 'birthDate' | 'phoneNumber' | 'email';
 
 @Component({
   selector: 'app-profile',
@@ -21,66 +23,176 @@ export class ProfileComponent implements OnInit {
     title.setTitle('Profil | ADS');
   }
 
-  isSubmitting = false;
-  errorMessage = '';
-  successMessage = '';
   maxDate = new Date().toISOString().split('T')[0]; // takvimde gelecek tarih seçilemesin
 
-  form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+  // Son kaydedilen değerler — bir alanı "Vazgeç" ile iptal edince buraya geri dönüyoruz.
+  originalProfile: UpdateProfileDto = { fullName: '', birthDate: '', phoneNumber: '', email: '' };
+
+  editingField: ProfileField | null = null;
+  fieldSubmitting = false;
+  fieldErrorMessage = '';
+  phoneInvalidCharWarning = false;
+
+  showPasswordSection = false;
+  passwordSubmitting = false;
+  passwordSubmitted = false;
+  passwordErrorMessage = '';
+  passwordSuccessMessage = '';
+
+  fieldForm = this.fb.group({
     fullName: ['', Validators.required],
     birthDate: ['', Validators.required],
-    // Boş bırakılabilir (parola değişmesin diye) — Angular'ın minLength/pattern validator'ları
-    // boş değeri zaten geçerli sayıyor, sadece dolu girilirse kurala bakıyor.
-    newPassword: ['', [Validators.minLength(8), Validators.pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/)]],
-    newPasswordConfirm: ['']
+    phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10,11}$/)]],
+    email: ['', [Validators.required, Validators.email]]
+  });
+
+  passwordForm = this.fb.group({
+    oldPassword: ['', Validators.required],
+    newPassword: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/)]],
+    newPasswordConfirm: ['', Validators.required]
   });
 
   ngOnInit(): void {
     this.userService.getProfile().subscribe({
       next: (result) => {
         if (result.success) {
-          this.form.patchValue({
-            email: result.data.email,
+          this.originalProfile = {
             fullName: result.data.fullName,
-            birthDate: result.data.birthDate
-          });
+            birthDate: result.data.birthDate,
+            phoneNumber: result.data.phoneNumber,
+            email: result.data.email
+          };
+          this.fieldForm.patchValue(this.originalProfile);
         }
       }
     });
   }
 
-  submit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  startEdit(field: ProfileField): void {
+    this.fieldErrorMessage = '';
+    this.editingField = field;
+  }
+
+  cancelEdit(field: ProfileField): void {
+    this.fieldForm.patchValue({ [field]: this.originalProfile[field] });
+    this.fieldErrorMessage = '';
+    this.editingField = null;
+  }
+
+  saveField(field: ProfileField): void {
+    const control = this.fieldForm.get(field)!;
+    control.markAsTouched();
+    if (control.invalid) {
       return;
     }
 
     const dto: UpdateProfileDto = {
-      email: this.form.value.email!,
-      fullName: this.form.value.fullName!,
-      birthDate: this.form.value.birthDate!,
-      newPassword: this.form.value.newPassword || null,
-      newPasswordConfirm: this.form.value.newPasswordConfirm || null
+      fullName: this.fieldForm.value.fullName!,
+      birthDate: this.fieldForm.value.birthDate!,
+      phoneNumber: this.fieldForm.value.phoneNumber!,
+      email: this.fieldForm.value.email!
     };
 
-    this.isSubmitting = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.fieldSubmitting = true;
+    this.fieldErrorMessage = '';
 
     this.userService.updateProfile(dto).subscribe({
       next: (result) => {
-        this.isSubmitting = false;
+        this.fieldSubmitting = false;
         if (result.success) {
-          this.successMessage = result.message ?? 'Profil güncellendi.';
-          this.form.patchValue({ newPassword: '', newPasswordConfirm: '' });
+          this.originalProfile = dto;
+          this.editingField = null;
         } else {
-          this.errorMessage = result.message ?? 'Güncelleme başarısız.';
+          this.fieldErrorMessage = result.message ?? 'Güncelleme başarısız.';
         }
       },
       error: (err: HttpErrorResponse) => {
-        this.isSubmitting = false;
-        this.errorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+        this.fieldSubmitting = false;
+        this.fieldErrorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
+  }
+
+  // Kayıt formundakiyle aynı mantık: uzunluğa değil öneke (5/0/90) bakarak
+  // dinamik azami hane sayısı uyguluyor ve rakam dışı karakterleri anında temizliyor.
+  onPhoneInput(): void {
+    const raw = this.fieldForm.value.phoneNumber ?? '';
+    let digitsOnly = raw.replace(/[^0-9]/g, '');
+
+    this.phoneInvalidCharWarning = raw !== digitsOnly;
+
+    let maxLen = 11;
+    if (digitsOnly.startsWith('90')) {
+      maxLen = 12;
+    } else if (digitsOnly.startsWith('0')) {
+      maxLen = 11;
+    } else if (digitsOnly.startsWith('5')) {
+      maxLen = 10;
+    }
+
+    if (digitsOnly.length > maxLen) {
+      digitsOnly = digitsOnly.slice(0, maxLen);
+    }
+
+    if (raw !== digitsOnly) {
+      this.fieldForm.patchValue({ phoneNumber: digitsOnly });
+    }
+  }
+
+  normalizePhoneNumber(): void {
+    let digits = (this.fieldForm.value.phoneNumber ?? '').replace(/\D/g, '');
+
+    if (digits.startsWith('90')) {
+      digits = digits.slice(2);
+    }
+    if (digits.length > 0 && !digits.startsWith('0')) {
+      digits = '0' + digits;
+    }
+
+    this.fieldForm.patchValue({ phoneNumber: digits });
+  }
+
+  togglePasswordSection(): void {
+    this.showPasswordSection = !this.showPasswordSection;
+    this.passwordErrorMessage = '';
+    this.passwordSuccessMessage = '';
+    this.passwordSubmitted = false;
+    if (!this.showPasswordSection) {
+      this.passwordForm.reset();
+    }
+  }
+
+  submitPasswordChange(): void {
+    this.passwordSubmitted = true;
+    this.passwordErrorMessage = '';
+    this.passwordSuccessMessage = '';
+
+    if (this.passwordForm.invalid) {
+      return;
+    }
+
+    const dto: ChangePasswordDto = {
+      oldPassword: this.passwordForm.value.oldPassword!,
+      newPassword: this.passwordForm.value.newPassword!,
+      newPasswordConfirm: this.passwordForm.value.newPasswordConfirm!
+    };
+
+    this.passwordSubmitting = true;
+
+    this.userService.changePassword(dto).subscribe({
+      next: (result) => {
+        this.passwordSubmitting = false;
+        if (result.success) {
+          this.passwordSuccessMessage = result.message ?? 'Parola güncellendi.';
+          this.passwordForm.reset();
+          this.passwordSubmitted = false;
+        } else {
+          this.passwordErrorMessage = result.message ?? 'Parola güncellenemedi.';
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.passwordSubmitting = false;
+        this.passwordErrorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
       }
     });
   }

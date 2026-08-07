@@ -31,4 +31,11 @@ public class UserController : ControllerBase
         var result = await _userService.UpdateProfileAsync(this.GetUserId(), dto);
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    [HttpPut("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+    {
+        var result = await _userService.ChangePasswordAsync(this.GetUserId(), dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
 }

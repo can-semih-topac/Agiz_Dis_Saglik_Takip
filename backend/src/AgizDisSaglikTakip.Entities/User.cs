@@ -4,7 +4,8 @@ public class User
 {
     public int Id { get; set; }
     public string Email { get; set; } = string.Empty;
-    public string PasswordEncrypted { get; set; } = string.Empty;
+    // Google ile oluşturulan hesaplarda kullanıcı henüz kendi şifresini belirlemediği için boş olabilir.
+    public string? PasswordEncrypted { get; set; }
     public string FullName { get; set; } = string.Empty;
     public DateOnly BirthDate { get; set; }
     public string PhoneNumber { get; set; } = string.Empty;

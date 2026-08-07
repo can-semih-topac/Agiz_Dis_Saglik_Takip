@@ -1,55 +1,163 @@
 <app-navbar pageTitle="Profil"></app-navbar>
 
+<div class="profile-page">
 <a routerLink="/home" class="back-link">← Ana Sayfaya Dön</a>
 <h2>Profil</h2>
 
-<form [formGroup]="form" (ngSubmit)="submit()">
-  <div>
-    <label for="email">E-posta</label>
-    <input id="email" type="email" formControlName="email" />
-    @if (form.get('email')?.invalid && form.get('email')?.touched) {
-      <span class="error">Geçerli bir e-posta gir.</span>
+<div class="profile-card">
+  <!-- Ad Soyad -->
+  <div class="profile-row">
+    @if (editingField !== 'fullName') {
+      <div class="profile-row-view">
+        <span class="profile-label">Ad Soyad</span>
+        <span class="profile-value">{{ originalProfile.fullName }}</span>
+        <button type="button" class="edit-icon-btn" (click)="startEdit('fullName')" aria-label="Ad Soyadı düzenle">✎</button>
+      </div>
+    } @else {
+      <form class="profile-edit-form" [formGroup]="fieldForm" (ngSubmit)="saveField('fullName')">
+        <div>
+          <label for="fullName">Ad Soyad</label>
+          <input id="fullName" type="text" formControlName="fullName" />
+          @if (fieldForm.get('fullName')?.invalid && fieldForm.get('fullName')?.touched) {
+            <span class="error">Bu alan zorunlu.</span>
+          }
+        </div>
+        <div class="profile-edit-actions">
+          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
+          <button type="button" class="btn-secondary" (click)="cancelEdit('fullName')">Vazgeç</button>
+        </div>
+      </form>
     }
   </div>
 
-  <div>
-    <label for="fullName">Ad Soyad</label>
-    <input id="fullName" type="text" formControlName="fullName" />
-    @if (form.get('fullName')?.invalid && form.get('fullName')?.touched) {
-      <span class="error">Bu alan zorunlu.</span>
+  <!-- Doğum Tarihi -->
+  <div class="profile-row">
+    @if (editingField !== 'birthDate') {
+      <div class="profile-row-view">
+        <span class="profile-label">Doğum Tarihi</span>
+        <span class="profile-value">{{ originalProfile.birthDate }}</span>
+        <button type="button" class="edit-icon-btn" (click)="startEdit('birthDate')" aria-label="Doğum tarihini düzenle">✎</button>
+      </div>
+    } @else {
+      <form class="profile-edit-form" [formGroup]="fieldForm" (ngSubmit)="saveField('birthDate')">
+        <div>
+          <label for="birthDate">Doğum Tarihi</label>
+          <input id="birthDate" type="date" formControlName="birthDate" [max]="maxDate" />
+          @if (fieldForm.get('birthDate')?.invalid && fieldForm.get('birthDate')?.touched) {
+            <span class="error">Bu alan zorunlu.</span>
+          }
+        </div>
+        <div class="profile-edit-actions">
+          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
+          <button type="button" class="btn-secondary" (click)="cancelEdit('birthDate')">Vazgeç</button>
+        </div>
+      </form>
     }
   </div>
 
-  <div>
-    <label for="birthDate">Doğum Tarihi</label>
-    <input id="birthDate" type="date" formControlName="birthDate" [max]="maxDate" />
-    @if (form.get('birthDate')?.invalid && form.get('birthDate')?.touched) {
-      <span class="error">Bu alan zorunlu.</span>
+  <!-- Telefon Numarası -->
+  <div class="profile-row">
+    @if (editingField !== 'phoneNumber') {
+      <div class="profile-row-view">
+        <span class="profile-label">Telefon Numarası</span>
+        <span class="profile-value">{{ originalProfile.phoneNumber }}</span>
+        <button type="button" class="edit-icon-btn" (click)="startEdit('phoneNumber')" aria-label="Telefon numarasını düzenle">✎</button>
+      </div>
+    } @else {
+      <form class="profile-edit-form" [formGroup]="fieldForm" (ngSubmit)="saveField('phoneNumber')">
+        <div>
+          <label for="phoneNumber">Telefon Numarası</label>
+          <input id="phoneNumber" type="tel" formControlName="phoneNumber" (input)="onPhoneInput()" (blur)="normalizePhoneNumber()" />
+          @if (phoneInvalidCharWarning) {
+            <span class="warning">Sadece rakam girebilirsiniz.</span>
+          }
+          @if (fieldForm.get('phoneNumber')?.invalid && fieldForm.get('phoneNumber')?.touched) {
+            <span class="error">Telefon numarası 10 veya 11 haneli olmalı.</span>
+          }
+        </div>
+        <div class="profile-edit-actions">
+          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
+          <button type="button" class="btn-secondary" (click)="cancelEdit('phoneNumber')">Vazgeç</button>
+        </div>
+      </form>
     }
   </div>
 
-  <div>
-    <label for="newPassword">Yeni Parola (boş bırakılırsa değişmez)</label>
-    <input id="newPassword" type="password" formControlName="newPassword" />
-    @if (form.get('newPassword')?.invalid && form.get('newPassword')?.touched) {
-      <span class="error">En az 8 karakter, büyük/küçük harf ve rakam içermeli.</span>
+  <!-- E-posta -->
+  <div class="profile-row">
+    @if (editingField !== 'email') {
+      <div class="profile-row-view">
+        <span class="profile-label">E-posta</span>
+        <span class="profile-value">{{ originalProfile.email }}</span>
+        <button type="button" class="edit-icon-btn" (click)="startEdit('email')" aria-label="E-postayı düzenle">✎</button>
+      </div>
+    } @else {
+      <form class="profile-edit-form" [formGroup]="fieldForm" (ngSubmit)="saveField('email')">
+        <div>
+          <label for="email">E-posta</label>
+          <input id="email" type="email" formControlName="email" />
+          @if (fieldForm.get('email')?.invalid && fieldForm.get('email')?.touched) {
+            <span class="error">Geçerli bir e-posta gir.</span>
+          }
+        </div>
+        <div class="profile-edit-actions">
+          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
+          <button type="button" class="btn-secondary" (click)="cancelEdit('email')">Vazgeç</button>
+        </div>
+      </form>
     }
   </div>
 
-  <div>
-    <label for="newPasswordConfirm">Yeni Parola (tekrar)</label>
-    <input id="newPasswordConfirm" type="password" formControlName="newPasswordConfirm" />
-  </div>
+  @if (fieldErrorMessage) {
+    <p class="error">{{ fieldErrorMessage }}</p>
+  }
+</div>
 
-  <button type="submit" [disabled]="isSubmitting">
-    {{ isSubmitting ? 'Kaydediliyor...' : 'Kaydet' }}
+<div class="password-card">
+  <button type="button" class="password-toggle-btn" (click)="togglePasswordSection()">
+    Şifreyi Değiştir {{ showPasswordSection ? '▲' : '▼' }}
   </button>
 
-  @if (errorMessage) {
-    <p class="error">{{ errorMessage }}</p>
-  }
+  @if (showPasswordSection) {
+    <form class="password-form" [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()">
+      <div>
+        <label for="oldPassword">Mevcut Parola</label>
+        <input id="oldPassword" type="password" formControlName="oldPassword" />
+        @if (passwordForm.get('oldPassword')?.invalid && passwordSubmitted) {
+          <span class="error">Bu alan zorunlu.</span>
+        }
+      </div>
+      <div>
+        <label for="newPassword">Yeni Parola</label>
+        <input id="newPassword" type="password" formControlName="newPassword" />
+        @if (passwordForm.get('newPassword')?.invalid && passwordSubmitted) {
+          <span class="error">En az 8 karakter, büyük/küçük harf ve rakam içermeli.</span>
+        }
+      </div>
+      <div>
+        <label for="newPasswordConfirm">Yeni Parola (tekrar)</label>
+        <input id="newPasswordConfirm" type="password" formControlName="newPasswordConfirm" />
+        @if (passwordForm.get('newPasswordConfirm')?.invalid && passwordSubmitted) {
+          <span class="error">Bu alan zorunlu.</span>
+        }
+      </div>
 
-  @if (successMessage) {
-    <p class="success">{{ successMessage }}</p>
+      <a routerLink="/forgot-password" class="forgot-password-link">Şifremi unuttum</a>
+
+      <button type="submit" [disabled]="passwordSubmitting">
+        {{ passwordSubmitting ? 'Güncelleniyor...' : 'Onayla' }}
+      </button>
+
+      @if (passwordSubmitted && passwordForm.invalid) {
+        <p class="error">Lütfen zorunlu alanları doldurun.</p>
+      }
+      @if (passwordErrorMessage) {
+        <p class="error">{{ passwordErrorMessage }}</p>
+      }
+      @if (passwordSuccessMessage) {
+        <p class="success">{{ passwordSuccessMessage }}</p>
+      }
+    </form>
   }
-</form>
+</div>
+</div>

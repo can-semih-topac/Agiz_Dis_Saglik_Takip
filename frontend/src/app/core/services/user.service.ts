@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { UpdateProfileDto, UserProfileDto } from '../models/user.models';
+import { ChangePasswordDto, UpdateProfileDto, UserProfileDto } from '../models/user.models';
 import { ServiceResult } from '../models/service-result';
 
 @Injectable({ providedIn: 'root' })
@@ -16,5 +16,9 @@ export class UserService {
 
   updateProfile(dto: UpdateProfileDto): Observable<ServiceResult> {
     return this.http.put<ServiceResult>(`${this.baseUrl}/profile`, dto);
+  }
+
+  changePassword(dto: ChangePasswordDto): Observable<ServiceResult> {
+    return this.http.put<ServiceResult>(`${this.baseUrl}/change-password`, dto);
   }
 }

@@ -21,7 +21,7 @@ public class AppDbContext : DbContext
         {
             entity.Property(u => u.Email).HasMaxLength(256).IsRequired();
             entity.HasIndex(u => u.Email).IsUnique();
-            entity.Property(u => u.PasswordEncrypted).IsRequired();
+            entity.Property(u => u.PasswordEncrypted).IsRequired(false);
             entity.Property(u => u.FullName).HasMaxLength(150).IsRequired();
             // Mevcut kayıtlarda (migration öncesi) bu alan yoktu, boş metin varsayılanıyla dolduruluyor.
             entity.Property(u => u.PhoneNumber).HasMaxLength(15).IsRequired().HasDefaultValue(string.Empty);

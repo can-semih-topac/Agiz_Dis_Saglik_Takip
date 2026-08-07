@@ -1,0 +1,132 @@
+.profile-page {
+  max-width: 480px;
+  margin: 1.5rem auto;
+}
+
+.profile-page h2 {
+  text-align: center;
+}
+
+.profile-card,
+.password-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.1rem 1.4rem;
+}
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.password-card {
+  margin-top: 1rem;
+}
+
+.profile-row {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.profile-row:last-of-type {
+  border-bottom: none;
+}
+
+.profile-row-view {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-label {
+  min-width: 140px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.profile-value {
+  flex: 1;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.edit-icon-btn {
+  background: transparent;
+  border: none;
+  color: #0f766e;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+  margin: 0;
+}
+
+.edit-icon-btn:hover {
+  color: #0d5f58;
+}
+
+/* Alan düzenleme formu, sayfadaki genel `form` kart/grid stilini miras almasın —
+   zaten .profile-card'ın içinde tek satırlık bir satır olarak duruyor. */
+.profile-edit-form {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-edit-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  margin-bottom: 0;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.password-toggle-btn {
+  width: 100%;
+  background: transparent;
+  color: #0f766e;
+  border: none;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.2rem 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.password-form {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-top: 0.9rem;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.password-form button[type="submit"] {
+  width: 100%;
+}
+
+.forgot-password-link {
+  align-self: flex-end;
+  font-size: 0.85rem;
+  margin: -0.3rem 0 0.7rem;
+}

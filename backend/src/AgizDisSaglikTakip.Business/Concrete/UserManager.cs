@@ -38,7 +38,9 @@ public class UserManager : IUserService
         {
             Email = user.Email,
             FullName = user.FullName,
-            BirthDate = user.BirthDate
+            BirthDate = user.BirthDate,
+            PhoneNumber = user.PhoneNumber,
+            HasPassword = !string.IsNullOrEmpty(user.PasswordEncrypted)
         };
 
         return ServiceResult<UserProfileDto>.Ok(profile);
@@ -56,6 +58,9 @@ public class UserManager : IUserService
         if (dto.BirthDate > DateOnly.FromDateTime(DateTime.Today))
             return ServiceResult.Fail("Doğum tarihi gelecekte olamaz.");
 
+        if (!AuthBusinessRules.IsValidPhoneNumber(dto.PhoneNumber))
+            return ServiceResult.Fail("Telefon numarası 10 veya 11 haneli, sadece rakamlardan oluşmalı.");
+
         if (!string.Equals(dto.Email, user.Email, StringComparison.OrdinalIgnoreCase))
         {
             var ownerOfEmail = await _userRepository.GetByEmailAsync(dto.Email);
@@ -63,40 +68,56 @@ public class UserManager : IUserService
                 return ServiceResult.Fail("Bu e-posta adresi başka bir kullanıcıya ait.");
         }
 
-        var passwordChanged = !string.IsNullOrEmpty(dto.NewPassword);
-
-        if (passwordChanged)
-        {
-            if (!AuthBusinessRules.IsValidPassword(dto.NewPassword!))
-                return ServiceResult.Fail("Parola en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
-
-            if (dto.NewPassword != dto.NewPasswordConfirm)
-                return ServiceResult.Fail("Parolalar eşleşmiyor.");
-
-            user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword!);
-        }
-
         user.Email = dto.Email;
         user.FullName = dto.FullName;
         user.BirthDate = dto.BirthDate;
+        user.PhoneNumber = dto.PhoneNumber;
 
         await _userRepository.UpdateAsync(user);
 
-        if (passwordChanged)
+        return ServiceResult.Ok("Profil güncellendi.");
+    }
+
+    // Profil sayfasındaki "Şifreyi Değiştir" bölümü — UpdateProfileAsync'ten ayrı tutuluyor
+    // çünkü burada mevcut parolanın doğrulanması gerekiyor (profildeki diğer alanlar için gerekmiyor).
+    public async Task<ServiceResult> ChangePasswordAsync(int userId, ChangePasswordDto dto)
+    {
+        var user = await _userRepository.GetAsync(u => u.Id == userId);
+        if (user == null)
+            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+
+        // Google ile oluşturulmuş hesaplarda henüz parola yok — bu durumda eski parola istemeden
+        // doğrudan yeni parolayı kaydediyoruz (ilk kez parola belirleme).
+        var hasExistingPassword = !string.IsNullOrEmpty(user.PasswordEncrypted);
+
+        if (hasExistingPassword)
         {
-            try
-            {
-                await _emailService.SendHtmlEmailAsync(
-                    user.Email,
-                    "Parolanız Değiştirildi",
-                    AuthEmailTemplates.PasswordChangedEmail(user.FullName));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Parola değişikliği bildirim maili gönderilemedi. Kullanıcı: {Email}", user.Email);
-            }
+            var currentPassword = _encryptionService.Decrypt(user.PasswordEncrypted!);
+            if (currentPassword != dto.OldPassword)
+                return ServiceResult.Fail("Mevcut parola yanlış.");
         }
 
-        return ServiceResult.Ok("Profil güncellendi.");
+        if (!AuthBusinessRules.IsValidPassword(dto.NewPassword))
+            return ServiceResult.Fail("Parola en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
+
+        if (dto.NewPassword != dto.NewPasswordConfirm)
+            return ServiceResult.Fail("Parolalar eşleşmiyor.");
+
+        user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword);
+        await _userRepository.UpdateAsync(user);
+
+        try
+        {
+            await _emailService.SendHtmlEmailAsync(
+                user.Email,
+                "Parolanız Değiştirildi",
+                AuthEmailTemplates.PasswordChangedEmail(user.FullName));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Parola değişikliği bildirim maili gönderilemedi. Kullanıcı: {Email}", user.Email);
+        }
+
+        return ServiceResult.Ok("Parola güncellendi.");
     }
 }

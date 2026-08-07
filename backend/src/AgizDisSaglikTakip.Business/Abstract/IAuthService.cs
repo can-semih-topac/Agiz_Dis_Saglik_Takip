@@ -7,6 +7,7 @@ public interface IAuthService
 {
     Task<ServiceResult> RegisterAsync(RegisterDto dto);
     Task<ServiceResult<LoginResultDto>> LoginAsync(LoginDto dto);
+    Task<ServiceResult<LoginResultDto>> GoogleLoginAsync(GoogleLoginDto dto);
 
     // Parola hatırlatma 3 adımlı: kod gönder -> kodu doğrula -> yeni parolayı kaydet.
     Task<ServiceResult> RequestPasswordResetCodeAsync(string email);

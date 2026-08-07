@@ -4,6 +4,7 @@ using AgizDisSaglikTakip.Business.Rules;
 using AgizDisSaglikTakip.Core.Utilities.Email;
 using AgizDisSaglikTakip.Core.Utilities.Results;
 using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
+using AgizDisSaglikTakip.Core.Utilities.Security.Google;
 using AgizDisSaglikTakip.Core.Utilities.Security.Jwt;
 using AgizDisSaglikTakip.DataAccess.Abstract;
 using AgizDisSaglikTakip.Entities;
@@ -17,6 +18,7 @@ public class AuthManager : IAuthService
     private readonly IEncryptionService _encryptionService;
     private readonly ITokenService _tokenService;
     private readonly IEmailService _emailService;
+    private readonly IGoogleAuthValidator _googleAuthValidator;
     private readonly ILogger<AuthManager> _logger;
 
     public AuthManager(
@@ -24,12 +26,14 @@ public class AuthManager : IAuthService
         IEncryptionService encryptionService,
         ITokenService tokenService,
         IEmailService emailService,
+        IGoogleAuthValidator googleAuthValidator,
         ILogger<AuthManager> logger)
     {
         _userRepository = userRepository;
         _encryptionService = encryptionService;
         _tokenService = tokenService;
         _emailService = emailService;
+        _googleAuthValidator = googleAuthValidator;
         _logger = logger;
     }
 
@@ -90,9 +94,65 @@ public class AuthManager : IAuthService
         if (user == null)
             return ServiceResult<LoginResultDto>.Fail("Kullanıcı bulunamadı.");
 
+        // Google ile oluşturulmuş ve henüz şifre belirlememiş hesaplarda PasswordEncrypted boştur.
+        if (string.IsNullOrEmpty(user.PasswordEncrypted))
+            return ServiceResult<LoginResultDto>.Fail("Bu hesap Google ile oluşturulmuş. Google ile giriş yapabilir ya da 'Parolamı Unuttum' ile bir parola belirleyebilirsiniz.");
+
         var decryptedPassword = _encryptionService.Decrypt(user.PasswordEncrypted);
         if (decryptedPassword != dto.Password)
             return ServiceResult<LoginResultDto>.Fail("Parola yanlış.");
+
+        var token = _tokenService.CreateToken(user.Id, user.Email);
+
+        var result = new LoginResultDto
+        {
+            Token = token,
+            Email = user.Email,
+            FullName = user.FullName
+        };
+
+        return ServiceResult<LoginResultDto>.Ok(result, "Giriş başarılı.");
+    }
+
+    // Google ile giriş: ID token doğrulanır, aynı e-postalı kullanıcı varsa ona giriş yapılır
+    // (elle kayıt olmuş biri de olabilir — parolasına dokunulmaz), yoksa otomatik kayıt oluşturulur.
+    public async Task<ServiceResult<LoginResultDto>> GoogleLoginAsync(GoogleLoginDto dto)
+    {
+        var googleUser = await _googleAuthValidator.ValidateAsync(dto.IdToken);
+        if (googleUser == null)
+            return ServiceResult<LoginResultDto>.Fail("Google doğrulaması başarısız.");
+
+        if (!googleUser.EmailVerified)
+            return ServiceResult<LoginResultDto>.Fail("Google hesabınızın e-postası doğrulanmamış.");
+
+        var user = await _userRepository.GetByEmailAsync(googleUser.Email);
+
+        if (user == null)
+        {
+            user = new User
+            {
+                Email = googleUser.Email,
+                FullName = googleUser.FullName,
+                PhoneNumber = string.Empty,
+                BirthDate = DateOnly.FromDateTime(DateTime.Today),
+                PasswordEncrypted = null,
+                CreatedAt = DateTime.Now
+            };
+
+            await _userRepository.AddAsync(user);
+
+            try
+            {
+                await _emailService.SendHtmlEmailAsync(
+                    user.Email,
+                    "Kaydınız Başarıyla Oluşturuldu",
+                    AuthEmailTemplates.WelcomeEmail(user.FullName));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Google kaydı sonrası bilgilendirme maili gönderilemedi. Kullanıcı: {Email}", user.Email);
+            }
+        }
 
         var token = _tokenService.CreateToken(user.Id, user.Email);
 

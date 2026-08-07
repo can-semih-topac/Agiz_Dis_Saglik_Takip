@@ -29,6 +29,13 @@ public class AuthController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
+    [HttpPost("google")]
+    public async Task<IActionResult> GoogleLogin(GoogleLoginDto dto)
+    {
+        var result = await _authService.GoogleLoginAsync(dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
     [HttpPost("forgot-password/request-code")]
     public async Task<IActionResult> RequestResetCode(VerifyEmailDto dto)
     {
