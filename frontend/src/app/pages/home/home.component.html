@@ -7,7 +7,7 @@
   </div>
 }
 
-<div class="willpower-card">
+<div class="willpower-card" (click)="openWillpowerHistory()" title="Geçmiş grafiğini görmek için tıkla">
   <div class="willpower-summary">
     <div class="willpower-ring" [style.background]="'conic-gradient(var(--primary) ' + willpowerScore + '%, var(--surface-alt) 0)'">
       <div class="willpower-ring-inner">{{ willpowerScore }}</div>
@@ -132,9 +132,12 @@
 @if (longestStreaks.length === 0) {
   <p>Henüz veri yok.</p>
 } @else {
-  <ul>
-    @for (s of longestStreaks; track s.goalId) {
-      <li>{{ s.goalTitle }} — 🔥 {{ s.longestStreak }} gün</li>
+  <ul class="streak-list">
+    @for (s of longestStreaks.slice(0, 5); track s.goalId) {
+      <li class="streak-item" [class.is-low]="s.longestStreak <= 1" [title]="s.goalTitle">
+        <span class="streak-item-title">{{ s.goalTitle }}</span>
+        <span class="streak-item-value">🔥 {{ s.longestStreak }} gün</span>
+      </li>
     }
   </ul>
 }
@@ -149,4 +152,8 @@
     [note]="noteFor(selectedStatus)"
     (closed)="closeDetail()">
   </app-status-detail-modal>
+}
+
+@if (showWillpowerHistory) {
+  <app-willpower-history-modal (closed)="closeWillpowerHistory()"></app-willpower-history-modal>
 }

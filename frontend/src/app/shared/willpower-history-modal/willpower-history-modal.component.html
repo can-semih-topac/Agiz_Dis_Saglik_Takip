@@ -1,0 +1,48 @@
+<div class="detail-backdrop" (click)="close()">
+  <div class="detail-box history-box" (click)="$event.stopPropagation()">
+    <button type="button" class="detail-close-btn" (click)="close()" aria-label="Kapat">✕</button>
+    <h3>İrade Puanı Geçmişi</h3>
+
+    <div class="granularity-tabs">
+      @for (opt of granularityOptions; track opt.value) {
+        <button
+          type="button"
+          class="granularity-tab"
+          [class.is-active]="granularity === opt.value"
+          (click)="selectGranularity(opt.value)">
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+
+    @if (loading) {
+      <p class="history-empty">Yükleniyor...</p>
+    } @else if (points.length === 0) {
+      <p class="history-empty">Henüz veri yok.</p>
+    } @else {
+      <svg class="history-chart" [attr.viewBox]="'0 0 ' + chartWidth + ' ' + chartHeight" preserveAspectRatio="xMidYMid meet">
+        @for (g of gridLines; track g) {
+          <line
+            [attr.x1]="padding.left" [attr.x2]="chartWidth - padding.right"
+            [attr.y1]="yFor(g)" [attr.y2]="yFor(g)"
+            class="grid-line" />
+          <text [attr.x]="padding.left - 6" [attr.y]="yFor(g) + 3" class="grid-label" text-anchor="end">{{ g }}</text>
+        }
+
+        <polyline [attr.points]="polylinePoints" class="history-line" />
+
+        @for (p of points; track p.date; let i = $index) {
+          <circle [attr.cx]="xFor(i)" [attr.cy]="yFor(p.score)" r="3.5" class="history-point">
+            <title>{{ formatPointLabel(p) }}: {{ p.score }}</title>
+          </circle>
+        }
+
+        @for (i of labeledIndices; track i) {
+          <text [attr.x]="xFor(i)" [attr.y]="chartHeight - 8" class="x-label" text-anchor="middle">
+            {{ formatPointLabel(points[i]) }}
+          </text>
+        }
+      </svg>
+    }
+  </div>
+</div>

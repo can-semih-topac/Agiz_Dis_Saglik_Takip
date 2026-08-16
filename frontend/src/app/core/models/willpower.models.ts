@@ -10,3 +10,10 @@ export interface WillpowerScoreDto {
   rawPoints: number;
   tiers: WillpowerTierDto[];
 }
+
+export interface WillpowerHistoryPointDto {
+  date: string;
+  score: number;
+}
+
+export type WillpowerGranularity = 'day' | 'week' | 'month' | 'year';

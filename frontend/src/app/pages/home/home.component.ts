@@ -16,11 +16,12 @@ import { GoalDto, PeriodUnit, TrackingType } from '../../core/models/goal.models
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
 import { StatusDetailModalComponent } from '../../shared/status-detail-modal/status-detail-modal.component';
 import { CalendarViewComponent } from '../../shared/calendar-view/calendar-view.component';
+import { WillpowerHistoryModalComponent } from '../../shared/willpower-history-modal/willpower-history-modal.component';
 import { formatTurkishDate, formatTurkishDateTime } from '../../shared/turkish-date';
 
 @Component({
   selector: 'app-home',
-  imports: [FormsModule, NavbarComponent, StatusDetailModalComponent, CalendarViewComponent],
+  imports: [FormsModule, NavbarComponent, StatusDetailModalComponent, CalendarViewComponent, WillpowerHistoryModalComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -51,6 +52,7 @@ export class HomeComponent implements OnInit {
 
   selectedCalendarDate: string | null = null;
   selectedStatus: GoalStatusDto | null = null;
+  showWillpowerHistory = false;
 
   // Hızlı ekleme (Bugün bölümü) — süreli hedeflerde tıklayınca küçük bir süre kutusu açılır.
   expandedQuickGoalId: number | null = null;
@@ -177,6 +179,14 @@ export class HomeComponent implements OnInit {
 
   closeDetail(): void {
     this.selectedStatus = null;
+  }
+
+  openWillpowerHistory(): void {
+    this.showWillpowerHistory = true;
+  }
+
+  closeWillpowerHistory(): void {
+    this.showWillpowerHistory = false;
   }
 
   // ---- Veri yükleme ----

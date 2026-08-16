@@ -18,3 +18,9 @@ public class WillpowerTierDto
     public int ScoreTo { get; set; }
     public string Label { get; set; } = string.Empty;
 }
+
+public class WillpowerHistoryPointDto
+{
+    public DateOnly Date { get; set; }
+    public int Score { get; set; }
+}
