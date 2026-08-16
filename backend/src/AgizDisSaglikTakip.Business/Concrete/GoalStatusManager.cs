@@ -59,12 +59,29 @@ public class GoalStatusManager : IGoalStatusService
     public async Task<ServiceResult<List<GoalStatusDto>>> GetLast7DaysAsync(int userId)
     {
         var allRecords = await _goalStatusRepository.GetAllByUserIdAsync(userId);
-        var datesByGoal = BuildDistinctDatesByGoal(allRecords);
-
         var sevenDaysAgo = DateOnly.FromDateTime(DateTime.Today.AddDays(-7));
 
-        var dtos = allRecords
-            .Where(gs => gs.ActivityDate >= sevenDaysAgo)
+        var dtos = MapToDtosWithStreak(allRecords, allRecords.Where(gs => gs.ActivityDate >= sevenDaysAgo));
+
+        return ServiceResult<List<GoalStatusDto>>.Ok(dtos);
+    }
+
+    // Takvim görünümü — herhangi bir ayı gezebilmek için tüm geçmiş kayıtlar gerekiyor.
+    public async Task<ServiceResult<List<GoalStatusDto>>> GetAllAsync(int userId)
+    {
+        var allRecords = await _goalStatusRepository.GetAllByUserIdAsync(userId);
+        var dtos = MapToDtosWithStreak(allRecords, allRecords);
+
+        return ServiceResult<List<GoalStatusDto>>.Ok(dtos);
+    }
+
+    // Seri hesaplaması her zaman TÜM geçmişe bakmalı (aksi halde bir aylık pencerenin başındaki
+    // kayıtların serisi yanlış görünür); dönen liste ise sadece "toShow" içindekilerle sınırlanır.
+    private static List<GoalStatusDto> MapToDtosWithStreak(List<GoalStatus> allRecords, IEnumerable<GoalStatus> toShow)
+    {
+        var datesByGoal = BuildDistinctDatesByGoal(allRecords);
+
+        return toShow
             .OrderByDescending(gs => gs.ActivityDate)
             .ThenByDescending(gs => gs.ActivityTime)
             .Select(gs => new GoalStatusDto
@@ -79,8 +96,6 @@ public class GoalStatusManager : IGoalStatusService
                 StreakCount = ComputeStreakAt(datesByGoal[gs.GoalId], gs.ActivityDate)
             })
             .ToList();
-
-        return ServiceResult<List<GoalStatusDto>>.Ok(dtos);
     }
 
     public async Task<ServiceResult<List<LongestStreakDto>>> GetLongestStreaksAsync(int userId)

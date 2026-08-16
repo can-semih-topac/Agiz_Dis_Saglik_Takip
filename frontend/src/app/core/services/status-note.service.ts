@@ -25,4 +25,8 @@ export class StatusNoteService {
   getLast7Days(): Observable<ServiceResult<StatusNoteDto[]>> {
     return this.http.get<ServiceResult<StatusNoteDto[]>>(`${this.baseUrl}/last7days`);
   }
+
+  getAll(): Observable<ServiceResult<StatusNoteDto[]>> {
+    return this.http.get<ServiceResult<StatusNoteDto[]>>(`${this.baseUrl}/all`);
+  }
 }

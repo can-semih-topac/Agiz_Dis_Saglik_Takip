@@ -19,6 +19,11 @@ export class GoalStatusService {
     return this.http.get<ServiceResult<GoalStatusDto[]>>(`${this.baseUrl}/last7days`);
   }
 
+  // Takvim görünümü için — herhangi bir ayı gezebilmek amacıyla tüm geçmiş kayıtlar.
+  getAll(): Observable<ServiceResult<GoalStatusDto[]>> {
+    return this.http.get<ServiceResult<GoalStatusDto[]>>(`${this.baseUrl}/all`);
+  }
+
   getLongestStreaks(): Observable<ServiceResult<LongestStreakDto[]>> {
     return this.http.get<ServiceResult<LongestStreakDto[]>>(`${this.baseUrl}/longest-streaks`);
   }

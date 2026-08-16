@@ -40,4 +40,11 @@ public class StatusNoteController : ControllerBase
         var result = await _statusNoteService.GetLast7DaysAsync(this.GetUserId());
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _statusNoteService.GetAllAsync(this.GetUserId());
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
 }

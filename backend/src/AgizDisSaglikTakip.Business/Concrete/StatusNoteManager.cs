@@ -61,18 +61,23 @@ public class StatusNoteManager : IStatusNoteService
     public async Task<ServiceResult<List<StatusNoteDto>>> GetLast7DaysAsync(int userId)
     {
         var records = await _statusNoteRepository.GetLast7DaysByUserIdAsync(userId);
-
-        var dtos = records.Select(sn => new StatusNoteDto
-        {
-            Id = sn.Id,
-            Description = sn.Description,
-            ImagePath = sn.ImagePath,
-            GoalStatusId = sn.GoalStatusId,
-            CreatedAt = sn.CreatedAt
-        }).ToList();
-
-        return ServiceResult<List<StatusNoteDto>>.Ok(dtos);
+        return ServiceResult<List<StatusNoteDto>>.Ok(records.Select(MapToDto).ToList());
     }
+
+    public async Task<ServiceResult<List<StatusNoteDto>>> GetAllAsync(int userId)
+    {
+        var records = await _statusNoteRepository.GetAllByUserIdAsync(userId);
+        return ServiceResult<List<StatusNoteDto>>.Ok(records.Select(MapToDto).ToList());
+    }
+
+    private static StatusNoteDto MapToDto(StatusNote sn) => new()
+    {
+        Id = sn.Id,
+        Description = sn.Description,
+        ImagePath = sn.ImagePath,
+        GoalStatusId = sn.GoalStatusId,
+        CreatedAt = sn.CreatedAt
+    };
 
     // Notu bir durum kaydına bağlamadan önce, o kaydın gerçekten bu kullanıcıya ait olduğunu doğrular.
     private async Task<int?> ResolveOwnedGoalStatusIdAsync(int userId, int? goalStatusId)

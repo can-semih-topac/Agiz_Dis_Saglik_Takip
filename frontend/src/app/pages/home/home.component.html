@@ -7,28 +7,126 @@
   </div>
 }
 
-<h3>Son 7 Günün Verileri <button (click)="loadLast7Days()">Yenile</button></h3>
-@if (last7Days.length === 0) {
-  <p>Son 7 günde kayıt yok.</p>
-} @else {
-  <ul class="status-list">
-    @for (item of last7Days; track item.id) {
-      <li class="status-card" (click)="openDetail(item)">
-        <div class="status-card-main">
-          <span class="status-card-title">{{ item.goalTitle }}</span>
-          <span class="status-card-streak">🔥 {{ item.streakCount }}</span>
-          @if (noteFor(item)?.description) {
-            <span class="status-card-icon" title="Not var">📝</span>
-          }
-          @if (noteFor(item)?.imagePath) {
-            <span class="status-card-icon" title="Görsel var">🖼️</span>
-          }
-        </div>
-        <div class="status-card-date">{{ formatTurkishDateTime(item.activityDate, item.activityTime) }}</div>
-      </li>
+<div class="willpower-card">
+  <div class="willpower-summary">
+    <div class="willpower-ring" [style.background]="'conic-gradient(var(--primary) ' + willpowerScore + '%, var(--surface-alt) 0)'">
+      <div class="willpower-ring-inner">{{ willpowerScore }}</div>
+    </div>
+    <div class="willpower-text">
+      <h4>İrade Puanı <span class="willpower-badge">{{ willpowerLabel }}</span></h4>
+      <p>Hedeflerinin önem derecesine ve seri uzunluğuna göre hesaplanır; tamamlanmayan günlük hedefler puan kırar. Yükseldikçe bir sonraki kademeye geçmek zorlaşır.</p>
+    </div>
+  </div>
+
+  @if (willpowerTiers.length > 0) {
+    <div class="willpower-tiers">
+      @for (tier of willpowerTiers; track tier.label) {
+        <span class="willpower-tier" [class.is-current]="willpowerLabel === tier.label">
+          {{ tier.scoreFrom }}-{{ tier.scoreTo }} {{ tier.label }}
+        </span>
+      }
+    </div>
+  }
+</div>
+
+<h3>Bugün</h3>
+<div class="today-grid">
+  <section class="today-column">
+    <h4>Yapılması Gerekenler</h4>
+    @if (todoTodayList.length === 0) {
+      <p class="today-empty">Bugün için bekleyen bir şey yok 🎉</p>
+    } @else {
+      <ul class="todo-list">
+        @for (item of todoTodayList; track item.goal.id) {
+          <li class="todo-item">
+            <div class="todo-item-main">
+              <span class="todo-item-title">{{ item.goal.title }}</span>
+              @if (item.goal.periodFrequency > 1) {
+                <span class="todo-item-count">{{ item.doneCount }}/{{ item.goal.periodFrequency }}</span>
+              }
+            </div>
+
+            @if (item.goal.trackingType === TrackingType.Yapildi) {
+              <button type="button" class="todo-quick-btn" (click)="quickAddYapildi(item.goal)">✓ Yapıldı İşaretle</button>
+            } @else if (expandedQuickGoalId === item.goal.id) {
+              <div class="todo-quick-form">
+                <input type="number" min="0" [(ngModel)]="quickDuration" placeholder="dk" />
+                <button type="button" class="todo-quick-btn" (click)="confirmQuickAddSureli(item.goal)">Kaydet</button>
+                <button type="button" class="btn-secondary" (click)="cancelQuickAdd()">Vazgeç</button>
+              </div>
+            } @else {
+              <button type="button" class="todo-quick-btn" (click)="startQuickAddSureli(item.goal)">+ Ekle</button>
+            }
+          </li>
+        }
+      </ul>
+      @if (quickAddError) {
+        <p class="error">{{ quickAddError }}</p>
+      }
     }
-  </ul>
-}
+  </section>
+
+  <section class="today-column">
+    <h4>Bugün Yapılanlar</h4>
+    @if (todaysStatus.length === 0) {
+      <p class="today-empty">Bugün henüz kayıt yok.</p>
+    } @else {
+      <ul class="status-list status-list-grid">
+        @for (item of todaysStatus; track item.id) {
+          <li class="status-card" (click)="openDetail(item)">
+            <div class="status-card-main">
+              <span class="status-card-title">{{ item.goalTitle }}</span>
+              <span class="status-card-streak">🔥 {{ item.streakCount }}</span>
+              @if (noteFor(item)?.description) {
+                <span class="status-card-icon" title="Not var">📝</span>
+              }
+              @if (noteFor(item)?.imagePath) {
+                <span class="status-card-icon" title="Görsel var">🖼️</span>
+              }
+            </div>
+            <div class="status-card-date">{{ item.activityTime.slice(0, 5) }}</div>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>
+
+<h3>Takvim</h3>
+<div class="calendar-grid-layout">
+  <app-calendar-view
+    [recordDates]="recordDates"
+    [selectedDate]="selectedCalendarDate"
+    (dateSelected)="onCalendarDateSelected($event)">
+  </app-calendar-view>
+
+  <div class="calendar-day-panel">
+    @if (selectedCalendarDate) {
+      <h4>{{ selectedDateLabel }}</h4>
+      @if (selectedDateRecords.length === 0) {
+        <p class="today-empty">Bu günde kayıt yok.</p>
+      } @else {
+        <ul class="status-list">
+          @for (item of selectedDateRecords; track item.id) {
+            <li class="status-card" (click)="openDetail(item)">
+              <div class="status-card-main">
+                <span class="status-card-title">{{ item.goalTitle }}</span>
+                <span class="status-card-streak">🔥 {{ item.streakCount }}</span>
+                @if (noteFor(item)?.description) {
+                  <span class="status-card-icon" title="Not var">📝</span>
+                }
+                @if (noteFor(item)?.imagePath) {
+                  <span class="status-card-icon" title="Görsel var">🖼️</span>
+                }
+              </div>
+              <div class="status-card-date">{{ item.activityTime.slice(0, 5) }}</div>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+</div>
 
 <h3>En Uzun Seriler</h3>
 @if (longestStreaks.length === 0) {

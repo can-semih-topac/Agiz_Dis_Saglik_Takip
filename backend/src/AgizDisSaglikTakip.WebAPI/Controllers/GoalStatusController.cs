@@ -32,6 +32,13 @@ public class GoalStatusController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _goalStatusService.GetAllAsync(this.GetUserId());
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
     [HttpGet("longest-streaks")]
     public async Task<IActionResult> GetLongestStreaks()
     {

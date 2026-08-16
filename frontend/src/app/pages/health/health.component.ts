@@ -89,8 +89,8 @@ export class HealthComponent implements OnInit {
   // açıklama+görsel opsiyonel, doluysa not olarak da ayrıca kaydedilecek.
   statusForm = this.fb.group({
     goalId: [null as number | null, Validators.required],
-    activityDate: ['', Validators.required],
-    activityTime: ['', Validators.required],
+    activityDate: [this.currentDateStr(), Validators.required],
+    activityTime: [this.currentTimeStr(), Validators.required],
     durationMinutes: [0 as number | null, [Validators.min(0)]],
     noteDescription: ['']
   });
@@ -302,8 +302,28 @@ export class HealthComponent implements OnInit {
   }
 
   private resetAfterSave(): void {
-    this.statusForm.patchValue({ noteDescription: '' });
+    // Ardı ardına kayıt eklenebilsin diye tarih/saat her kayıttan sonra o ana yenileniyor.
+    this.statusForm.patchValue({
+      noteDescription: '',
+      activityDate: this.currentDateStr(),
+      activityTime: this.currentTimeStr()
+    });
     this.selectedImage = null;
     this.loadLast7Days();
+  }
+
+  private currentDateStr(): string {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  private currentTimeStr(): string {
+    const d = new Date();
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    return `${h}:${m}`;
   }
 }
