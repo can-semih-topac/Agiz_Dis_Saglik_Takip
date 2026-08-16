@@ -26,7 +26,8 @@ public class StatusNoteController : ControllerBase
         {
             Description = request.Description ?? string.Empty,
             ImageStream = request.Image?.OpenReadStream(),
-            ImageExtension = request.Image != null ? Path.GetExtension(request.Image.FileName) : null
+            ImageExtension = request.Image != null ? Path.GetExtension(request.Image.FileName) : null,
+            GoalStatusId = request.GoalStatusId
         };
 
         var result = await _statusNoteService.CreateStatusNoteAsync(this.GetUserId(), dto);

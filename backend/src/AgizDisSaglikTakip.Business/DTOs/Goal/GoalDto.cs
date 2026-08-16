@@ -10,5 +10,6 @@ public class GoalDto
     public PeriodUnit PeriodUnit { get; set; }
     public int PeriodFrequency { get; set; }
     public Importance Importance { get; set; }
+    public TrackingType TrackingType { get; set; }
     public DateTime CreatedAt { get; set; }
 }

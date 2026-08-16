@@ -11,11 +11,13 @@ public class GoalManager : IGoalService
 {
     private readonly IGoalRepository _goalRepository;
     private readonly IGoalStatusRepository _goalStatusRepository;
+    private readonly IStatusNoteRepository _statusNoteRepository;
 
-    public GoalManager(IGoalRepository goalRepository, IGoalStatusRepository goalStatusRepository)
+    public GoalManager(IGoalRepository goalRepository, IGoalStatusRepository goalStatusRepository, IStatusNoteRepository statusNoteRepository)
     {
         _goalRepository = goalRepository;
         _goalStatusRepository = goalStatusRepository;
+        _statusNoteRepository = statusNoteRepository;
     }
 
     public async Task<ServiceResult<List<GoalDto>>> GetGoalsAsync(int userId)
@@ -30,6 +32,7 @@ public class GoalManager : IGoalService
             PeriodUnit = g.PeriodUnit,
             PeriodFrequency = g.PeriodFrequency,
             Importance = g.Importance,
+            TrackingType = g.TrackingType,
             CreatedAt = g.CreatedAt
         }).ToList();
 
@@ -53,6 +56,9 @@ public class GoalManager : IGoalService
         if (!Enum.IsDefined(typeof(Importance), dto.Importance))
             return ServiceResult.Fail("Geçersiz önem derecesi.");
 
+        if (!Enum.IsDefined(typeof(TrackingType), dto.TrackingType))
+            return ServiceResult.Fail("Geçersiz takip türü.");
+
         var goal = new Goal
         {
             UserId = userId,
@@ -61,6 +67,7 @@ public class GoalManager : IGoalService
             PeriodUnit = dto.PeriodUnit,
             PeriodFrequency = dto.PeriodFrequency,
             Importance = dto.Importance,
+            TrackingType = dto.TrackingType,
             CreatedAt = DateTime.Now
         };
 
@@ -79,6 +86,18 @@ public class GoalManager : IGoalService
         if (statusRecords.Count > 0 && !confirmed)
         {
             return ServiceResult<bool>.Ok(true, "Bu hedefe ait durum kayıtları var. Silmek istediğinize emin misiniz?");
+        }
+
+        // StatusNote->GoalStatus ilişkisi NO ACTION (SQL Server çoklu cascade yoluna izin vermiyor) —
+        // hedefi silmeden önce bağlı notların bağlantısını elle koparıyoruz, notların kendisi silinmez.
+        if (statusRecords.Count > 0)
+        {
+            var linkedNotes = await _statusNoteRepository.GetByGoalStatusIdsAsync(statusRecords.Select(gs => gs.Id));
+            foreach (var note in linkedNotes)
+            {
+                note.GoalStatusId = null;
+                await _statusNoteRepository.UpdateAsync(note);
+            }
         }
 
         await _goalRepository.DeleteAsync(goal);

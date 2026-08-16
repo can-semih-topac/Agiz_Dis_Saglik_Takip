@@ -31,4 +31,11 @@ public class GoalStatusController : ControllerBase
         var result = await _goalStatusService.GetLast7DaysAsync(this.GetUserId());
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    [HttpGet("longest-streaks")]
+    public async Task<IActionResult> GetLongestStreaks()
+    {
+        var result = await _goalStatusService.GetLongestStreaksAsync(this.GetUserId());
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
 }

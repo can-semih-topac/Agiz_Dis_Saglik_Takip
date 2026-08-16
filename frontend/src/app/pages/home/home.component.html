@@ -11,9 +11,32 @@
 @if (last7Days.length === 0) {
   <p>Son 7 günde kayıt yok.</p>
 } @else {
-  <ul>
+  <ul class="status-list">
     @for (item of last7Days; track item.id) {
-      <li>{{ item.goalTitle }} — {{ item.activityDate }} {{ item.activityTime }} ({{ item.durationMinutes }} dk) — {{ item.isApplied ? 'Uygulandı' : 'Uygulanmadı' }}</li>
+      <li class="status-card" (click)="openDetail(item)">
+        <div class="status-card-main">
+          <span class="status-card-title">{{ item.goalTitle }}</span>
+          <span class="status-card-streak">🔥 {{ item.streakCount }}</span>
+          @if (noteFor(item)?.description) {
+            <span class="status-card-icon" title="Not var">📝</span>
+          }
+          @if (noteFor(item)?.imagePath) {
+            <span class="status-card-icon" title="Görsel var">🖼️</span>
+          }
+        </div>
+        <div class="status-card-date">{{ formatTurkishDateTime(item.activityDate, item.activityTime) }}</div>
+      </li>
+    }
+  </ul>
+}
+
+<h3>En Uzun Seriler</h3>
+@if (longestStreaks.length === 0) {
+  <p>Henüz veri yok.</p>
+} @else {
+  <ul>
+    @for (s of longestStreaks; track s.goalId) {
+      <li>{{ s.goalTitle }} — 🔥 {{ s.longestStreak }} gün</li>
     }
   </ul>
 }
@@ -21,3 +44,11 @@
 <h3>Öneri</h3>
 <p>{{ suggestionText }}</p>
 <button (click)="loadSuggestion()">Başka Öneri</button>
+
+@if (selectedStatus) {
+  <app-status-detail-modal
+    [status]="selectedStatus"
+    [note]="noteFor(selectedStatus)"
+    (closed)="closeDetail()">
+  </app-status-detail-modal>
+}

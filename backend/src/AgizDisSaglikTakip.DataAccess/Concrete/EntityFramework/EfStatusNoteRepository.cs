@@ -19,4 +19,11 @@ public class EfStatusNoteRepository : EfRepositoryBase<StatusNote>, IStatusNoteR
             .Where(sn => sn.UserId == userId && sn.CreatedAt >= sevenDaysAgo)
             .ToListAsync();
     }
+
+    public async Task<List<StatusNote>> GetByGoalStatusIdsAsync(IEnumerable<int> goalStatusIds)
+    {
+        return await Context.StatusNotes
+            .Where(sn => sn.GoalStatusId != null && goalStatusIds.Contains(sn.GoalStatusId.Value))
+            .ToListAsync();
+    }
 }

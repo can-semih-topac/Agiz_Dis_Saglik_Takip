@@ -11,6 +11,8 @@ public class Goal
     public PeriodUnit PeriodUnit { get; set; }
     public int PeriodFrequency { get; set; }
     public Importance Importance { get; set; }
+    // Bu hedefe ait durum kayıtları süre girilerek mi yoksa sadece "yapıldı" işaretiyle mi tutulacak.
+    public TrackingType TrackingType { get; set; }
     public DateTime CreatedAt { get; set; }
 
     public User User { get; set; } = null!;

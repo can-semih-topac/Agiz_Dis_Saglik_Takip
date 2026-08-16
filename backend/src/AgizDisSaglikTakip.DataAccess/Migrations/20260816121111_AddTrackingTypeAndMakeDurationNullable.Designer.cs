@@ -4,6 +4,7 @@ using AgizDisSaglikTakip.DataAccess.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgizDisSaglikTakip.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260816121111_AddTrackingTypeAndMakeDurationNullable")]
+    partial class AddTrackingTypeAndMakeDurationNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -146,9 +149,6 @@ namespace AgizDisSaglikTakip.DataAccess.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<int?>("GoalStatusId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ImagePath")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -157,8 +157,6 @@ namespace AgizDisSaglikTakip.DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GoalStatusId");
 
                     b.HasIndex("UserId");
 
@@ -308,18 +306,11 @@ namespace AgizDisSaglikTakip.DataAccess.Migrations
 
             modelBuilder.Entity("AgizDisSaglikTakip.Entities.StatusNote", b =>
                 {
-                    b.HasOne("AgizDisSaglikTakip.Entities.GoalStatus", "GoalStatus")
-                        .WithMany()
-                        .HasForeignKey("GoalStatusId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("AgizDisSaglikTakip.Entities.User", "User")
                         .WithMany("StatusNotes")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("GoalStatus");
 
                     b.Navigation("User");
                 });

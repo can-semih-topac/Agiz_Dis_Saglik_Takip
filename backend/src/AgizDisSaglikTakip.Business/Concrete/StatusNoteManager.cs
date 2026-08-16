@@ -12,11 +12,19 @@ public class StatusNoteManager : IStatusNoteService
     private static readonly string[] AllowedImageExtensions = { ".jpg", ".jpeg", ".png" };
 
     private readonly IStatusNoteRepository _statusNoteRepository;
+    private readonly IGoalStatusRepository _goalStatusRepository;
+    private readonly IGoalRepository _goalRepository;
     private readonly IFileStorageService _fileStorageService;
 
-    public StatusNoteManager(IStatusNoteRepository statusNoteRepository, IFileStorageService fileStorageService)
+    public StatusNoteManager(
+        IStatusNoteRepository statusNoteRepository,
+        IGoalStatusRepository goalStatusRepository,
+        IGoalRepository goalRepository,
+        IFileStorageService fileStorageService)
     {
         _statusNoteRepository = statusNoteRepository;
+        _goalStatusRepository = goalStatusRepository;
+        _goalRepository = goalRepository;
         _fileStorageService = fileStorageService;
     }
 
@@ -41,6 +49,7 @@ public class StatusNoteManager : IStatusNoteService
             UserId = userId,
             Description = dto.Description,
             ImagePath = imagePath,
+            GoalStatusId = await ResolveOwnedGoalStatusIdAsync(userId, dto.GoalStatusId),
             CreatedAt = DateTime.Now
         };
 
@@ -58,9 +67,24 @@ public class StatusNoteManager : IStatusNoteService
             Id = sn.Id,
             Description = sn.Description,
             ImagePath = sn.ImagePath,
+            GoalStatusId = sn.GoalStatusId,
             CreatedAt = sn.CreatedAt
         }).ToList();
 
         return ServiceResult<List<StatusNoteDto>>.Ok(dtos);
+    }
+
+    // Notu bir durum kaydına bağlamadan önce, o kaydın gerçekten bu kullanıcıya ait olduğunu doğrular.
+    private async Task<int?> ResolveOwnedGoalStatusIdAsync(int userId, int? goalStatusId)
+    {
+        if (goalStatusId == null)
+            return null;
+
+        var goalStatus = await _goalStatusRepository.GetAsync(gs => gs.Id == goalStatusId.Value);
+        if (goalStatus == null)
+            return null;
+
+        var goal = await _goalRepository.GetAsync(g => g.Id == goalStatus.GoalId && g.UserId == userId);
+        return goal != null ? goalStatus.Id : null;
     }
 }

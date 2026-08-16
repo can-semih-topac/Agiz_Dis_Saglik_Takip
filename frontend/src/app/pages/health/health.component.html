@@ -15,9 +15,21 @@
       @if (last7DaysStatus.length === 0) {
         <p>Kayıt yok.</p>
       } @else {
-        <ul class="stack-list">
+        <ul class="status-list">
           @for (item of last7DaysStatus; track item.id) {
-            <li>{{ item.goalTitle }} — {{ item.activityDate }} {{ item.activityTime }} ({{ item.durationMinutes }} dk) — {{ item.isApplied ? 'Uygulandı' : 'Uygulanmadı' }}</li>
+            <li class="status-card" (click)="openDetail(item)">
+              <div class="status-card-main">
+                <span class="status-card-title">{{ item.goalTitle }}</span>
+                <span class="status-card-streak">🔥 {{ item.streakCount }}</span>
+                @if (noteFor(item)?.description) {
+                  <span class="status-card-icon" title="Not var">📝</span>
+                }
+                @if (noteFor(item)?.imagePath) {
+                  <span class="status-card-icon" title="Görsel var">🖼️</span>
+                }
+              </div>
+              <div class="status-card-date">{{ formatTurkishDateTime(item.activityDate, item.activityTime) }}</div>
+            </li>
           }
         </ul>
       }
@@ -28,7 +40,7 @@
       <form [formGroup]="statusForm" (ngSubmit)="submitStatus()">
         <div>
           <label for="statusGoal">Hedef</label>
-          <select id="statusGoal" formControlName="goalId">
+          <select id="statusGoal" formControlName="goalId" (change)="onStatusGoalChange()">
             <option [ngValue]="null">Seçiniz</option>
             @for (g of goals; track g.id) {
               <option [ngValue]="g.id">{{ g.title }}</option>
@@ -43,15 +55,14 @@
           <label for="activityTime">Saat</label>
           <input id="activityTime" type="time" formControlName="activityTime" />
         </div>
+        @if (selectedGoalForStatus?.trackingType === TrackingType.Sureli) {
+          <div>
+            <label for="durationMinutes">Süre (dk)</label>
+            <input id="durationMinutes" type="number" formControlName="durationMinutes" />
+          </div>
+        }
         <div>
-          <label for="durationMinutes">Süre (dk)</label>
-          <input id="durationMinutes" type="number" formControlName="durationMinutes" />
-        </div>
-        <div>
-          <label><input type="checkbox" formControlName="isApplied" /> Uygulandı</label>
-        </div>
-        <div>
-          <label for="noteDescription">Açıklama (opsiyonel not)</label>
+          <label for="noteDescription">Açıklama (opsiyonel)</label>
           <textarea id="noteDescription" formControlName="noteDescription"></textarea>
         </div>
         <div>
@@ -96,6 +107,7 @@
           @for (g of goals; track g.id) {
             <li>
               <strong>{{ g.title }}</strong> — {{ g.description }}
+              <span class="tracking-badge">{{ g.trackingType === TrackingType.Sureli ? 'Süreli' : 'Yapıldı' }}</span>
               <button (click)="deleteGoal(g)">Sil</button>
             </li>
           }
@@ -134,6 +146,14 @@
             }
           </select>
         </div>
+        <div>
+          <label for="trackingType">Takip Türü</label>
+          <select id="trackingType" formControlName="trackingType">
+            @for (t of trackingTypes; track t.value) {
+              <option [ngValue]="t.value">{{ t.label }}</option>
+            }
+          </select>
+        </div>
         <button type="submit">Ekle</button>
         @if (goalError) { <p class="error">{{ goalError }}</p> }
         @if (goalSuccess) { <p class="success">{{ goalSuccess }}</p> }
@@ -151,4 +171,12 @@
       <button class="modal-cancel" (click)="cancelDelete()">İptal</button>
     </div>
   </div>
+}
+
+@if (selectedStatus) {
+  <app-status-detail-modal
+    [status]="selectedStatus"
+    [note]="noteFor(selectedStatus)"
+    (closed)="closeDetail()">
+  </app-status-detail-modal>
 }

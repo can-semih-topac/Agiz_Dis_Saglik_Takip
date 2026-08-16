@@ -1,0 +1,28 @@
+<div class="detail-backdrop" (click)="close()">
+  <div class="detail-box" (click)="$event.stopPropagation()">
+    <button type="button" class="detail-close-btn" (click)="close()" aria-label="Kapat">✕</button>
+    <h3>{{ status.goalTitle }}</h3>
+    <p class="detail-date">{{ formattedDate }}</p>
+
+    <div class="detail-facts">
+      <span class="detail-streak">🔥 {{ status.streakCount }}. gün</span>
+      @if (status.trackingType === TrackingType.Sureli) {
+        <span class="detail-duration">{{ status.durationMinutes }} dk</span>
+      } @else {
+        <span class="detail-duration">Yapıldı</span>
+      }
+    </div>
+
+    @if (note) {
+      <div class="detail-note">
+        <h4>Not</h4>
+        <p>{{ note.description }}</p>
+        @if (note.imagePath) {
+          <img [src]="apiOrigin + note.imagePath" alt="Durum kaydı görseli" />
+        }
+      </div>
+    } @else {
+      <p class="detail-empty">Bu kayda eklenmiş not veya görsel yok.</p>
+    }
+  </div>
+</div>

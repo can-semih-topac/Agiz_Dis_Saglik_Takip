@@ -57,6 +57,14 @@ public class AppDbContext : DbContext
                   .WithMany(u => u.StatusNotes)
                   .HasForeignKey(sn => sn.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            // Restrict (NO ACTION): User->StatusNote zaten cascade olduğu için buraya Cascade/SetNull
+            // eklemek SQL Server'da "multiple cascade paths" hatası veriyor (User->Goal->GoalStatus->StatusNote).
+            // Bağlantı, GoalManager.DeleteGoalAsync içinde hedef silinmeden önce elle koparılıyor.
+            entity.HasOne(sn => sn.GoalStatus)
+                  .WithMany()
+                  .HasForeignKey(sn => sn.GoalStatusId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<ContactMessage>(entity =>

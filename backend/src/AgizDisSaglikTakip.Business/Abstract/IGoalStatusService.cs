@@ -5,6 +5,8 @@ namespace AgizDisSaglikTakip.Business.Abstract;
 
 public interface IGoalStatusService
 {
-    Task<ServiceResult> CreateGoalStatusAsync(int userId, CreateGoalStatusDto dto);
+    // Dönen int, oluşturulan kaydın Id'si — StatusNote'u aynı kayda bağlayabilmek için.
+    Task<ServiceResult<int>> CreateGoalStatusAsync(int userId, CreateGoalStatusDto dto);
     Task<ServiceResult<List<GoalStatusDto>>> GetLast7DaysAsync(int userId);
+    Task<ServiceResult<List<LongestStreakDto>>> GetLongestStreaksAsync(int userId);
 }

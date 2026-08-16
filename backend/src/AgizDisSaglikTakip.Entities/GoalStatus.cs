@@ -6,8 +6,8 @@ public class GoalStatus
     public int GoalId { get; set; }
     public DateOnly ActivityDate { get; set; }
     public TimeOnly ActivityTime { get; set; }
-    public int DurationMinutes { get; set; }
-    public bool IsApplied { get; set; }
+    // Hedefin TrackingType'ı Sureli ise dolu, Yapildi ise null.
+    public int? DurationMinutes { get; set; }
     public DateTime CreatedAt { get; set; }
 
     public Goal Goal { get; set; } = null!;

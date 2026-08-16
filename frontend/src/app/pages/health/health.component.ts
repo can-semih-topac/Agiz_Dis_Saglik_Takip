@@ -7,15 +7,17 @@ import { GoalService } from '../../core/services/goal.service';
 import { GoalStatusService } from '../../core/services/goal-status.service';
 import { StatusNoteService } from '../../core/services/status-note.service';
 import { SuggestionService } from '../../core/services/suggestion.service';
-import { GoalDto, PeriodUnit, Importance, CreateGoalDto } from '../../core/models/goal.models';
+import { GoalDto, PeriodUnit, Importance, TrackingType, CreateGoalDto } from '../../core/models/goal.models';
 import { GoalStatusDto, CreateGoalStatusDto } from '../../core/models/goal-status.models';
 import { StatusNoteDto } from '../../core/models/status-note.models';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
+import { StatusDetailModalComponent } from '../../shared/status-detail-modal/status-detail-modal.component';
+import { formatTurkishDateTime } from '../../shared/turkish-date';
 import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-health',
-  imports: [ReactiveFormsModule, RouterLink, NavbarComponent],
+  imports: [ReactiveFormsModule, RouterLink, NavbarComponent, StatusDetailModalComponent],
   templateUrl: './health.component.html',
   styleUrl: './health.component.css'
 })
@@ -33,11 +35,17 @@ export class HealthComponent implements OnInit {
   // Görsellerin yolu backend'den "/uploads/..." olarak geliyor, başına backend adresini eklememiz lazım.
   apiOrigin = environment.apiBaseUrl.replace('/api', '');
 
+  // Template'te enum karşılaştırması yapabilmek için.
+  readonly TrackingType = TrackingType;
+  readonly formatTurkishDateTime = formatTurkishDateTime;
+
   activeTab: 'durum' | 'hedef' = 'durum';
 
   goals: GoalDto[] = [];
   last7DaysStatus: GoalStatusDto[] = [];
   last7DaysNotes: StatusNoteDto[] = [];
+  notesByStatusId = new Map<number, StatusNoteDto>();
+  selectedStatus: GoalStatusDto | null = null;
   suggestionText = '';
   selectedImage: File | null = null;
 
@@ -62,24 +70,47 @@ export class HealthComponent implements OnInit {
     { value: Importance.Yuksek, label: 'Yüksek' }
   ];
 
+  trackingTypes = [
+    { value: TrackingType.Sureli, label: 'Süreli Kaydet' },
+    { value: TrackingType.Yapildi, label: 'Sadece Yapıldı Olarak İşaretle' }
+  ];
+
   goalForm = this.fb.group({
     title: ['', Validators.required],
     description: ['', Validators.required],
     periodUnit: [PeriodUnit.Gun, Validators.required],
     periodFrequency: [1, [Validators.required, Validators.min(1)]],
-    importance: [Importance.Orta, Validators.required]
+    importance: [Importance.Orta, Validators.required],
+    trackingType: [TrackingType.Sureli, Validators.required]
   });
 
-  // Durum kaydı + not tek formda birleşti: goal/tarih/saat/süre zorunlu,
-  // açıklama+görsel opsiyonel — doluysa not olarak da ayrıca kaydedilecek.
+  // Durum kaydı + not tek formda birleşti: goal/tarih/saat zorunlu, süre ise
+  // seçilen hedefin takip türüne göre zorunlu ya da hiç gösterilmiyor —
+  // açıklama+görsel opsiyonel, doluysa not olarak da ayrıca kaydedilecek.
   statusForm = this.fb.group({
     goalId: [null as number | null, Validators.required],
     activityDate: ['', Validators.required],
     activityTime: ['', Validators.required],
-    durationMinutes: [0, [Validators.required, Validators.min(0)]],
-    isApplied: [true],
+    durationMinutes: [0 as number | null, [Validators.min(0)]],
     noteDescription: ['']
   });
+
+  get selectedGoalForStatus(): GoalDto | undefined {
+    return this.goals.find(g => g.id === this.statusForm.value.goalId);
+  }
+
+  // Hedef seçimi değişince süre alanının zorunlu olup olmayacağını (ve görünürlüğünü) günceller.
+  onStatusGoalChange(): void {
+    const durationControl = this.statusForm.get('durationMinutes')!;
+
+    if (this.selectedGoalForStatus?.trackingType === TrackingType.Sureli) {
+      durationControl.setValidators([Validators.required, Validators.min(0)]);
+    } else {
+      durationControl.clearValidators();
+      durationControl.setValue(null);
+    }
+    durationControl.updateValueAndValidity();
+  }
 
   ngOnInit(): void {
     this.loadGoals();
@@ -102,8 +133,30 @@ export class HealthComponent implements OnInit {
       next: (result) => { if (result.success) this.last7DaysStatus = result.data; }
     });
     this.statusNoteService.getLast7Days().subscribe({
-      next: (result) => { if (result.success) this.last7DaysNotes = result.data; }
+      next: (result) => {
+        if (result.success) {
+          this.last7DaysNotes = result.data;
+          this.notesByStatusId.clear();
+          for (const note of this.last7DaysNotes) {
+            if (note.goalStatusId != null) {
+              this.notesByStatusId.set(note.goalStatusId, note);
+            }
+          }
+        }
+      }
     });
+  }
+
+  noteFor(status: GoalStatusDto): StatusNoteDto | null {
+    return this.notesByStatusId.get(status.id) ?? null;
+  }
+
+  openDetail(status: GoalStatusDto): void {
+    this.selectedStatus = status;
+  }
+
+  closeDetail(): void {
+    this.selectedStatus = null;
   }
 
   loadSuggestion(): void {
@@ -125,14 +178,15 @@ export class HealthComponent implements OnInit {
       description: this.goalForm.value.description!,
       periodUnit: this.goalForm.value.periodUnit!,
       periodFrequency: this.goalForm.value.periodFrequency!,
-      importance: this.goalForm.value.importance!
+      importance: this.goalForm.value.importance!,
+      trackingType: this.goalForm.value.trackingType!
     };
 
     this.goalService.createGoal(dto).subscribe({
       next: (result) => {
         if (result.success) {
           this.goalSuccess = result.message ?? 'Hedef oluşturuldu.';
-          this.goalForm.reset({ periodUnit: PeriodUnit.Gun, periodFrequency: 1, importance: Importance.Orta });
+          this.goalForm.reset({ periodUnit: PeriodUnit.Gun, periodFrequency: 1, importance: Importance.Orta, trackingType: TrackingType.Sureli });
           this.loadGoals();
         } else {
           this.goalError = result.message ?? 'Hedef oluşturulamadı.';
@@ -200,21 +254,22 @@ export class HealthComponent implements OnInit {
     const rawTime = this.statusForm.value.activityTime!;
     const activityTime = rawTime.length === 5 ? `${rawTime}:00` : rawTime;
 
+    const isSureli = this.selectedGoalForStatus?.trackingType === TrackingType.Sureli;
+
     const dto: CreateGoalStatusDto = {
       goalId: this.statusForm.value.goalId!,
       activityDate: this.statusForm.value.activityDate!,
       activityTime,
-      durationMinutes: this.statusForm.value.durationMinutes!,
-      isApplied: this.statusForm.value.isApplied!
+      durationMinutes: isSureli ? this.statusForm.value.durationMinutes! : null
     };
 
     this.goalStatusService.createGoalStatus(dto).subscribe({
       next: (result) => {
-        if (!result.success) {
+        if (!result.success || result.data == null) {
           this.statusError = result.message ?? 'Kayıt başarısız.';
           return;
         }
-        this.saveNoteIfPresent();
+        this.saveNoteIfPresent(result.data);
       },
       error: (err: HttpErrorResponse) => {
         this.statusError = err.error?.message ?? 'Sunucuya ulaşılamadı.';
@@ -222,7 +277,7 @@ export class HealthComponent implements OnInit {
     });
   }
 
-  private saveNoteIfPresent(): void {
+  private saveNoteIfPresent(goalStatusId: number): void {
     const description = this.statusForm.value.noteDescription?.trim();
 
     if (!description) {
@@ -231,7 +286,7 @@ export class HealthComponent implements OnInit {
       return;
     }
 
-    this.statusNoteService.createStatusNote(description, this.selectedImage).subscribe({
+    this.statusNoteService.createStatusNote(description, this.selectedImage, goalStatusId).subscribe({
       next: (result) => {
         this.statusSuccess = result.success
           ? 'Durum ve not kaydedildi.'
