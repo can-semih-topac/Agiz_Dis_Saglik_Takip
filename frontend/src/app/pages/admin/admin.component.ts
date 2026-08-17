@@ -1,27 +1,34 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ContactService } from '../../core/services/contact.service';
 import { ContactMessageDto } from '../../core/models/contact.models';
 import { LogService } from '../../core/services/log.service';
 import { LogDto } from '../../core/models/log.models';
+import { UserService } from '../../core/services/user.service';
+import { Role, UserAdminDto } from '../../core/models/user.models';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
-import { formatTurkishDateTime } from '../../shared/turkish-date';
+import { AddUserModalComponent } from '../../shared/add-user-modal/add-user-modal.component';
+import { formatTurkishDate, formatTurkishDateTime } from '../../shared/turkish-date';
 
-type AdminTab = 'messages' | 'logs';
+type AdminTab = 'messages' | 'logs' | 'users';
 
 @Component({
   selector: 'app-admin',
-  imports: [NavbarComponent],
+  imports: [NavbarComponent, AddUserModalComponent],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.css'
 })
 export class AdminComponent implements OnInit {
   private contactService = inject(ContactService);
   private logService = inject(LogService);
+  private userService = inject(UserService);
 
   // Görsellerin yolu backend'den "/uploads/..." olarak geliyor, başına backend adresini eklememiz lazım.
   apiOrigin = environment.apiBaseUrl.replace('/api', '');
+
+  readonly Role = Role;
 
   activeTab: AdminTab = 'messages';
 
@@ -32,6 +39,16 @@ export class AdminComponent implements OnInit {
   logs: LogDto[] = [];
   logsLoading = true;
   logsError = '';
+
+  users: UserAdminDto[] = [];
+  usersLoading = true;
+  usersError = '';
+
+  showAddUserModal = false;
+
+  pendingDeleteUser: UserAdminDto | null = null;
+  deleteSubmitting = false;
+  deleteErrorMessage = '';
 
   constructor(title: Title) {
     title.setTitle('Admin Paneli | ADS');
@@ -67,10 +84,74 @@ export class AdminComponent implements OnInit {
         this.logsError = 'Sunucuya ulaşılamadı.';
       }
     });
+
+    this.loadUsers();
+  }
+
+  loadUsers(): void {
+    this.usersLoading = true;
+    this.userService.getAllUsers().subscribe({
+      next: (result) => {
+        this.usersLoading = false;
+        if (result.success) {
+          this.users = result.data;
+        } else {
+          this.usersError = result.message ?? 'Kullanıcılar alınamadı.';
+        }
+      },
+      error: () => {
+        this.usersLoading = false;
+        this.usersError = 'Sunucuya ulaşılamadı.';
+      }
+    });
   }
 
   selectTab(tab: AdminTab): void {
     this.activeTab = tab;
+  }
+
+  openAddUserModal(): void {
+    this.showAddUserModal = true;
+  }
+
+  closeAddUserModal(): void {
+    this.showAddUserModal = false;
+  }
+
+  onUserCreated(): void {
+    this.loadUsers();
+  }
+
+  requestDeleteUser(user: UserAdminDto): void {
+    this.deleteErrorMessage = '';
+    this.pendingDeleteUser = user;
+  }
+
+  cancelDeleteUser(): void {
+    this.pendingDeleteUser = null;
+  }
+
+  confirmDeleteUser(): void {
+    if (!this.pendingDeleteUser) return;
+
+    this.deleteSubmitting = true;
+    this.deleteErrorMessage = '';
+
+    this.userService.deleteUser(this.pendingDeleteUser.id).subscribe({
+      next: (result) => {
+        this.deleteSubmitting = false;
+        if (result.success) {
+          this.pendingDeleteUser = null;
+          this.loadUsers();
+        } else {
+          this.deleteErrorMessage = result.message ?? 'Kullanıcı silinemedi.';
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.deleteSubmitting = false;
+        this.deleteErrorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
   }
 
   // Error/Critical kırmızı, Warning turuncu — Log seviyesi (LogLevel enum'unun ToString() hali) burada belirliyor.
@@ -83,5 +164,9 @@ export class AdminComponent implements OnInit {
   formatDate(createdAt: string): string {
     const [date, time] = createdAt.split('T');
     return formatTurkishDateTime(date, time ?? '00:00:00');
+  }
+
+  formatBirthDate(birthDate: string | null): string {
+    return birthDate ? formatTurkishDate(birthDate) : '—';
   }
 }

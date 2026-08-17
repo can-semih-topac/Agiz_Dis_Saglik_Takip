@@ -9,6 +9,8 @@ public class User
     public Role Role { get; set; } = Role.User;
     // Google ile oluşturulan hesaplarda kullanıcı henüz kendi şifresini belirlemediği için boş olabilir.
     public string? PasswordEncrypted { get; set; }
+    // Admin panelinden geçici şifreyle oluşturulan admin hesaplarında true olur, şifre değiştirilince false'a döner.
+    public bool MustChangePassword { get; set; }
     public string FullName { get; set; } = string.Empty;
     // Google ile oluşturulan hesaplarda kullanıcı henüz belirtmediği için boş olabilir.
     public DateOnly? BirthDate { get; set; }

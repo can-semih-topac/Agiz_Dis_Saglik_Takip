@@ -24,6 +24,19 @@ internal static class AuthEmailTemplates
         </html>
         """;
 
+    // Admin panelinden "Kullanıcı" rolüyle eklenen kişiye gidiyor — hesap şifresiz oluşturulduğu için
+    // Google ile giriş yapması ya da "Şifremi Unuttum" ile ilk şifresini belirlemesi gerekiyor.
+    public static string InviteEmail(string loginLink) => $"""
+        <html>
+            <body style="font-family: Arial, sans-serif;">
+                <h2>Davet Edildiniz</h2>
+                <p>Ağız ve Diş Sağlığı Takip Uygulaması'na bir hesap oluşturuldu.</p>
+                <p>Google hesabınızla giriş yapabilir ya da "Şifremi Unuttum" seçeneğiyle bu e-posta adresi için bir şifre belirleyebilirsiniz:</p>
+                <p><a href="{loginLink}">{loginLink}</a></p>
+            </body>
+        </html>
+        """;
+
     public static string PasswordChangedEmail(string fullName) => $"""
         <html>
             <body style="font-family: Arial, sans-serif;">

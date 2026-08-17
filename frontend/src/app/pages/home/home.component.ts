@@ -61,6 +61,8 @@ export class HomeComponent implements OnInit {
 
   // Google ile oluşturulup henüz şifre belirlememiş hesaplar için bildirim.
   showPasswordBanner = false;
+  // Admin panelinden geçici şifreyle oluşturulan hesaplar için — şifre değiştirilene kadar gösterilir.
+  showTempPasswordBanner = false;
 
   // "Bugün Yapılanlar" -> "Yapılması Gerekenler" sürükle-bırak (yanlışlıkla işaretlenen kaydı geri alma).
   draggingStatusId: number | null = null;
@@ -290,7 +292,12 @@ export class HomeComponent implements OnInit {
 
   checkPasswordStatus(): void {
     this.userService.getProfile().subscribe({
-      next: (result) => { if (result.success) this.showPasswordBanner = !result.data.hasPassword; }
+      next: (result) => {
+        if (result.success) {
+          this.showPasswordBanner = !result.data.hasPassword;
+          this.showTempPasswordBanner = result.data.hasPassword && result.data.mustChangePassword;
+        }
+      }
     });
   }
 

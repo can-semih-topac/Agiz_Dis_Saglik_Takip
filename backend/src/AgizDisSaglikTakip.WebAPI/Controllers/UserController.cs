@@ -45,4 +45,29 @@ public class UserController : ControllerBase
         var result = await _userService.DeleteAccountAsync(this.GetUserId());
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    // Sadece admin panelinden kullanılacak — controller'daki genel [Authorize] yetmiyor, admin şartı ekliyoruz.
+    [HttpGet("all")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var result = await _userService.GetAllUsersAsync();
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateUser(CreateUserByAdminDto dto)
+    {
+        var result = await _userService.CreateUserByAdminAsync(dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        var result = await _userService.DeleteUserByAdminAsync(this.GetUserId(), id);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
 }

@@ -7,6 +7,13 @@
   </div>
 }
 
+@if (showTempPasswordBanner) {
+  <div class="password-banner">
+    <p>🔒 Geçici şifrenizi değiştirmenizi öneririz.</p>
+    <button type="button" (click)="goToSetPassword()">Şifre Değiştir</button>
+  </div>
+}
+
 <div class="willpower-card" (click)="openWillpowerHistory()" title="Geçmiş grafiğini görmek için tıkla">
   <div class="willpower-summary">
     <div class="willpower-ring" [style.background]="'conic-gradient(var(--primary) ' + willpowerScore + '%, var(--surface-alt) 0)'">

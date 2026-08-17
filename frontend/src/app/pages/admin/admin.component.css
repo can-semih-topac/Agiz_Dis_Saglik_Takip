@@ -148,3 +148,111 @@
   margin: 0.4rem 0 0;
   font-size: 0.8rem;
 }
+
+.user-table-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.user-table-wrapper {
+  overflow-x: auto;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.user-table th,
+.user-table td {
+  text-align: left;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.user-table th {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.user-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.role-badge {
+  background: var(--surface-alt);
+  color: var(--label);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+}
+
+.role-badge.is-admin {
+  background: var(--primary);
+  color: #fff;
+}
+
+.user-delete-btn {
+  background: var(--surface);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+.user-delete-btn:hover:not(:disabled) {
+  background: var(--error-bg);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-box {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 1.5rem;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 10px 30px var(--shadow-strong);
+}
+
+.modal-box-danger {
+  border: 2px solid var(--danger);
+}
+
+.modal-box h4 {
+  margin-top: 0;
+  color: var(--error-text);
+}
+
+.delete-confirm-btn {
+  background: var(--danger);
+  margin-right: 0.5rem;
+}
+
+.delete-confirm-btn:hover:not(:disabled) {
+  background: var(--danger-hover);
+}
+
+.modal-cancel {
+  background: var(--text-muted);
+}
+
+.modal-cancel:hover:not(:disabled) {
+  background: var(--label);
+}

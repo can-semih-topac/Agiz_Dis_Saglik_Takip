@@ -5,26 +5,34 @@ using AgizDisSaglikTakip.Core.Utilities.Email;
 using AgizDisSaglikTakip.Core.Utilities.Results;
 using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
 using AgizDisSaglikTakip.DataAccess.Abstract;
+using AgizDisSaglikTakip.Entities;
+using AgizDisSaglikTakip.Entities.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace AgizDisSaglikTakip.Business.Concrete;
 
 public class UserManager : IUserService
 {
+    // Proje henüz kendi alan adına sahip olmadığı için davet e-postalarında bu adrese yönlendiriyoruz.
+    private const string LoginLink = "http://localhost:4200/login";
+
     private readonly IUserRepository _userRepository;
     private readonly IEncryptionService _encryptionService;
     private readonly IEmailService _emailService;
+    private readonly IWillpowerService _willpowerService;
     private readonly ILogger<UserManager> _logger;
 
     public UserManager(
         IUserRepository userRepository,
         IEncryptionService encryptionService,
         IEmailService emailService,
+        IWillpowerService willpowerService,
         ILogger<UserManager> logger)
     {
         _userRepository = userRepository;
         _encryptionService = encryptionService;
         _emailService = emailService;
+        _willpowerService = willpowerService;
         _logger = logger;
     }
 
@@ -40,7 +48,8 @@ public class UserManager : IUserService
             FullName = user.FullName,
             BirthDate = user.BirthDate,
             PhoneNumber = user.PhoneNumber,
-            HasPassword = !string.IsNullOrEmpty(user.PasswordEncrypted)
+            HasPassword = !string.IsNullOrEmpty(user.PasswordEncrypted),
+            MustChangePassword = user.MustChangePassword
         };
 
         return ServiceResult<UserProfileDto>.Ok(profile);
@@ -104,6 +113,8 @@ public class UserManager : IUserService
             return ServiceResult.Fail("Şifreler eşleşmiyor.");
 
         user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword);
+        // Admin panelinden geçici şifreyle oluşturulmuşsa, ilk (gerçek) şifre değişikliğiyle bu uyarı kalkar.
+        user.MustChangePassword = false;
         await _userRepository.UpdateAsync(user);
 
         try
@@ -131,5 +142,100 @@ public class UserManager : IUserService
         await _userRepository.DeleteAsync(user);
 
         return ServiceResult.Ok("Hesap silindi.");
+    }
+
+    // Admin paneli için — en yeni kayıt üstte.
+    public async Task<ServiceResult<List<UserAdminDto>>> GetAllUsersAsync()
+    {
+        var users = await _userRepository.GetAllAsync();
+
+        var dtos = new List<UserAdminDto>();
+        foreach (var u in users.OrderByDescending(u => u.CreatedAt))
+        {
+            var scoreResult = await _willpowerService.GetScoreAsync(u.Id);
+
+            dtos.Add(new UserAdminDto
+            {
+                Id = u.Id,
+                FullName = u.FullName,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                BirthDate = u.BirthDate,
+                Role = u.Role,
+                CreatedAt = u.CreatedAt,
+                WillpowerScore = scoreResult.Success ? scoreResult.Data!.Score : 0
+            });
+        }
+
+        return ServiceResult<List<UserAdminDto>>.Ok(dtos);
+    }
+
+    // Admin panelinden yeni kullanıcı/admin ekleme. Admin -> geçici şifre zorunlu, ilk girişte
+    // değiştirmesi hatırlatılır. User -> şifresiz oluşturulur (Google hesabıyla aynı mantık),
+    // e-postasına giriş sayfasının linkiyle bir davet gönderilir.
+    public async Task<ServiceResult> CreateUserByAdminAsync(CreateUserByAdminDto dto)
+    {
+        if (!AuthBusinessRules.IsValidEmailFormat(dto.Email))
+            return ServiceResult.Fail("Geçersiz e-posta formatı.");
+
+        var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
+        if (existingUser != null)
+            return ServiceResult.Fail("Bu e-posta adresi zaten kayıtlı.");
+
+        var user = new User
+        {
+            Email = dto.Email,
+            Role = dto.Role,
+            FullName = string.Empty,
+            PhoneNumber = string.Empty,
+            BirthDate = null,
+            CreatedAt = DateTime.Now
+        };
+
+        if (dto.Role == Role.Admin)
+        {
+            if (string.IsNullOrEmpty(dto.TemporaryPassword) || !AuthBusinessRules.IsValidPassword(dto.TemporaryPassword))
+                return ServiceResult.Fail("Geçici şifre en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
+
+            user.PasswordEncrypted = _encryptionService.Encrypt(dto.TemporaryPassword);
+            user.MustChangePassword = true;
+
+            await _userRepository.AddAsync(user);
+
+            return ServiceResult.Ok("Admin hesabı oluşturuldu.");
+        }
+
+        user.PasswordEncrypted = null;
+        await _userRepository.AddAsync(user);
+
+        try
+        {
+            await _emailService.SendHtmlEmailAsync(
+                user.Email,
+                "Davet Edildiniz - Ağız ve Diş Sağlığı Takip",
+                AuthEmailTemplates.InviteEmail(LoginLink));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Davet maili gönderilemedi. Kullanıcı: {Email}", user.Email);
+        }
+
+        return ServiceResult.Ok("Kullanıcı oluşturuldu, davet e-postası gönderildi.");
+    }
+
+    // Kalıcı (hard) silme — DeleteAccountAsync'teki gibi, yumuşak silme ileride eklenecek.
+    // Onay ekranı frontend'de; burada sadece adminin kendi hesabını silmesini engelliyoruz.
+    public async Task<ServiceResult> DeleteUserByAdminAsync(int adminUserId, int targetUserId)
+    {
+        if (adminUserId == targetUserId)
+            return ServiceResult.Fail("Kendi hesabınızı buradan silemezsiniz.");
+
+        var user = await _userRepository.GetAsync(u => u.Id == targetUserId);
+        if (user == null)
+            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+
+        await _userRepository.DeleteAsync(user);
+
+        return ServiceResult.Ok("Kullanıcı silindi.");
     }
 }

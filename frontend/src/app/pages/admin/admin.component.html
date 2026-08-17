@@ -7,6 +7,9 @@
   <button type="button" class="admin-tab" [class.is-active]="activeTab === 'logs'" (click)="selectTab('logs')">
     Loglar
   </button>
+  <button type="button" class="admin-tab" [class.is-active]="activeTab === 'users'" (click)="selectTab('users')">
+    Kayıtlı Kullanıcılar
+  </button>
 </div>
 
 @if (activeTab === 'messages') {
@@ -62,4 +65,75 @@
       }
     </ul>
   }
+}
+
+@if (activeTab === 'users') {
+  @if (usersLoading) {
+    <p>Yükleniyor...</p>
+  } @else if (usersError) {
+    <p class="error">{{ usersError }}</p>
+  } @else {
+    <div class="user-table-header">
+      <button type="button" (click)="openAddUserModal()">+ Kullanıcı Ekle</button>
+    </div>
+
+    @if (users.length === 0) {
+      <p>Henüz kullanıcı yok.</p>
+    } @else {
+      <div class="user-table-wrapper">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>Ad Soyad</th>
+              <th>E-posta</th>
+              <th>Telefon</th>
+              <th>Doğum Tarihi</th>
+              <th>Rol</th>
+              <th>İrade Puanı</th>
+              <th>Kayıt Tarihi</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of users; track u.id) {
+              <tr>
+                <td>{{ u.fullName }}</td>
+                <td><a href="mailto:{{ u.email }}">{{ u.email }}</a></td>
+                <td>{{ u.phoneNumber || '—' }}</td>
+                <td>{{ formatBirthDate(u.birthDate) }}</td>
+                <td>
+                  <span class="role-badge" [class.is-admin]="u.role === Role.Admin">
+                    {{ u.role === Role.Admin ? 'Admin' : 'Kullanıcı' }}
+                  </span>
+                </td>
+                <td>{{ u.willpowerScore }}</td>
+                <td>{{ formatDate(u.createdAt) }}</td>
+                <td><button type="button" class="user-delete-btn" (click)="requestDeleteUser(u)">Sil</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+}
+
+@if (showAddUserModal) {
+  <app-add-user-modal (closed)="closeAddUserModal()" (created)="onUserCreated()"></app-add-user-modal>
+}
+
+@if (pendingDeleteUser) {
+  <div class="modal-backdrop">
+    <div class="modal-box modal-box-danger">
+      <h4>Kullanıcıyı Sil</h4>
+      <p>{{ pendingDeleteUser.fullName || pendingDeleteUser.email }} kişisini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+      @if (deleteErrorMessage) {
+        <p class="error">{{ deleteErrorMessage }}</p>
+      }
+      <button type="button" class="delete-confirm-btn" [disabled]="deleteSubmitting" (click)="confirmDeleteUser()">
+        {{ deleteSubmitting ? 'Siliniyor...' : 'Evet, Sil' }}
+      </button>
+      <button type="button" class="modal-cancel" (click)="cancelDeleteUser()">Vazgeç</button>
+    </div>
+  </div>
 }

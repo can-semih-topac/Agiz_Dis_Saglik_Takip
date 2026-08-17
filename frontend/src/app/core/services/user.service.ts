@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ChangePasswordDto, UpdateProfileDto, UserProfileDto } from '../models/user.models';
+import { ChangePasswordDto, CreateUserByAdminDto, UpdateProfileDto, UserAdminDto, UserProfileDto } from '../models/user.models';
 import { ServiceResult } from '../models/service-result';
 
 @Injectable({ providedIn: 'root' })
@@ -24,5 +24,18 @@ export class UserService {
 
   deleteAccount(): Observable<ServiceResult> {
     return this.http.delete<ServiceResult>(`${this.baseUrl}/account`);
+  }
+
+  // Sadece admin çağırabilir — backend 403/401 ile reddeder.
+  getAllUsers(): Observable<ServiceResult<UserAdminDto[]>> {
+    return this.http.get<ServiceResult<UserAdminDto[]>>(`${this.baseUrl}/all`);
+  }
+
+  createUser(dto: CreateUserByAdminDto): Observable<ServiceResult> {
+    return this.http.post<ServiceResult>(this.baseUrl, dto);
+  }
+
+  deleteUser(id: number): Observable<ServiceResult> {
+    return this.http.delete<ServiceResult>(`${this.baseUrl}/${id}`);
   }
 }
