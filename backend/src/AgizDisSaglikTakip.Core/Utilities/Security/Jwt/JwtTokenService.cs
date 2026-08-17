@@ -14,12 +14,13 @@ public class JwtTokenService : ITokenService
         _settings = settings;
     }
 
-    public string CreateToken(int userId, string email)
+    public string CreateToken(int userId, string email, string role)
     {
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, email)
+            new Claim(JwtRegisteredClaimNames.Email, email),
+            new Claim("role", role)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecretKey));

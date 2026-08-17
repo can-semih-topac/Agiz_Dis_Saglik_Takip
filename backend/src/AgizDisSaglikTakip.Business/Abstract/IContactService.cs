@@ -6,4 +6,5 @@ namespace AgizDisSaglikTakip.Business.Abstract;
 public interface IContactService
 {
     Task<ServiceResult> SendMessageAsync(SendContactMessageDto dto);
+    Task<ServiceResult<List<ContactMessageDto>>> GetAllMessagesAsync();
 }

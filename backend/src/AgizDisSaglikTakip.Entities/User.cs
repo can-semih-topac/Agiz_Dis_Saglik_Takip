@@ -1,9 +1,12 @@
+using AgizDisSaglikTakip.Entities.Enums;
+
 namespace AgizDisSaglikTakip.Entities;
 
 public class User
 {
     public int Id { get; set; }
     public string Email { get; set; } = string.Empty;
+    public Role Role { get; set; } = Role.User;
     // Google ile oluşturulan hesaplarda kullanıcı henüz kendi şifresini belirlemediği için boş olabilir.
     public string? PasswordEncrypted { get; set; }
     public string FullName { get; set; } = string.Empty;

@@ -41,7 +41,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!))
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!)),
+            // [Authorize(Roles = "...")] varsayılan olarak uzun bir claim URI'sine bakıyor; token'a
+            // kısa "role" adıyla yazdığımız için burada da aynı adı söylememiz lazım, yoksa admin dahil
+            // kimse Roles kontrolünden geçemez.
+            RoleClaimType = "role"
         };
     });
 

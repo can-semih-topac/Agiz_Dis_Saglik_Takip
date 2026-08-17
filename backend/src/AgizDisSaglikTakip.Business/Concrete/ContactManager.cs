@@ -90,4 +90,25 @@ public class ContactManager : IContactService
 
         return ServiceResult.Ok("Mesajınız gönderildi, teşekkürler!");
     }
+
+    // Admin paneli için — gönderen herkes görebilsin diye herhangi bir kullanıcı filtresi yok, hepsi listeleniyor.
+    public async Task<ServiceResult<List<ContactMessageDto>>> GetAllMessagesAsync()
+    {
+        var messages = await _contactMessageRepository.GetAllAsync();
+
+        var dtos = messages
+            .OrderByDescending(m => m.CreatedAt)
+            .Select(m => new ContactMessageDto
+            {
+                Id = m.Id,
+                FullName = m.FullName,
+                Email = m.Email,
+                Message = m.Message,
+                ImagePath = m.ImagePath,
+                CreatedAt = m.CreatedAt
+            })
+            .ToList();
+
+        return ServiceResult<List<ContactMessageDto>>.Ok(dtos);
+    }
 }

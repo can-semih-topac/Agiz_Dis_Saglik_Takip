@@ -8,6 +8,7 @@ using AgizDisSaglikTakip.Core.Utilities.Security.Google;
 using AgizDisSaglikTakip.Core.Utilities.Security.Jwt;
 using AgizDisSaglikTakip.DataAccess.Abstract;
 using AgizDisSaglikTakip.Entities;
+using AgizDisSaglikTakip.Entities.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace AgizDisSaglikTakip.Business.Concrete;
@@ -102,13 +103,14 @@ public class AuthManager : IAuthService
         if (decryptedPassword != dto.Password)
             return ServiceResult<LoginResultDto>.Fail("Şifre yanlış.");
 
-        var token = _tokenService.CreateToken(user.Id, user.Email);
+        var token = _tokenService.CreateToken(user.Id, user.Email, user.Role.ToString());
 
         var result = new LoginResultDto
         {
             Token = token,
             Email = user.Email,
-            FullName = user.FullName
+            FullName = user.FullName,
+            IsAdmin = user.Role == Role.Admin
         };
 
         return ServiceResult<LoginResultDto>.Ok(result, "Giriş başarılı.");
@@ -154,19 +156,20 @@ public class AuthManager : IAuthService
             }
         }
 
-        var token = _tokenService.CreateToken(user.Id, user.Email);
+        var token = _tokenService.CreateToken(user.Id, user.Email, user.Role.ToString());
 
         var result = new LoginResultDto
         {
             Token = token,
             Email = user.Email,
-            FullName = user.FullName
+            FullName = user.FullName,
+            IsAdmin = user.Role == Role.Admin
         };
 
         return ServiceResult<LoginResultDto>.Ok(result, "Giriş başarılı.");
     }
 
-    // Adım 1: 
+    // Adım 1:
     // Email kayıtlıysa 6 haneli bir kod üretip 10 dakika geçerlilikle DB'ye yazıyoruz ve mailliyoruz
     public async Task<ServiceResult> RequestPasswordResetCodeAsync(string email)
     {

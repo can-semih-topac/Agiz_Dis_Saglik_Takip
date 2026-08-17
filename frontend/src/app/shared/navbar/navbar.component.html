@@ -8,6 +8,11 @@
     <button type="button" class="navbar-btn" (click)="showContactModal = true">
       <span class="navbar-btn-icon">✉</span> Bize Ulaşın
     </button>
+    @if (isAdmin) {
+      <a routerLink="/admin" class="navbar-btn">
+        <span class="navbar-btn-icon">🛡️</span> Admin Paneli
+      </a>
+    }
     <a routerLink="/profile" class="navbar-avatar" title="Profil">👤</a>
     <a routerLink="/settings" class="navbar-avatar" title="Ayarlar">⚙️</a>
     <button (click)="logout()">Çıkış Yap</button>

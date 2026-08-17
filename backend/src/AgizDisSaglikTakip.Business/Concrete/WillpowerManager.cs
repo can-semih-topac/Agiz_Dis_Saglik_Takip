@@ -24,12 +24,12 @@ public class WillpowerManager : IWillpowerService
     // için gereken ham puan miktarı kademe ilerledikçe katlanarak büyüyor (10 -> 20 -> 80 -> 200 -> 400 -> 1000).
     private static readonly WillpowerTier[] Tiers =
     {
-        new(0,  10,  0,    10,   "Çok Kolay"),
-        new(10, 20,  10,   30,   "Kolay"),
-        new(20, 40,  30,   110,  "Orta"),
-        new(40, 60,  110,  310,  "Zor"),
-        new(60, 80,  310,  710,  "Çok Zor"),
-        new(80, 100, 710,  1710, "Neredeyse İmkansız")
+        new(0,  10,  0,    10,   "Çok Kolay"),         // 10 ham puan
+        new(10, 20,  10,   30,   "Kolay"),             // 20
+        new(20, 40,  30,   110,  "Orta"),              // 80
+        new(40, 60,  110,  310,  "Zor"),               // 200
+        new(60, 80,  310,  710,  "Çok Zor"),           // 400
+        new(80, 100, 710,  1710, "Neredeyse İmkansız") // 1000
     };
 
     private readonly IGoalRepository _goalRepository;

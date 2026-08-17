@@ -24,6 +24,7 @@ export interface LoginResultDto {
   token: string;
   email: string;
   fullName: string;
+  isAdmin: boolean;
 }
 
 // localStorage'a bu şekilde kaydedeceğiz — token + ekranlarda göstereceğimiz kullanıcı bilgisi bir arada.
@@ -31,6 +32,7 @@ export interface AuthSession {
   token: string;
   email: string;
   fullName: string;
+  isAdmin: boolean;
 }
 
 export interface VerifyEmailDto {

@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStatusNoteService, StatusNoteManager>();
         services.AddScoped<IContactService, ContactManager>();
         services.AddScoped<IWillpowerService, WillpowerManager>();
+        services.AddScoped<ILogService, LogManager>();
 
         return services;
     }

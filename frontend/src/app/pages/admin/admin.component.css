@@ -1,0 +1,150 @@
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 0.6rem 0.2rem;
+  margin: 0 0.75rem 0 0;
+  cursor: pointer;
+}
+
+.admin-tab:hover {
+  background: none;
+  color: var(--text);
+}
+
+.admin-tab.is-active {
+  color: var(--heading);
+  border-bottom-color: var(--primary);
+}
+
+.message-list,
+.log-list {
+  display: block;
+}
+
+.message-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.message-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.message-card-name {
+  font-weight: 600;
+}
+
+.message-card-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.message-card-email {
+  display: block;
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+.message-card-text {
+  margin: 0.6rem 0 0;
+  white-space: pre-wrap;
+}
+
+.message-card img {
+  max-width: 240px;
+  margin-top: 0.6rem;
+}
+
+.log-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.log-card.is-warning {
+  border-left-color: var(--warning-border);
+  background: var(--warning-bg);
+}
+
+.log-card.is-error {
+  border-left-color: var(--error-border);
+  background: var(--error-bg);
+}
+
+.log-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.log-card-level {
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.log-card.is-warning .log-card-level {
+  color: var(--warning-text);
+}
+
+.log-card.is-error .log-card-level {
+  color: var(--error-text);
+}
+
+.log-card-category {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.log-card-date {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.log-card-message {
+  margin: 0.4rem 0 0;
+  white-space: pre-wrap;
+}
+
+.log-card-exception {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.log-card-exception summary {
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.log-card-exception pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+}

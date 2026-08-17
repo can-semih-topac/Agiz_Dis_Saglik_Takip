@@ -1,6 +1,7 @@
 using AgizDisSaglikTakip.Business.Abstract;
 using AgizDisSaglikTakip.Business.DTOs.Contact;
 using AgizDisSaglikTakip.WebAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgizDisSaglikTakip.WebAPI.Controllers;
@@ -41,6 +42,16 @@ public class ContactController : ControllerBase
         };
 
         var result = await _contactService.SendMessageAsync(dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    // Sadece admin panelinden kullanılacak — controller'da genel [Authorize] olmadığı için
+    // burada action bazında ekliyoruz, POST tarafı herkese açık kalmaya devam ediyor.
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAllMessages()
+    {
+        var result = await _contactService.GetAllMessagesAsync();
         return result.Success ? Ok(result) : BadRequest(result);
     }
 }

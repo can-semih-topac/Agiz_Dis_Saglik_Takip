@@ -39,7 +39,12 @@ export class AuthService {
 
   // Giriş başarılı olunca component bunu çağırıp token'ı kalıcı hale getirecek.
   saveSession(result: LoginResultDto): void {
-    const session: AuthSession = { token: result.token, email: result.email, fullName: result.fullName };
+    const session: AuthSession = {
+      token: result.token,
+      email: result.email,
+      fullName: result.fullName,
+      isAdmin: result.isAdmin
+    };
     localStorage.setItem(this.storageKey, JSON.stringify(session));
   }
 
@@ -54,6 +59,10 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  isAdmin(): boolean {
+    return this.getSession()?.isAdmin ?? false;
   }
 
   logout(): void {

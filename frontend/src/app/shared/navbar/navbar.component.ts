@@ -19,6 +19,7 @@ export class NavbarComponent {
 
   fullName = this.authService.getSession()?.fullName ?? '';
   email = this.authService.getSession()?.email ?? '';
+  isAdmin = this.authService.isAdmin();
 
   showContactModal = false;
 
