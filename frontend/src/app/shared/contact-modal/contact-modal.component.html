@@ -54,7 +54,12 @@
 
     <p class="contact-direct">
       Dilerseniz doğrudan e-posta da gönderebilirsiniz:
-      <a href="mailto:{{ supportEmail }}">{{ supportEmail }}</a>
+      <button type="button" class="contact-email-copy" (click)="copyEmail()" title="Panoya kopyalamak için tıkla">
+        {{ supportEmail }}
+      </button>
+      @if (emailCopied) {
+        <span class="contact-email-copied">Panoya kopyalandı</span>
+      }
     </p>
   </div>
 </div>

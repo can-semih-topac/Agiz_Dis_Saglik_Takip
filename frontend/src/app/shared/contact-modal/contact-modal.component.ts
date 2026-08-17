@@ -26,6 +26,8 @@ export class ContactModalComponent implements OnInit {
   successMessage = '';
   selectedImage: File | null = null;
   imageWarning = '';
+  emailCopied = false;
+  private emailCopiedTimeout: ReturnType<typeof setTimeout> | null = null;
 
   form = this.fb.group({
     fullName: ['', Validators.required],
@@ -57,6 +59,14 @@ export class ContactModalComponent implements OnInit {
 
   close(): void {
     this.closed.emit();
+  }
+
+  copyEmail(): void {
+    navigator.clipboard.writeText(this.supportEmail).then(() => {
+      this.emailCopied = true;
+      if (this.emailCopiedTimeout) clearTimeout(this.emailCopiedTimeout);
+      this.emailCopiedTimeout = setTimeout(() => this.emailCopied = false, 2000);
+    });
   }
 
   submit(): void {

@@ -193,9 +193,7 @@ export class HomeComponent implements OnInit {
 
   // ---- Takvim ----
 
-  get recordDates(): Set<string> {
-    return new Set(this.allStatus.map(s => s.activityDate));
-  }
+  recordDates: Set<string> = new Set();
 
   get selectedDateRecords(): GoalStatusDto[] {
     if (!this.selectedCalendarDate) return [];
@@ -244,7 +242,12 @@ export class HomeComponent implements OnInit {
 
   loadStatusData(): void {
     this.goalStatusService.getAll().subscribe({
-      next: (result) => { if (result.success) this.allStatus = result.data; },
+      next: (result) => {
+        if (result.success) {
+          this.allStatus = result.data;
+          this.recordDates = new Set(this.allStatus.map(s => s.activityDate));
+        }
+      },
       error: (err) => console.error('Durum verileri alınamadı', err)
     });
     this.statusNoteService.getAll().subscribe({
