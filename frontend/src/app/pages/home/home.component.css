@@ -215,6 +215,27 @@
   font-size: 0.9rem;
 }
 
+/* Yanlışlıkla işaretlenen bir kaydı geri almak için sürükle-bırak hedefi. */
+.todo-drop-zone {
+  border-radius: 8px;
+  transition: background-color 0.15s ease, outline-color 0.15s ease;
+  outline: 2px dashed transparent;
+  outline-offset: 4px;
+}
+
+.todo-drop-zone.is-drop-target {
+  background: var(--surface-alt);
+  outline-color: var(--primary);
+}
+
+.status-card[draggable="true"] {
+  cursor: grab;
+}
+
+.status-card.is-dragging {
+  opacity: 0.4;
+}
+
 .todo-list {
   display: block;
 }

@@ -45,4 +45,11 @@ public class GoalStatusController : ControllerBase
         var result = await _goalStatusService.GetLongestStreaksAsync(this.GetUserId());
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteGoalStatus(int id)
+    {
+        var result = await _goalStatusService.DeleteGoalStatusAsync(this.GetUserId(), id);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
 }

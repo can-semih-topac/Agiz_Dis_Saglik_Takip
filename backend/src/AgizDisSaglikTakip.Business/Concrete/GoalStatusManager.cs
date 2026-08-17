@@ -11,11 +11,16 @@ public class GoalStatusManager : IGoalStatusService
 {
     private readonly IGoalStatusRepository _goalStatusRepository;
     private readonly IGoalRepository _goalRepository;
+    private readonly IStatusNoteRepository _statusNoteRepository;
 
-    public GoalStatusManager(IGoalStatusRepository goalStatusRepository, IGoalRepository goalRepository)
+    public GoalStatusManager(
+        IGoalStatusRepository goalStatusRepository,
+        IGoalRepository goalRepository,
+        IStatusNoteRepository statusNoteRepository)
     {
         _goalStatusRepository = goalStatusRepository;
         _goalRepository = goalRepository;
+        _statusNoteRepository = statusNoteRepository;
     }
 
     public async Task<ServiceResult<int>> CreateGoalStatusAsync(int userId, CreateGoalStatusDto dto)
@@ -114,6 +119,26 @@ public class GoalStatusManager : IGoalStatusService
             .ToList();
 
         return ServiceResult<List<LongestStreakDto>>.Ok(result);
+    }
+
+    public async Task<ServiceResult<bool>> DeleteGoalStatusAsync(int userId, int id)
+    {
+        var goalStatus = await _goalStatusRepository.GetAsync(gs => gs.Id == id && gs.Goal.UserId == userId);
+        if (goalStatus == null)
+            return ServiceResult<bool>.Fail("Durum kaydı bulunamadı.");
+
+        // StatusNote->GoalStatus ilişkisi NO ACTION olduğu için kaydı silmeden önce
+        // bağlı notun bağlantısını koparıyoruz (GoalManager.DeleteGoalAsync'teki gibi), not silinmez.
+        var linkedNotes = await _statusNoteRepository.GetByGoalStatusIdsAsync(new[] { id });
+        foreach (var note in linkedNotes)
+        {
+            note.GoalStatusId = null;
+            await _statusNoteRepository.UpdateAsync(note);
+        }
+
+        await _goalStatusRepository.DeleteAsync(goalStatus);
+
+        return ServiceResult<bool>.Ok(true, "Durum kaydı silindi.");
     }
 
     private static Dictionary<int, List<DateOnly>> BuildDistinctDatesByGoal(List<GoalStatus> allRecords)

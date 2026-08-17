@@ -62,6 +62,10 @@ export class HomeComponent implements OnInit {
   // Google ile oluşturulup henüz şifre belirlememiş hesaplar için bildirim.
   showPasswordBanner = false;
 
+  // "Bugün Yapılanlar" -> "Yapılması Gerekenler" sürükle-bırak (yanlışlıkla işaretlenen kaydı geri alma).
+  draggingStatusId: number | null = null;
+  isTodoDropTarget = false;
+
   constructor(title: Title) {
     title.setTitle('Ana Sayfa | ADS');
   }
@@ -142,6 +146,47 @@ export class HomeComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.quickAddError = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
+  }
+
+  // ---- Sürükle-bırak: yanlışlıkla işaretlenen kaydı geri alma ----
+
+  onStatusDragStart(event: DragEvent, status: GoalStatusDto): void {
+    this.draggingStatusId = status.id;
+    event.dataTransfer?.setData('text/plain', String(status.id));
+    if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+  }
+
+  onStatusDragEnd(): void {
+    this.draggingStatusId = null;
+    this.isTodoDropTarget = false;
+  }
+
+  onTodoDragOver(event: DragEvent): void {
+    event.preventDefault();
+    this.isTodoDropTarget = true;
+  }
+
+  onTodoDragLeave(): void {
+    this.isTodoDropTarget = false;
+  }
+
+  onTodoDrop(event: DragEvent): void {
+    event.preventDefault();
+    this.isTodoDropTarget = false;
+
+    const statusId = this.draggingStatusId;
+    this.draggingStatusId = null;
+    if (statusId == null) return;
+
+    this.goalStatusService.delete(statusId).subscribe({
+      next: (result) => {
+        if (result.success) {
+          this.loadStatusData();
+          this.loadLongestStreaks();
+          this.loadWillpowerScore();
+        }
       }
     });
   }

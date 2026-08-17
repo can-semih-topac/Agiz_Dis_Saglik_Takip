@@ -10,4 +10,6 @@ public interface IGoalStatusService
     Task<ServiceResult<List<GoalStatusDto>>> GetLast7DaysAsync(int userId);
     Task<ServiceResult<List<GoalStatusDto>>> GetAllAsync(int userId);
     Task<ServiceResult<List<LongestStreakDto>>> GetLongestStreaksAsync(int userId);
+    // Yanlışlıkla "yapıldı" işaretlenen bir kaydı geri almak için — kayıt silinir, hedef tekrar yapılması gerekenlere döner.
+    Task<ServiceResult<bool>> DeleteGoalStatusAsync(int userId, int id);
 }

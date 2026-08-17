@@ -27,4 +27,9 @@ export class GoalStatusService {
   getLongestStreaks(): Observable<ServiceResult<LongestStreakDto[]>> {
     return this.http.get<ServiceResult<LongestStreakDto[]>>(`${this.baseUrl}/longest-streaks`);
   }
+
+  // Yanlışlıkla "yapıldı" işaretlenen bir kaydı geri almak için (sürükle-bırak ile geri taşıma).
+  delete(id: number): Observable<ServiceResult<boolean>> {
+    return this.http.delete<ServiceResult<boolean>>(`${this.baseUrl}/${id}`);
+  }
 }

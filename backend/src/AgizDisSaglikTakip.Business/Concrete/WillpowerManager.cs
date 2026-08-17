@@ -7,17 +7,15 @@ using AgizDisSaglikTakip.Entities.Enums;
 
 namespace AgizDisSaglikTakip.Business.Concrete;
 
-// Matematiğin özeti (kullanıcıya da anlatıldı):
+// Matematiğin özeti:
+
 // 1) Her hedefin "ham puana" katkısı = önem ağırlığı (Düşük=1, Orta=2, Yüksek=3) x güncel seri uzunluğu.
-//    Seri kırılınca katkı sıfırlanır — kayıp zaten weight*streak olduğu için uzun seriyi bozmak otomatik
-//    olarak daha çok puan kaybettirir, ayrı bir ceza formülüne gerek yok.
+
 // 2) Günlük hedeflerde o gün eksik kalan her tekrar, önem derecesiyle orantılı puan KIRAR
-//    (weight * eksikSayısı) — tek bir hedefte uzun seri tutup diğerlerini ihmal etmeyi caydırır.
-// 3) Toplam ham puan, aşağıdaki Tiers tablosundaki kademelere göre 0-100'e eşleniyor — her kademede
-//    aynı miktar ham puanın skora kattığı miktar bir öncekinden daha az (kademe ilerledikçe zorlaşıyor),
-//    ama önceki (doygunluk/asla-100-olmayan) modelden farklı olarak skor gerçekten 100'e ULAŞABİLİYOR.
-// 4) Aynı hesap, GEÇMİŞTEKİ herhangi bir tarih için de çalışıyor (GetHistoryAsync) — o tarihten sonra
-//    oluşturulan hedefler o tarihte sayılmaz, o tarihten sonraki kayıtlar görmezden gelinir.
+
+// 3) Toplam ham puan, aşağıdaki Tiers tablosundaki kademelere göre 0-100'e eşleniyor — (kademe ilerledikçe zorlaşıyor),
+
+
 public class WillpowerManager : IWillpowerService
 {
     private sealed record WillpowerTier(int ScoreFrom, int ScoreTo, double RawFrom, double RawTo, string Label);
@@ -75,7 +73,7 @@ public class WillpowerManager : IWillpowerService
         {
             "day" => (30, (Func<int, DateOnly>)(i => today.AddDays(-i))),
             "month" => (12, (Func<int, DateOnly>)(i => today.AddMonths(-i))),
-            "year" => (3, (Func<int, DateOnly>)(i => today.AddYears(-i))),
+            "year" => (4, (Func<int, DateOnly>)(i => today.AddYears(-i))),
             _ => (12, (Func<int, DateOnly>)(i => today.AddDays(-i * 7))) // "week" ve tanımsız değer varsayılanı
         };
 

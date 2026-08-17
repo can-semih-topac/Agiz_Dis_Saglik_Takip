@@ -31,10 +31,21 @@
 
 <h3>Bugün</h3>
 <div class="today-grid">
-  <section class="today-column">
+  <section
+    class="today-column todo-drop-zone"
+    [class.is-drop-target]="isTodoDropTarget"
+    (dragover)="onTodoDragOver($event)"
+    (dragleave)="onTodoDragLeave()"
+    (drop)="onTodoDrop($event)">
     <h4>Yapılması Gerekenler</h4>
     @if (todoTodayList.length === 0) {
-      <p class="today-empty">Bugün için bekleyen bir şey yok 🎉</p>
+      <p class="today-empty">
+        @if (isTodoDropTarget) {
+          Bırakınca bu kayıt silinir ve hedef tekrar buraya döner.
+        } @else {
+          Bugün için bekleyen bir şey yok 🎉
+        }
+      </p>
     } @else {
       <ul class="todo-list">
         @for (item of todoTodayList; track item.goal.id) {
@@ -73,7 +84,14 @@
     } @else {
       <ul class="status-list status-list-grid">
         @for (item of todaysStatus; track item.id) {
-          <li class="status-card" (click)="openDetail(item)">
+          <li
+            class="status-card"
+            [class.is-dragging]="draggingStatusId === item.id"
+            draggable="true"
+            (dragstart)="onStatusDragStart($event, item)"
+            (dragend)="onStatusDragEnd()"
+            (click)="openDetail(item)"
+            title="Yanlışlıkla mı işaretledin? Yapılması gerekenlere sürükleyip bırak.">
             <div class="status-card-main">
               <span class="status-card-title">{{ item.goalTitle }}</span>
               <span class="status-card-streak">🔥 {{ item.streakCount }}</span>
