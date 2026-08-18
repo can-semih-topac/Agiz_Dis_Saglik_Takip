@@ -35,6 +35,8 @@ export class ForgotPasswordComponent {
   codeSubmitted = false;
   resetSubmitted = false;
   errorMessage = '';
+  showNewPassword = false;
+  showNewPasswordConfirm = false;
 
   emailForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]]

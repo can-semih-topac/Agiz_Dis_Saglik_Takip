@@ -24,6 +24,7 @@ export class AddUserModalComponent {
   submitted = false;
   errorMessage = '';
   successMessage = '';
+  showTempPassword = false;
 
   // AuthBusinessRules.IsValidPassword ile aynı — kullanıcı sunucuya sormadan anında uyarı görsün diye (register formundakiyle aynı desen).
   private static readonly passwordComplexityPattern = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/;

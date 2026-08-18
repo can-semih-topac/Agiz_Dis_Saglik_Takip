@@ -29,6 +29,8 @@ export class RegisterComponent { // kayıt formu ve submit işlemleri için comp
 
   showCountryInfo = false; // bayrak rozetine tıklanınca "sadece Türkiye" notu
   phoneInvalidCharWarning = false; // rakam dışı bir şey yazılmaya çalışılınca turuncu uyarı
+  showPassword = false;
+  showPasswordConfirm = false;
 
   // Şifre kuralı (min 8 karakter + büyük/küçük harf + rakam) backend'deki
   // AuthBusinessRules.IsValidPassword ile aynı — kullanıcı sunucuya sormadan anında uyarı görsün diye.

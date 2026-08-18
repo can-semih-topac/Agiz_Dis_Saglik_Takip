@@ -248,6 +248,40 @@ textarea:focus {
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
+/* Şifre alanlarında göz ikonuyla göster/gizle — login, şifremi unuttum, şifre sıfırlama ortak kullanıyor. */
+.password-field-wrapper {
+  position: relative;
+}
+
+.password-field-wrapper input {
+  width: 100%;
+  padding-right: 2.4rem;
+}
+
+/* "password-toggle-btn" ismi profil sayfasındaki (şifre bölümünü aç/kapa) buton tarafından zaten
+   kullanılıyordu — isim çakışmasın diye bu göz ikonu butonuna ayrı bir sınıf adı verdik. */
+.password-visibility-btn {
+  position: absolute;
+  right: 0.3rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0.3rem;
+  margin: 0;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.password-visibility-btn:hover {
+  background: none;
+  color: var(--text);
+}
+
 textarea {
   min-height: 70px;
   resize: vertical;

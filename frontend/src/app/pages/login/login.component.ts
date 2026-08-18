@@ -27,6 +27,7 @@ export class LoginComponent implements AfterViewInit {
   submitted = false;
   errorMessage = '';
   successMessage = '';
+  showPassword = false;
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],

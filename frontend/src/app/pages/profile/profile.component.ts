@@ -44,6 +44,9 @@ export class ProfileComponent implements OnInit {
   passwordSubmitted = false;
   passwordErrorMessage = '';
   passwordSuccessMessage = '';
+  showOldPassword = false;
+  showNewPassword = false;
+  showNewPasswordConfirm = false;
 
   pendingDeleteAccount = false;
   deleteSubmitting = false;
