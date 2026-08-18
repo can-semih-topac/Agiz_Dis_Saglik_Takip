@@ -1,3 +1,11 @@
+@if (showSuccessDialog) {
+  <div class="contact-backdrop" (click)="closeSuccessDialog()">
+    <div class="contact-success-box" (click)="$event.stopPropagation()">
+      <p>{{ successMessage }}</p>
+      <button type="button" (click)="closeSuccessDialog()">Tamam</button>
+    </div>
+  </div>
+} @else {
 <div class="contact-backdrop" (click)="close()">
   <div class="contact-box" (click)="$event.stopPropagation()">
     <button type="button" class="contact-close-btn" (click)="close()" aria-label="Kapat">✕</button>
@@ -47,9 +55,6 @@
       @if (errorMessage) {
         <p class="error">{{ errorMessage }}</p>
       }
-      @if (successMessage) {
-        <p class="success">{{ successMessage }}</p>
-      }
     </form>
 
     <p class="contact-direct">
@@ -63,3 +68,4 @@
     </p>
   </div>
 </div>
+}

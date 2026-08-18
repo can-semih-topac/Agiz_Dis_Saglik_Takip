@@ -99,3 +99,23 @@
   font-size: 0.8rem;
   font-weight: 600;
 }
+
+.contact-success-box {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.75rem 2rem;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 10px 30px var(--shadow-strong);
+  text-align: center;
+}
+
+.contact-success-box p {
+  margin: 0 0 1.25rem;
+  color: var(--heading);
+  font-weight: 600;
+}
+
+.contact-success-box button {
+  min-width: 120px;
+}

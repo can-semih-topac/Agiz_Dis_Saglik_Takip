@@ -20,39 +20,35 @@
     <p>Yükleniyor...</p>
   } @else if (messagesError) {
     <p class="error">{{ messagesError }}</p>
-  } @else if (messages.length === 0) {
-    <p>Henüz mesaj yok.</p>
   } @else {
     @if (reviewErrorMessage) {
       <p class="error">{{ reviewErrorMessage }}</p>
     }
-    <ul class="message-list">
-      @for (m of messages; track m.id) {
-        <li class="message-card">
-          <div class="message-card-header">
-            <span class="message-card-name">{{ m.fullName }}</span>
-            <span class="status-badge" [class.is-reviewed]="m.status === ContactMessageStatus.Reviewed">
-              {{ m.status === ContactMessageStatus.Reviewed ? 'İncelendi' : 'İşlem Bekliyor' }}
-            </span>
-            <span class="message-card-date">{{ formatDate(m.createdAt) }}</span>
-          </div>
-          <a class="message-card-email" href="mailto:{{ m.email }}">{{ m.email }}</a>
-          <p class="message-card-text">{{ m.message }}</p>
-          @if (m.imagePath) {
-            <img [src]="apiOrigin + m.imagePath" alt="Ek görsel" />
-          }
-          @if (m.status === ContactMessageStatus.Pending) {
-            <button
-              type="button"
-              class="mark-reviewed-btn"
-              [disabled]="reviewingMessageId === m.id"
-              (click)="markAsReviewed(m)">
-              {{ reviewingMessageId === m.id ? 'İşaretleniyor...' : 'İncelendi Olarak İşaretle' }}
-            </button>
-          }
-        </li>
-      }
-    </ul>
+    <div class="message-subtabs">
+      <button type="button" class="message-subtab" [class.is-active]="messagesSubTab === 'pending'" (click)="selectMessagesSubTab('pending')">
+        İşlem Bekleyen ({{ pendingMessages.length }})
+      </button>
+      <button type="button" class="message-subtab" [class.is-active]="messagesSubTab === 'reviewed'" (click)="selectMessagesSubTab('reviewed')">
+        İncelendi ({{ reviewedMessages.length }})
+      </button>
+    </div>
+
+    @if (visibleMessages.length === 0) {
+      <p>Bu sekmede mesaj yok.</p>
+    } @else {
+      <ul class="message-row-list">
+        @for (m of visibleMessages; track m.id) {
+          <li class="message-row" (click)="openMessageDetail(m)">
+            <span class="message-row-name">{{ m.fullName }}</span>
+            <span class="message-row-preview">{{ messagePreview(m.message) }}</span>
+            @if (m.imagePath) {
+              <span class="message-row-icon" title="Görsel var">🖼️</span>
+            }
+            <span class="message-row-date">{{ formatDate(m.createdAt) }}</span>
+          </li>
+        }
+      </ul>
+    }
   }
 }
 
@@ -171,6 +167,34 @@
 
 @if (showAddUserModal) {
   <app-add-user-modal (closed)="closeAddUserModal()" (created)="onUserCreated()"></app-add-user-modal>
+}
+
+@if (selectedMessage) {
+  <div class="modal-backdrop" (click)="closeMessageDetail()">
+    <div class="modal-box message-detail-box" (click)="$event.stopPropagation()">
+      <button type="button" class="detail-close-btn" (click)="closeMessageDetail()" aria-label="Kapat">✕</button>
+      <h4>{{ selectedMessage.fullName }}</h4>
+      <a class="message-card-email" href="mailto:{{ selectedMessage.email }}">{{ selectedMessage.email }}</a>
+      <p class="message-detail-date">{{ formatDate(selectedMessage.createdAt) }}</p>
+
+      <p class="message-card-text">{{ selectedMessage.message }}</p>
+      @if (selectedMessage.imagePath) {
+        <img [src]="apiOrigin + selectedMessage.imagePath" alt="Ek görsel" />
+      }
+
+      @if (selectedMessage.status === ContactMessageStatus.Pending) {
+        <button
+          type="button"
+          class="mark-reviewed-btn"
+          [disabled]="reviewingMessageId === selectedMessage.id"
+          (click)="markAsReviewed(selectedMessage)">
+          {{ reviewingMessageId === selectedMessage.id ? 'İşaretleniyor...' : 'İncelendi Olarak İşaretle' }}
+        </button>
+      } @else {
+        <span class="status-badge is-reviewed">İncelendi</span>
+      }
+    </div>
+  </div>
 }
 
 @if (pendingDeleteUser) {

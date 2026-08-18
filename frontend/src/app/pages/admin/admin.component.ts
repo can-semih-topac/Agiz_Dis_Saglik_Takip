@@ -44,6 +44,8 @@ export class AdminComponent implements OnInit {
   messagesError = '';
   reviewingMessageId: number | null = null;
   reviewErrorMessage = '';
+  messagesSubTab: 'pending' | 'reviewed' = 'pending';
+  selectedMessage: ContactMessageDto | null = null;
 
   logs: LogDto[] = [];
   logsLoading = true;
@@ -107,6 +109,34 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  get pendingMessages(): ContactMessageDto[] {
+    return this.messages.filter(m => m.status === ContactMessageStatus.Pending);
+  }
+
+  get reviewedMessages(): ContactMessageDto[] {
+    return this.messages.filter(m => m.status === ContactMessageStatus.Reviewed);
+  }
+
+  get visibleMessages(): ContactMessageDto[] {
+    return this.messagesSubTab === 'pending' ? this.pendingMessages : this.reviewedMessages;
+  }
+
+  selectMessagesSubTab(tab: 'pending' | 'reviewed'): void {
+    this.messagesSubTab = tab;
+  }
+
+  messagePreview(text: string): string {
+    return text.length > 90 ? text.slice(0, 90) + '…' : text;
+  }
+
+  openMessageDetail(message: ContactMessageDto): void {
+    this.selectedMessage = message;
+  }
+
+  closeMessageDetail(): void {
+    this.selectedMessage = null;
+  }
+
   markAsReviewed(message: ContactMessageDto): void {
     this.reviewingMessageId = message.id;
     this.reviewErrorMessage = '';
@@ -115,6 +145,7 @@ export class AdminComponent implements OnInit {
       next: (result) => {
         this.reviewingMessageId = null;
         if (result.success) {
+          this.closeMessageDetail();
           this.loadMessages();
           this.loadAdminActions();
         } else {

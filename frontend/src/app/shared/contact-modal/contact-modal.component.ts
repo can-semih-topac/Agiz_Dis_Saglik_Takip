@@ -24,6 +24,7 @@ export class ContactModalComponent implements OnInit {
   submitted = false;
   errorMessage = '';
   successMessage = '';
+  showSuccessDialog = false;
   selectedImage: File | null = null;
   imageWarning = '';
   emailCopied = false;
@@ -61,6 +62,13 @@ export class ContactModalComponent implements OnInit {
     this.closed.emit();
   }
 
+  // Gönderim sonrası formu değil, ortada küçük bir onay penceresi gösteriyoruz —
+  // "Tamam"a basınca hem bu pencere hem "Bize Ulaşın" formu kapanıp kalınan sayfaya dönülüyor.
+  closeSuccessDialog(): void {
+    this.showSuccessDialog = false;
+    this.closed.emit();
+  }
+
   copyEmail(): void {
     navigator.clipboard.writeText(this.supportEmail).then(() => {
       this.emailCopied = true;
@@ -89,6 +97,7 @@ export class ContactModalComponent implements OnInit {
         this.isSubmitting = false;
         if (result.success) {
           this.successMessage = result.message ?? 'Mesajınız gönderildi, teşekkürler!';
+          this.showSuccessDialog = true;
           this.form.patchValue({ message: '' });
           this.selectedImage = null;
           this.submitted = false;

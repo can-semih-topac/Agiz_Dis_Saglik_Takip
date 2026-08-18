@@ -27,31 +27,73 @@
   border-bottom-color: var(--primary);
 }
 
-.message-list,
 .log-list {
   display: block;
 }
 
-.message-card {
+.message-subtabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.message-subtab {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.message-subtab:hover {
+  color: var(--text);
+}
+
+.message-subtab.is-active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.message-row-list {
+  display: block;
+}
+
+.message-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 0.9rem 1.1rem;
-  margin-bottom: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
 }
 
-.message-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+.message-row:hover {
+  border-color: var(--border-strong);
 }
 
-.message-card-name {
+.message-row-name {
   font-weight: 600;
+  white-space: nowrap;
 }
 
-.message-card-date {
+.message-row-preview {
+  flex: 1;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-row-icon {
+  font-size: 0.9rem;
+}
+
+.message-row-date {
   font-size: 0.8rem;
   color: var(--text-muted);
   white-space: nowrap;
@@ -95,9 +137,45 @@
   background: var(--surface-alt-hover);
 }
 
-.message-card img {
-  max-width: 240px;
+.message-detail-box {
+  position: relative;
+  max-width: 480px;
+  text-align: left;
+}
+
+.message-detail-box h4 {
+  margin: 0;
+  color: var(--heading);
+}
+
+.message-detail-date {
+  margin: 0.35rem 0 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.message-detail-box img {
+  max-width: 100%;
   margin-top: 0.6rem;
+}
+
+.detail-close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.3rem 0.45rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.detail-close-btn:hover {
+  color: var(--text);
+  background: transparent;
 }
 
 .log-card {
