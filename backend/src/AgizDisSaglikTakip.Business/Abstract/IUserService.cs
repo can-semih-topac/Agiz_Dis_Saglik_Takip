@@ -10,6 +10,6 @@ public interface IUserService
     Task<ServiceResult> ChangePasswordAsync(int userId, ChangePasswordDto dto);
     Task<ServiceResult> DeleteAccountAsync(int userId);
     Task<ServiceResult<List<UserAdminDto>>> GetAllUsersAsync();
-    Task<ServiceResult> CreateUserByAdminAsync(CreateUserByAdminDto dto);
+    Task<ServiceResult> CreateUserByAdminAsync(int adminUserId, CreateUserByAdminDto dto);
     Task<ServiceResult> DeleteUserByAdminAsync(int adminUserId, int targetUserId);
 }

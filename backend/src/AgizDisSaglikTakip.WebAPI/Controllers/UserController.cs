@@ -59,7 +59,7 @@ public class UserController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CreateUser(CreateUserByAdminDto dto)
     {
-        var result = await _userService.CreateUserByAdminAsync(dto);
+        var result = await _userService.CreateUserByAdminAsync(this.GetUserId(), dto);
         return result.Success ? Ok(result) : BadRequest(result);
     }
 

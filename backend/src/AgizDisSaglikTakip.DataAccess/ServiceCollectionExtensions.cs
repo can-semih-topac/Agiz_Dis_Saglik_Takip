@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISuggestionRepository, EfSuggestionRepository>();
         services.AddScoped<IContactMessageRepository, EfContactMessageRepository>();
         services.AddScoped<ILogRepository, EfLogRepository>();
+        services.AddScoped<IAdminActionLogRepository, EfAdminActionLogRepository>();
 
         return services;
     }

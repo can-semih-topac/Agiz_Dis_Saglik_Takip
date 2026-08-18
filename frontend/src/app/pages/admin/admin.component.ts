@@ -8,11 +8,13 @@ import { LogService } from '../../core/services/log.service';
 import { LogDto } from '../../core/models/log.models';
 import { UserService } from '../../core/services/user.service';
 import { Role, UserAdminDto } from '../../core/models/user.models';
+import { AdminActionLogService } from '../../core/services/admin-action-log.service';
+import { AdminActionLogDto } from '../../core/models/admin-action-log.models';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
 import { AddUserModalComponent } from '../../shared/add-user-modal/add-user-modal.component';
 import { formatTurkishDate, formatTurkishDateTime } from '../../shared/turkish-date';
 
-type AdminTab = 'messages' | 'logs' | 'users';
+type AdminTab = 'messages' | 'logs' | 'adminActions' | 'users';
 
 @Component({
   selector: 'app-admin',
@@ -24,6 +26,7 @@ export class AdminComponent implements OnInit {
   private contactService = inject(ContactService);
   private logService = inject(LogService);
   private userService = inject(UserService);
+  private adminActionLogService = inject(AdminActionLogService);
 
   // Görsellerin yolu backend'den "/uploads/..." olarak geliyor, başına backend adresini eklememiz lazım.
   apiOrigin = environment.apiBaseUrl.replace('/api', '');
@@ -39,6 +42,10 @@ export class AdminComponent implements OnInit {
   logs: LogDto[] = [];
   logsLoading = true;
   logsError = '';
+
+  adminActions: AdminActionLogDto[] = [];
+  adminActionsLoading = true;
+  adminActionsError = '';
 
   users: UserAdminDto[] = [];
   usersLoading = true;
@@ -85,7 +92,26 @@ export class AdminComponent implements OnInit {
       }
     });
 
+    this.loadAdminActions();
     this.loadUsers();
+  }
+
+  loadAdminActions(): void {
+    this.adminActionsLoading = true;
+    this.adminActionLogService.getRecent().subscribe({
+      next: (result) => {
+        this.adminActionsLoading = false;
+        if (result.success) {
+          this.adminActions = result.data;
+        } else {
+          this.adminActionsError = result.message ?? 'İşlem geçmişi alınamadı.';
+        }
+      },
+      error: () => {
+        this.adminActionsLoading = false;
+        this.adminActionsError = 'Sunucuya ulaşılamadı.';
+      }
+    });
   }
 
   loadUsers(): void {
@@ -120,6 +146,7 @@ export class AdminComponent implements OnInit {
 
   onUserCreated(): void {
     this.loadUsers();
+    this.loadAdminActions();
   }
 
   requestDeleteUser(user: UserAdminDto): void {
@@ -143,6 +170,7 @@ export class AdminComponent implements OnInit {
         if (result.success) {
           this.pendingDeleteUser = null;
           this.loadUsers();
+          this.loadAdminActions();
         } else {
           this.deleteErrorMessage = result.message ?? 'Kullanıcı silinemedi.';
         }

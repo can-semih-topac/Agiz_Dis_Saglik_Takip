@@ -95,7 +95,7 @@
       <form class="profile-edit-form" [formGroup]="fieldForm" (ngSubmit)="saveField('email')">
         <div>
           <label for="email">E-posta</label>
-          <input id="email" type="email" formControlName="email" />
+          <input id="email" type="text" formControlName="email" />
           @if (fieldForm.get('email')?.invalid && fieldForm.get('email')?.touched) {
             <span class="error">Geçerli bir e-posta gir.</span>
           }

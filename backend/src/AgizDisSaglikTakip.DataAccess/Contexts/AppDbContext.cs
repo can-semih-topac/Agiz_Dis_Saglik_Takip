@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<Suggestion> Suggestions => Set<Suggestion>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<Log> Logs => Set<Log>();
+    public DbSet<AdminActionLog> AdminActionLogs => Set<AdminActionLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -81,6 +82,13 @@ public class AppDbContext : DbContext
             entity.Property(l => l.Level).HasMaxLength(20).IsRequired();
             entity.Property(l => l.Category).HasMaxLength(300).IsRequired();
             entity.Property(l => l.Message).IsRequired();
+        });
+
+        modelBuilder.Entity<AdminActionLog>(entity =>
+        {
+            entity.Property(a => a.AdminEmail).HasMaxLength(256).IsRequired();
+            entity.Property(a => a.Action).HasMaxLength(200).IsRequired();
+            entity.Property(a => a.TargetEmail).HasMaxLength(256).IsRequired();
         });
 
         modelBuilder.Entity<Suggestion>(entity =>

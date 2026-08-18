@@ -15,7 +15,7 @@
 
       <div>
         <label for="contactEmail">E-posta</label>
-        <input id="contactEmail" type="email" formControlName="email" />
+        <input id="contactEmail" type="text" formControlName="email" />
         @if (form.get('email')?.invalid && submitted) {
           <span class="error">Geçerli bir e-posta gir.</span>
         }

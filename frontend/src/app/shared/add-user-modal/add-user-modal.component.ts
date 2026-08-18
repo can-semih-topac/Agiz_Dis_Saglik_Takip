@@ -25,11 +25,15 @@ export class AddUserModalComponent {
   errorMessage = '';
   successMessage = '';
 
+  // AuthBusinessRules.IsValidPassword ile aynı — kullanıcı sunucuya sormadan anında uyarı görsün diye (register formundakiyle aynı desen).
+  private static readonly passwordComplexityPattern = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/;
+
   form = this.fb.group({
     role: [Role.User, Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    // Sadece rol Admin iken zorunlu — role değişince validator'ı elle güncelliyoruz (bkz. onRoleChange).
-    temporaryPassword: ['']
+    // Rol Admin iken zorunlu, User iken opsiyonel — girilirse yine de geçerli bir şifre olmalı
+    // (bkz. onRoleChange). Boş bırakılırsa hesap şifresiz oluşturulup davet e-postası gönderilir.
+    temporaryPassword: ['', [Validators.minLength(8), Validators.pattern(AddUserModalComponent.passwordComplexityPattern)]]
   });
 
   get isAdminRole(): boolean {
@@ -38,12 +42,8 @@ export class AddUserModalComponent {
 
   onRoleChange(): void {
     const control = this.form.controls.temporaryPassword;
-    if (this.isAdminRole) {
-      control.setValidators([Validators.required, Validators.minLength(8)]);
-    } else {
-      control.clearValidators();
-      control.setValue('');
-    }
+    const baseValidators = [Validators.minLength(8), Validators.pattern(AddUserModalComponent.passwordComplexityPattern)];
+    control.setValidators(this.isAdminRole ? [Validators.required, ...baseValidators] : baseValidators);
     control.updateValueAndValidity();
   }
 
@@ -65,7 +65,7 @@ export class AddUserModalComponent {
     this.userService.createUser({
       email: this.form.value.email!,
       role: this.form.value.role!,
-      temporaryPassword: this.isAdminRole ? this.form.value.temporaryPassword! : null
+      temporaryPassword: this.form.value.temporaryPassword || null
     }).subscribe({
       next: (result) => {
         this.isSubmitting = false;

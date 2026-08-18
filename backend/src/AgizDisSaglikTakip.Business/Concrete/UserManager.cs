@@ -20,6 +20,7 @@ public class UserManager : IUserService
     private readonly IEncryptionService _encryptionService;
     private readonly IEmailService _emailService;
     private readonly IWillpowerService _willpowerService;
+    private readonly IAdminActionLogService _adminActionLogService;
     private readonly ILogger<UserManager> _logger;
 
     public UserManager(
@@ -27,12 +28,14 @@ public class UserManager : IUserService
         IEncryptionService encryptionService,
         IEmailService emailService,
         IWillpowerService willpowerService,
+        IAdminActionLogService adminActionLogService,
         ILogger<UserManager> logger)
     {
         _userRepository = userRepository;
         _encryptionService = encryptionService;
         _emailService = emailService;
         _willpowerService = willpowerService;
+        _adminActionLogService = adminActionLogService;
         _logger = logger;
     }
 
@@ -170,10 +173,12 @@ public class UserManager : IUserService
         return ServiceResult<List<UserAdminDto>>.Ok(dtos);
     }
 
-    // Admin panelinden yeni kullanıcı/admin ekleme. Admin -> geçici şifre zorunlu, ilk girişte
-    // değiştirmesi hatırlatılır. User -> şifresiz oluşturulur (Google hesabıyla aynı mantık),
-    // e-postasına giriş sayfasının linkiyle bir davet gönderilir.
-    public async Task<ServiceResult> CreateUserByAdminAsync(CreateUserByAdminDto dto)
+    // Admin panelinden yeni kullanıcı/admin ekleme.
+    // - Admin: geçici şifre zorunlu.
+    // - User: geçici şifre opsiyonel — girilirse admin ile aynı mantık (ilk girişte değiştirmesi
+    //   hatırlatılır), boş bırakılırsa şifresiz oluşturulur (Google hesabıyla aynı mantık) ve
+    //   e-postasına giriş sayfasının linkiyle bir davet gönderilir.
+    public async Task<ServiceResult> CreateUserByAdminAsync(int adminUserId, CreateUserByAdminDto dto)
     {
         if (!AuthBusinessRules.IsValidEmailFormat(dto.Email))
             return ServiceResult.Fail("Geçersiz e-posta formatı.");
@@ -181,6 +186,11 @@ public class UserManager : IUserService
         var existingUser = await _userRepository.GetByEmailAsync(dto.Email);
         if (existingUser != null)
             return ServiceResult.Fail("Bu e-posta adresi zaten kayıtlı.");
+
+        if (dto.Role == Role.Admin && string.IsNullOrEmpty(dto.TemporaryPassword))
+            return ServiceResult.Fail("Admin hesapları için geçici şifre zorunlu.");
+
+        var admin = await _userRepository.GetAsync(u => u.Id == adminUserId);
 
         var user = new User
         {
@@ -192,9 +202,10 @@ public class UserManager : IUserService
             CreatedAt = DateTime.Now
         };
 
-        if (dto.Role == Role.Admin)
+        // Rolden bağımsız: geçici şifre verildiyse (admin için zorunlu, user için opsiyonel) ikisi de aynı yolu izler.
+        if (!string.IsNullOrEmpty(dto.TemporaryPassword))
         {
-            if (string.IsNullOrEmpty(dto.TemporaryPassword) || !AuthBusinessRules.IsValidPassword(dto.TemporaryPassword))
+            if (!AuthBusinessRules.IsValidPassword(dto.TemporaryPassword))
                 return ServiceResult.Fail("Geçici şifre en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
 
             user.PasswordEncrypted = _encryptionService.Encrypt(dto.TemporaryPassword);
@@ -202,11 +213,16 @@ public class UserManager : IUserService
 
             await _userRepository.AddAsync(user);
 
-            return ServiceResult.Ok("Admin hesabı oluşturuldu.");
+            var action = dto.Role == Role.Admin ? "Admin Oluşturuldu" : "Kullanıcı Oluşturuldu (geçici şifreyle)";
+            await _adminActionLogService.RecordAsync(admin?.Email ?? "?", action, user.Email);
+
+            var message = dto.Role == Role.Admin ? "Admin hesabı oluşturuldu." : "Kullanıcı oluşturuldu.";
+            return ServiceResult.Ok(message);
         }
 
         user.PasswordEncrypted = null;
         await _userRepository.AddAsync(user);
+        await _adminActionLogService.RecordAsync(admin?.Email ?? "?", "Kullanıcı Oluşturuldu", user.Email);
 
         try
         {
@@ -234,7 +250,11 @@ public class UserManager : IUserService
         if (user == null)
             return ServiceResult.Fail("Kullanıcı bulunamadı.");
 
+        var admin = await _userRepository.GetAsync(u => u.Id == adminUserId);
+        var targetEmail = user.Email;
+
         await _userRepository.DeleteAsync(user);
+        await _adminActionLogService.RecordAsync(admin?.Email ?? "?", "Kullanıcı Silindi", targetEmail);
 
         return ServiceResult.Ok("Kullanıcı silindi.");
     }

@@ -15,21 +15,22 @@
 
       <div>
         <label for="addUserEmail">E-posta</label>
-        <input id="addUserEmail" type="email" formControlName="email" />
+        <input id="addUserEmail" type="text" formControlName="email" />
         @if (form.get('email')?.invalid && submitted) {
           <span class="error">Geçerli bir e-posta gir.</span>
         }
       </div>
 
-      @if (isAdminRole) {
-        <div>
-          <label for="addUserTempPassword">Geçici Şifre</label>
-          <input id="addUserTempPassword" type="text" formControlName="temporaryPassword" />
-          @if (form.get('temporaryPassword')?.invalid && submitted) {
-            <span class="error">En az 8 karakter olmalı, büyük harf, küçük harf ve rakam içermeli.</span>
-          }
-        </div>
-      }
+      <div>
+        <label for="addUserTempPassword">Geçici Şifre{{ isAdminRole ? '' : ' (opsiyonel)' }}</label>
+        <input id="addUserTempPassword" type="text" formControlName="temporaryPassword" />
+        @if (form.get('temporaryPassword')?.invalid && submitted) {
+          <span class="error">En az 8 karakter olmalı, büyük harf, küçük harf ve rakam içermeli.</span>
+        }
+        @if (!isAdminRole) {
+          <span class="hint">Boş bırakılırsa kullanıcıya davet e-postası gönderilir.</span>
+        }
+      </div>
 
       <button type="submit" [disabled]="isSubmitting">
         {{ isSubmitting ? 'Ekleniyor...' : 'Ekle' }}
