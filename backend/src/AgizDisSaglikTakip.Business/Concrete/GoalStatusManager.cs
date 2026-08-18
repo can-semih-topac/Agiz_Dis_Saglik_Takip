@@ -121,6 +121,40 @@ public class GoalStatusManager : IGoalStatusService
         return ServiceResult<List<LongestStreakDto>>.Ok(result);
     }
 
+    public async Task<ServiceResult> UpdateGoalStatusAsync(int userId, int id, UpdateGoalStatusDto dto)
+    {
+        var goalStatus = await _goalStatusRepository.GetAsync(gs => gs.Id == id && gs.Goal.UserId == userId);
+        if (goalStatus == null)
+            return ServiceResult.Fail("Durum kaydı bulunamadı.");
+
+        if (dto.ActivityDate > DateOnly.FromDateTime(DateTime.Today))
+            return ServiceResult.Fail("Tarih gelecekte olamaz.");
+
+        var goal = await _goalRepository.GetAsync(g => g.Id == goalStatus.GoalId);
+        if (goal == null)
+            return ServiceResult.Fail("Hedef bulunamadı.");
+
+        int? durationMinutes;
+        if (goal.TrackingType == TrackingType.Sureli)
+        {
+            if (dto.DurationMinutes == null || dto.DurationMinutes < 0)
+                return ServiceResult.Fail("Bu hedef süreli takip edildiği için geçerli bir süre girilmeli.");
+
+            durationMinutes = dto.DurationMinutes;
+        }
+        else
+        {
+            durationMinutes = null;
+        }
+
+        goalStatus.ActivityDate = dto.ActivityDate;
+        goalStatus.ActivityTime = dto.ActivityTime;
+        goalStatus.DurationMinutes = durationMinutes;
+        await _goalStatusRepository.UpdateAsync(goalStatus);
+
+        return ServiceResult.Ok("Durum kaydı güncellendi.");
+    }
+
     public async Task<ServiceResult<bool>> DeleteGoalStatusAsync(int userId, int id)
     {
         var goalStatus = await _goalStatusRepository.GetAsync(gs => gs.Id == id && gs.Goal.UserId == userId);

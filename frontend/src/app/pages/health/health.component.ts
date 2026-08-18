@@ -162,6 +162,11 @@ export class HealthComponent implements OnInit {
     this.selectedStatus = null;
   }
 
+  onDetailSaved(): void {
+    this.selectedStatus = null;
+    this.loadLast7Days();
+  }
+
   loadSuggestion(): void {
     this.suggestionService.getRandom().subscribe({
       next: (result) => { if (result.success) this.suggestionText = result.data.text; }

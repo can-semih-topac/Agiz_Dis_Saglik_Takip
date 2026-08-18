@@ -34,6 +34,21 @@ public class StatusNoteController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateStatusNote(int id, [FromForm] UpdateStatusNoteRequest request)
+    {
+        var dto = new UpdateStatusNoteDto
+        {
+            Description = request.Description ?? string.Empty,
+            ImageStream = request.Image?.OpenReadStream(),
+            ImageExtension = request.Image != null ? Path.GetExtension(request.Image.FileName) : null,
+            RemoveImage = request.RemoveImage
+        };
+
+        var result = await _statusNoteService.UpdateStatusNoteAsync(this.GetUserId(), id, dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
     [HttpGet("last7days")]
     public async Task<IActionResult> GetLast7Days()
     {

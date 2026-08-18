@@ -1,28 +1,82 @@
 <div class="detail-backdrop" (click)="close()">
   <div class="detail-box" (click)="$event.stopPropagation()">
     <button type="button" class="detail-close-btn" (click)="close()" aria-label="Kapat">✕</button>
-    <h3>{{ status.goalTitle }}</h3>
-    <p class="detail-date">{{ formattedDate }}</p>
 
-    <div class="detail-facts">
-      <span class="detail-streak">🔥 {{ status.streakCount }}. gün</span>
-      @if (status.trackingType === TrackingType.Sureli) {
-        <span class="detail-duration">{{ status.durationMinutes }} dk</span>
-      } @else {
-        <span class="detail-duration">Yapıldı</span>
-      }
-    </div>
+    @if (!isEditing) {
+      <h3>{{ status.goalTitle }}</h3>
+      <p class="detail-date">{{ formattedDate }}</p>
 
-    @if (note) {
-      <div class="detail-note">
-        <h4>Not</h4>
-        <p>{{ note.description }}</p>
-        @if (note.imagePath) {
-          <img [src]="apiOrigin + note.imagePath" alt="Durum kaydı görseli" />
+      <div class="detail-facts">
+        <span class="detail-streak">🔥 {{ status.streakCount }}. gün</span>
+        @if (status.trackingType === TrackingType.Sureli) {
+          <span class="detail-duration">{{ status.durationMinutes }} dk</span>
+        } @else {
+          <span class="detail-duration">Yapıldı</span>
         }
       </div>
+
+      @if (note) {
+        <div class="detail-note">
+          <h4>Not</h4>
+          <p>{{ note.description }}</p>
+          @if (note.imagePath) {
+            <img [src]="apiOrigin + note.imagePath" alt="Durum kaydı görseli" />
+          }
+        </div>
+      } @else {
+        <p class="detail-empty">Bu kayda eklenmiş not veya görsel yok.</p>
+      }
+
+      <button type="button" class="detail-edit-btn" (click)="startEdit()">Düzenle</button>
     } @else {
-      <p class="detail-empty">Bu kayda eklenmiş not veya görsel yok.</p>
+      <h3>Kaydı Düzenle</h3>
+
+      <form class="detail-edit-form" [formGroup]="editForm" (ngSubmit)="submitEdit()">
+        <div>
+          <label for="editDate">Tarih</label>
+          <input id="editDate" type="date" formControlName="activityDate" />
+        </div>
+
+        <div>
+          <label for="editTime">Saat</label>
+          <input id="editTime" type="time" formControlName="activityTime" />
+        </div>
+
+        @if (status.trackingType === TrackingType.Sureli) {
+          <div>
+            <label for="editDuration">Süre (dk)</label>
+            <input id="editDuration" type="number" min="0" formControlName="durationMinutes" />
+          </div>
+        }
+
+        <div>
+          <label for="editDescription">Açıklama{{ descriptionRequired ? '' : ' (opsiyonel)' }}</label>
+          <textarea id="editDescription" formControlName="description"></textarea>
+        </div>
+
+        <div>
+          <label for="editImage">Görsel (.jpg/.png)</label>
+          @if (note?.imagePath && !removeImage) {
+            <div class="detail-current-image">
+              <img [src]="apiOrigin + note!.imagePath" alt="Mevcut görsel" />
+              <button type="button" class="detail-remove-image-btn" (click)="toggleRemoveImage()">Görseli Kaldır</button>
+            </div>
+          } @else if (removeImage) {
+            <p class="detail-empty">Görsel kaldırılacak.</p>
+            <button type="button" class="detail-remove-image-btn" (click)="toggleRemoveImage()">Vazgeç</button>
+          }
+          <input id="editImage" type="file" accept=".jpg,.jpeg,.png" (change)="onImageSelected($event)" />
+        </div>
+
+        @if (saveError) {
+          <p class="error">{{ saveError }}</p>
+        }
+
+        <div class="detail-edit-actions">
+          <button type="submit" [disabled]="isSaving">{{ isSaving ? 'Kaydediliyor...' : 'Kaydet' }}</button>
+          <button type="button" class="detail-cancel-btn" (click)="cancelEdit()">Vazgeç</button>
+        </div>
+      </form>
     }
   </div>
 </div>

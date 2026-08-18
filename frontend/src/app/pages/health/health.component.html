@@ -177,6 +177,7 @@
   <app-status-detail-modal
     [status]="selectedStatus"
     [note]="noteFor(selectedStatus)"
-    (closed)="closeDetail()">
+    (closed)="closeDetail()"
+    (saved)="onDetailSaved()">
   </app-status-detail-modal>
 }

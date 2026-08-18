@@ -58,6 +58,35 @@ public class StatusNoteManager : IStatusNoteService
         return ServiceResult.Ok("Not kaydedildi.");
     }
 
+    public async Task<ServiceResult> UpdateStatusNoteAsync(int userId, int id, UpdateStatusNoteDto dto)
+    {
+        var note = await _statusNoteRepository.GetAsync(sn => sn.Id == id && sn.UserId == userId);
+        if (note == null)
+            return ServiceResult.Fail("Not bulunamadı.");
+
+        if (string.IsNullOrWhiteSpace(dto.Description))
+            return ServiceResult.Fail("Açıklama boş olamaz.");
+
+        if (dto.ImageStream != null && dto.ImageExtension != null)
+        {
+            var extension = dto.ImageExtension.ToLowerInvariant();
+            if (!AllowedImageExtensions.Contains(extension))
+                return ServiceResult.Fail("Sadece .jpg, .jpeg, .png uzantılı görseller yüklenebilir.");
+
+            // Eski dosya diskte kalır (projede zaten hiçbir yüklenen dosya silinmiyor), sadece yeni yol kaydedilir.
+            note.ImagePath = await _fileStorageService.SaveFileAsync(dto.ImageStream, extension);
+        }
+        else if (dto.RemoveImage)
+        {
+            note.ImagePath = null;
+        }
+
+        note.Description = dto.Description;
+        await _statusNoteRepository.UpdateAsync(note);
+
+        return ServiceResult.Ok("Not güncellendi.");
+    }
+
     public async Task<ServiceResult<List<StatusNoteDto>>> GetLast7DaysAsync(int userId)
     {
         var records = await _statusNoteRepository.GetLast7DaysByUserIdAsync(userId);

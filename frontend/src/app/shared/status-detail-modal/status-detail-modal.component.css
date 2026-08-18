@@ -88,3 +88,55 @@
   border-top: 1px solid var(--border);
   padding-top: 0.9rem;
 }
+
+.detail-edit-btn {
+  margin-top: 1rem;
+  background: var(--surface-alt);
+  color: var(--label);
+}
+
+.detail-edit-btn:hover:not(:disabled) {
+  background: var(--surface-alt-hover);
+}
+
+.detail-edit-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-current-image {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.3rem 0 0.5rem;
+}
+
+.detail-current-image img {
+  max-width: 90px;
+  border-radius: 6px;
+}
+
+.detail-remove-image-btn {
+  background: var(--surface-alt);
+  color: var(--label);
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.detail-remove-image-btn:hover:not(:disabled) {
+  background: var(--surface-alt-hover);
+}
+
+.detail-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.detail-cancel-btn {
+  background: var(--text-muted);
+}
+
+.detail-cancel-btn:hover:not(:disabled) {
+  background: var(--label);
+}

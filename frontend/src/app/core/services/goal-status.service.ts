@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateGoalStatusDto, GoalStatusDto, LongestStreakDto } from '../models/goal-status.models';
+import { CreateGoalStatusDto, GoalStatusDto, LongestStreakDto, UpdateGoalStatusDto } from '../models/goal-status.models';
 import { ServiceResult } from '../models/service-result';
 
 @Injectable({ providedIn: 'root' })
@@ -13,6 +13,10 @@ export class GoalStatusService {
   // Dönen data, oluşturulan kaydın Id'si — notu aynı kayda bağlayabilmek için.
   createGoalStatus(dto: CreateGoalStatusDto): Observable<ServiceResult<number>> {
     return this.http.post<ServiceResult<number>>(this.baseUrl, dto);
+  }
+
+  updateGoalStatus(id: number, dto: UpdateGoalStatusDto): Observable<ServiceResult> {
+    return this.http.put<ServiceResult>(`${this.baseUrl}/${id}`, dto);
   }
 
   getLast7Days(): Observable<ServiceResult<GoalStatusDto[]>> {

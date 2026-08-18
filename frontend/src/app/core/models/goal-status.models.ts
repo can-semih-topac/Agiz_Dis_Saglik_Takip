@@ -20,6 +20,12 @@ export interface CreateGoalStatusDto {
   durationMinutes: number | null;
 }
 
+export interface UpdateGoalStatusDto {
+  activityDate: string;
+  activityTime: string;
+  durationMinutes: number | null;
+}
+
 export interface LongestStreakDto {
   goalId: number;
   goalTitle: string;

@@ -22,6 +22,16 @@ export class StatusNoteService {
     return this.http.post<ServiceResult>(this.baseUrl, formData);
   }
 
+  updateStatusNote(id: number, description: string, image: File | null, removeImage: boolean): Observable<ServiceResult> {
+    const formData = new FormData();
+    formData.append('description', description);
+    if (image) {
+      formData.append('image', image);
+    }
+    formData.append('removeImage', removeImage ? 'true' : 'false');
+    return this.http.put<ServiceResult>(`${this.baseUrl}/${id}`, formData);
+  }
+
   getLast7Days(): Observable<ServiceResult<StatusNoteDto[]>> {
     return this.http.get<ServiceResult<StatusNoteDto[]>>(`${this.baseUrl}/last7days`);
   }

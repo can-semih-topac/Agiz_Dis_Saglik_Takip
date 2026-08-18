@@ -226,6 +226,14 @@ export class HomeComponent implements OnInit {
     this.selectedStatus = null;
   }
 
+  // Detay penceresinden bir kayıt düzenlenince tarih/süre/seri/puan hepsi değişmiş olabilir.
+  onDetailSaved(): void {
+    this.selectedStatus = null;
+    this.loadStatusData();
+    this.loadLongestStreaks();
+    this.loadWillpowerScore();
+  }
+
   openWillpowerHistory(): void {
     this.showWillpowerHistory = true;
   }
