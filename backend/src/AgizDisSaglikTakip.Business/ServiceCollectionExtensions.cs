@@ -18,6 +18,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IWillpowerService, WillpowerManager>();
         services.AddScoped<ILogService, LogManager>();
         services.AddScoped<IAdminActionLogService, AdminActionLogManager>();
+        services.AddScoped<IDemoService, DemoManager>();
 
         return services;
     }

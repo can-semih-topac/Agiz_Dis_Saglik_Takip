@@ -3,6 +3,13 @@
 <div class="auth-content">
 <h2>Giriş Yap</h2>
 
+<div class="demo-callout">
+  <p>Hesap oluşturmadan önce, örnek verilerle dolu bir hesap üzerinden uygulamayı inceleyebilirsiniz.</p>
+  <button type="button" class="demo-btn" (click)="enterDemo()" [disabled]="isEnteringDemo">
+    {{ isEnteringDemo ? 'Hazırlanıyor...' : 'Tanıtımı Göster' }}
+  </button>
+</div>
+
 <form [formGroup]="form" (ngSubmit)="submit()">
   <div>
     <label for="email">E-posta</label>

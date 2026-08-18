@@ -11,6 +11,8 @@ public class User
     public string? PasswordEncrypted { get; set; }
     // Admin panelinden geçici şifreyle oluşturulan admin hesaplarında true olur, şifre değiştirilince false'a döner.
     public bool MustChangePassword { get; set; }
+    // "Tanıtımı Göster" ile giriş yapılan tek canlı demo hesabında true — her girişte verileri sıfırlanır.
+    public bool IsDemo { get; set; }
     public string FullName { get; set; } = string.Empty;
     // Google ile oluşturulan hesaplarda kullanıcı henüz belirtmediği için boş olabilir.
     public DateOnly? BirthDate { get; set; }

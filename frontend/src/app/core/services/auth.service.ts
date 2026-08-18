@@ -25,6 +25,11 @@ export class AuthService {
     return this.http.post<ServiceResult<LoginResultDto>>(`${this.baseUrl}/google`, dto);
   }
 
+  // Demo hesabının verilerini sıfırlayıp tazeler ve o hesaba giriş token'ı döner.
+  enterDemo(): Observable<ServiceResult<LoginResultDto>> {
+    return this.http.post<ServiceResult<LoginResultDto>>(`${this.baseUrl}/demo`, {});
+  }
+
   requestResetCode(dto: VerifyEmailDto): Observable<ServiceResult> {
     return this.http.post<ServiceResult>(`${this.baseUrl}/forgot-password/request-code`, dto);
   }

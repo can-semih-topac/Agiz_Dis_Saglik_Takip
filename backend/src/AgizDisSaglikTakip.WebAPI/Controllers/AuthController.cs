@@ -9,10 +9,12 @@ namespace AgizDisSaglikTakip.WebAPI.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IDemoService _demoService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IDemoService demoService)
     {
         _authService = authService;
+        _demoService = demoService;
     }
 
     [HttpPost("register")]
@@ -54,6 +56,13 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
     {
         var result = await _authService.ResetPasswordAsync(dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpPost("demo")]
+    public async Task<IActionResult> EnterDemo()
+    {
+        var result = await _demoService.EnterDemoAsync();
         return result.Success ? Ok(result) : BadRequest(result);
     }
 }

@@ -51,13 +51,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// Angular dev server (localhost:4200) farklı bir origin olduğu için tarayıcı
-// bunu açıkça izin vermedikçe backend'e istek atmayı engelliyor (CORS).
+// Angular dev server (localhost:4200) ve canlıdaki frontend (Cloudflare Tunnel üzerinden
+// ads.cansemihtopac.com) farklı origin'ler olduğu için tarayıcı bunlara açıkça izin
+// vermedikçe backend'e istek atmayı engelliyor (CORS).
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularDev", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "https://ads.cansemihtopac.com")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

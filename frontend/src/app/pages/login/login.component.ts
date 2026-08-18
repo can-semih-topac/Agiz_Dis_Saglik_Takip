@@ -28,6 +28,7 @@ export class LoginComponent implements AfterViewInit {
   errorMessage = '';
   successMessage = '';
   showPassword = false;
+  isEnteringDemo = false;
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -62,6 +63,27 @@ export class LoginComponent implements AfterViewInit {
       },
       error: (err: HttpErrorResponse) => {
         this.isSubmitting = false;
+        this.errorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
+  }
+
+  enterDemo(): void {
+    this.errorMessage = '';
+    this.isEnteringDemo = true;
+
+    this.authService.enterDemo().subscribe({
+      next: (result) => {
+        this.isEnteringDemo = false;
+        if (result.success && result.data) {
+          this.authService.saveSession(result.data);
+          this.router.navigate(['/home']);
+        } else {
+          this.errorMessage = result.message ?? 'Demo hesabına giriş yapılamadı.';
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isEnteringDemo = false;
         this.errorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
       }
     });

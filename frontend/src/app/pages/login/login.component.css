@@ -22,3 +22,30 @@
   justify-content: center;
   margin-bottom: 0.5rem;
 }
+
+.demo-callout {
+  width: 100%;
+  max-width: 640px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.2rem;
+  text-align: center;
+}
+
+.demo-callout p {
+  margin: 0 0 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.demo-btn {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.demo-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: #fff;
+}
