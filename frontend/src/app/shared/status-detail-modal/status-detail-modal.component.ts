@@ -19,7 +19,10 @@ export class StatusDetailModalComponent {
   readonly TrackingType = TrackingType;
 
   // Görsellerin yolu backend'den "/uploads/..." olarak geliyor, başına backend adresini eklememiz lazım.
-  apiOrigin = environment.apiBaseUrl.replace('/api', '');
+  // Not: apiBaseUrl'nin SONUNDAKİ "/api"yi kesiyoruz — düz .replace('/api','') canlıda
+  // "api.cansemihtopac.com" gibi "api" ile başlayan alt alan adlarında baştaki "/api"yi
+  // yanlışlıkla siliyor ve adresi bozuyordu (regex'teki $ ifadesi sonu sabitliyor).
+  apiOrigin = environment.apiBaseUrl.replace(/\/api$/, '');
 
   get formattedDate(): string {
     return formatTurkishDateTime(this.status.activityDate, this.status.activityTime);

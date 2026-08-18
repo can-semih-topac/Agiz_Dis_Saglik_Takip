@@ -33,7 +33,10 @@ export class HealthComponent implements OnInit {
   }
 
   // Görsellerin yolu backend'den "/uploads/..." olarak geliyor, başına backend adresini eklememiz lazım.
-  apiOrigin = environment.apiBaseUrl.replace('/api', '');
+  // Not: apiBaseUrl'nin SONUNDAKİ "/api"yi kesiyoruz — düz .replace('/api','') canlıda
+  // "api.cansemihtopac.com" gibi "api" ile başlayan alt alan adlarında baştaki "/api"yi
+  // yanlışlıkla siliyor ve adresi bozuyordu (regex'teki $ ifadesi sonu sabitliyor).
+  apiOrigin = environment.apiBaseUrl.replace(/\/api$/, '');
 
   // Template'te enum karşılaştırması yapabilmek için.
   readonly TrackingType = TrackingType;
@@ -246,6 +249,14 @@ export class HealthComponent implements OnInit {
       this.statusForm.markAllAsTouched();
       return;
     }
+
+    // Görsel tek başına anlamsız kalıyor (haftalar sonra bağlamı kayboluyor) — açıklamasız
+    // gönderilirse StatusNote hiç oluşturulmuyor ve seçilen görsel sessizce kayboluyordu.
+    if (this.selectedImage && !this.statusForm.value.noteDescription?.trim()) {
+      this.statusError = 'Görsel eklediğinizde açıklama yazmanız gerekiyor.';
+      return;
+    }
+
     this.statusError = '';
     this.statusSuccess = '';
 
