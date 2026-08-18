@@ -55,11 +55,14 @@ public class DemoManager : IDemoService
 
         // Önceki ziyaretin verilerini tamamen temizliyoruz: notlar goal statüslere Restrict ile
         // bağlı olduğu için önce onlar, sonra hedefler (GoalStatus'lar hedef üzerinden Cascade siliniyor).
-        var oldNotes = await _statusNoteRepository.GetAllByUserIdAsync(demoUser.Id);
+        // Demo verisi zaten geçici/tekrar üretilen olduğu için burası kalıcı (hard) silme — bu yüzden
+        // yumuşak silinmiş (bir önceki ziyaretçinin sildiği) kayıtları da "IncludingDeleted" ile
+        // dahil ediyoruz, aksi halde onlar görünmez ama kalıcı olarak birikirdi.
+        var oldNotes = await _statusNoteRepository.GetAllByUserIdIncludingDeletedAsync(demoUser.Id);
         if (oldNotes.Count > 0)
             await _statusNoteRepository.DeleteRangeAsync(oldNotes);
 
-        var oldGoals = await _goalRepository.GetByUserIdAsync(demoUser.Id);
+        var oldGoals = await _goalRepository.GetByUserIdIncludingDeletedAsync(demoUser.Id);
         if (oldGoals.Count > 0)
             await _goalRepository.DeleteRangeAsync(oldGoals);
 

@@ -17,6 +17,9 @@ public class UserManager : IUserService
     private const string LoginLink = "http://localhost:4200/login";
 
     private readonly IUserRepository _userRepository;
+    private readonly IGoalRepository _goalRepository;
+    private readonly IGoalStatusRepository _goalStatusRepository;
+    private readonly IStatusNoteRepository _statusNoteRepository;
     private readonly IEncryptionService _encryptionService;
     private readonly IEmailService _emailService;
     private readonly IWillpowerService _willpowerService;
@@ -25,6 +28,9 @@ public class UserManager : IUserService
 
     public UserManager(
         IUserRepository userRepository,
+        IGoalRepository goalRepository,
+        IGoalStatusRepository goalStatusRepository,
+        IStatusNoteRepository statusNoteRepository,
         IEncryptionService encryptionService,
         IEmailService emailService,
         IWillpowerService willpowerService,
@@ -32,6 +38,9 @@ public class UserManager : IUserService
         ILogger<UserManager> logger)
     {
         _userRepository = userRepository;
+        _goalRepository = goalRepository;
+        _goalStatusRepository = goalStatusRepository;
+        _statusNoteRepository = statusNoteRepository;
         _encryptionService = encryptionService;
         _emailService = emailService;
         _willpowerService = willpowerService;
@@ -135,16 +144,43 @@ public class UserManager : IUserService
         return ServiceResult.Ok("Şifre güncellendi.");
     }
 
-    // Kalıcı (hard) silme — yumuşak silme ileride eklenecek.
     public async Task<ServiceResult> DeleteAccountAsync(int userId)
     {
         var user = await _userRepository.GetAsync(u => u.Id == userId);
         if (user == null)
             return ServiceResult.Fail("Kullanıcı bulunamadı.");
 
-        await _userRepository.DeleteAsync(user);
+        await SoftDeleteUserDataAsync(user);
 
         return ServiceResult.Ok("Hesap silindi.");
+    }
+
+    // Kullanıcıya ait tüm veriyi (notlar, durum kayıtları, hedefler) ve kullanıcının kendisini
+    // yumuşak siler — hiçbiri veritabanından fiziksel olarak gitmez, sadece görünmez olur.
+    // DeleteAccountAsync (kullanıcı kendi hesabını siler) ve DeleteUserByAdminAsync (admin siler)
+    // aynı kademeli mantığı paylaşıyor.
+    private async Task SoftDeleteUserDataAsync(User user)
+    {
+        var notes = await _statusNoteRepository.GetAllByUserIdAsync(user.Id);
+        foreach (var note in notes)
+            note.IsDeleted = true;
+        if (notes.Count > 0)
+            await _statusNoteRepository.UpdateRangeAsync(notes);
+
+        var goalStatuses = await _goalStatusRepository.GetAllByUserIdAsync(user.Id);
+        foreach (var goalStatus in goalStatuses)
+            goalStatus.IsDeleted = true;
+        if (goalStatuses.Count > 0)
+            await _goalStatusRepository.UpdateRangeAsync(goalStatuses);
+
+        var goals = await _goalRepository.GetByUserIdAsync(user.Id);
+        foreach (var goal in goals)
+            goal.IsDeleted = true;
+        if (goals.Count > 0)
+            await _goalRepository.UpdateRangeAsync(goals);
+
+        user.IsDeleted = true;
+        await _userRepository.UpdateAsync(user);
     }
 
     // Admin paneli için — en yeni kayıt üstte.
@@ -239,7 +275,6 @@ public class UserManager : IUserService
         return ServiceResult.Ok("Kullanıcı oluşturuldu, davet e-postası gönderildi.");
     }
 
-    // Kalıcı (hard) silme — DeleteAccountAsync'teki gibi, yumuşak silme ileride eklenecek.
     // Onay ekranı frontend'de; burada sadece adminin kendi hesabını silmesini engelliyoruz.
     public async Task<ServiceResult> DeleteUserByAdminAsync(int adminUserId, int targetUserId)
     {
@@ -253,7 +288,7 @@ public class UserManager : IUserService
         var admin = await _userRepository.GetAsync(u => u.Id == adminUserId);
         var targetEmail = user.Email;
 
-        await _userRepository.DeleteAsync(user);
+        await SoftDeleteUserDataAsync(user);
         await _adminActionLogService.RecordAsync(admin?.Email ?? "?", "Kullanıcı Silindi", targetEmail);
 
         return ServiceResult.Ok("Kullanıcı silindi.");

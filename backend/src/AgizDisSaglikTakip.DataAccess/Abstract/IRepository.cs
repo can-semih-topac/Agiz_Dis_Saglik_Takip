@@ -11,6 +11,8 @@ public interface IRepository<T> where T : class
     // her çağrıda ayrı SaveChanges yapması toplu işlemlerde ciddi performans kaybına yol açıyor.
     Task AddRangeAsync(IEnumerable<T> entities);
     Task UpdateAsync(T entity);
+    // Toplu yumuşak silme gibi çok sayıda güncellemeyi tek SaveChanges ile yapmak için.
+    Task UpdateRangeAsync(IEnumerable<T> entities);
     Task DeleteAsync(T entity);
     Task DeleteRangeAsync(IEnumerable<T> entities);
 }

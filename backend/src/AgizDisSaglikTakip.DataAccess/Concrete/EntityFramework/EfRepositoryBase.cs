@@ -46,6 +46,12 @@ public class EfRepositoryBase<T> : IRepository<T> where T : class
         await Context.SaveChangesAsync();
     }
 
+    public async Task UpdateRangeAsync(IEnumerable<T> entities)
+    {
+        Context.Set<T>().UpdateRange(entities);
+        await Context.SaveChangesAsync();
+    }
+
     public async Task DeleteAsync(T entity)
     {
         Context.Set<T>().Remove(entity);

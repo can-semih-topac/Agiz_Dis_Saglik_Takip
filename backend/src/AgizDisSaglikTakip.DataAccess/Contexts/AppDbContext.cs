@@ -23,18 +23,24 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.Property(u => u.Email).HasMaxLength(256).IsRequired();
-            entity.HasIndex(u => u.Email).IsUnique();
+            // Filtreli: sadece silinmemiş kayıtlar arasında tekil — yumuşak silinen bir hesabın
+            // e-postası aksi halde bir daha hiç kayıt/davet için kullanılamazdı.
+            entity.HasIndex(u => u.Email).IsUnique().HasFilter("[IsDeleted] = 0");
             entity.Property(u => u.PasswordEncrypted).IsRequired(false);
             entity.Property(u => u.FullName).HasMaxLength(150).IsRequired();
             // Mevcut kayıtlarda (migration öncesi) bu alan yoktu, boş metin varsayılanıyla dolduruluyor.
             entity.Property(u => u.PhoneNumber).HasMaxLength(15).IsRequired().HasDefaultValue(string.Empty);
             entity.Property(u => u.PasswordResetCode).HasMaxLength(6);
+            entity.Property(u => u.IsDeleted).HasDefaultValue(false);
+            entity.HasQueryFilter(u => !u.IsDeleted);
         });
 
         modelBuilder.Entity<Goal>(entity =>
         {
             entity.Property(g => g.Title).HasMaxLength(150).IsRequired();
             entity.Property(g => g.Description).HasMaxLength(500).IsRequired();
+            entity.Property(g => g.IsDeleted).HasDefaultValue(false);
+            entity.HasQueryFilter(g => !g.IsDeleted);
 
             entity.HasOne(g => g.User)
                   .WithMany(u => u.Goals)
@@ -44,6 +50,9 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<GoalStatus>(entity =>
         {
+            entity.Property(gs => gs.IsDeleted).HasDefaultValue(false);
+            entity.HasQueryFilter(gs => !gs.IsDeleted);
+
             entity.HasOne(gs => gs.Goal)
                   .WithMany(g => g.GoalStatuses)
                   .HasForeignKey(gs => gs.GoalId)
@@ -54,6 +63,8 @@ public class AppDbContext : DbContext
         {
             entity.Property(sn => sn.Description).HasMaxLength(1000).IsRequired();
             entity.Property(sn => sn.ImagePath).HasMaxLength(500);
+            entity.Property(sn => sn.IsDeleted).HasDefaultValue(false);
+            entity.HasQueryFilter(sn => !sn.IsDeleted);
 
             entity.HasOne(sn => sn.User)
                   .WithMany(u => u.StatusNotes)

@@ -94,13 +94,20 @@ public class GoalManager : IGoalService
         {
             var linkedNotes = await _statusNoteRepository.GetByGoalStatusIdsAsync(statusRecords.Select(gs => gs.Id));
             foreach (var note in linkedNotes)
-            {
                 note.GoalStatusId = null;
-                await _statusNoteRepository.UpdateAsync(note);
-            }
+
+            if (linkedNotes.Count > 0)
+                await _statusNoteRepository.UpdateRangeAsync(linkedNotes);
+
+            foreach (var gs in statusRecords)
+                gs.IsDeleted = true;
+
+            await _goalStatusRepository.UpdateRangeAsync(statusRecords);
         }
 
-        await _goalRepository.DeleteAsync(goal);
+        // Yumuşak silme — hiçbir kayıt veritabanından fiziksel olarak gitmiyor.
+        goal.IsDeleted = true;
+        await _goalRepository.UpdateAsync(goal);
 
         return ServiceResult<bool>.Ok(false, "Hedef silindi.");
     }

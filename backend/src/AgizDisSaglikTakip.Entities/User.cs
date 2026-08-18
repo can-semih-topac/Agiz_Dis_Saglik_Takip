@@ -13,6 +13,9 @@ public class User
     public bool MustChangePassword { get; set; }
     // "Tanıtımı Göster" ile giriş yapılan tek canlı demo hesabında true — her girişte verileri sıfırlanır.
     public bool IsDemo { get; set; }
+    // Yumuşak silme — hiçbir kayıt veritabanından fiziksel olarak silinmiyor, bu alan true olunca
+    // global query filter sayesinde uygulamanın geri kalanına görünmez olur.
+    public bool IsDeleted { get; set; }
     public string FullName { get; set; } = string.Empty;
     // Google ile oluşturulan hesaplarda kullanıcı henüz belirtmediği için boş olabilir.
     public DateOnly? BirthDate { get; set; }

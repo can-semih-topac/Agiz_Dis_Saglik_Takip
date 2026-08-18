@@ -131,12 +131,14 @@ public class GoalStatusManager : IGoalStatusService
         // bağlı notun bağlantısını koparıyoruz (GoalManager.DeleteGoalAsync'teki gibi), not silinmez.
         var linkedNotes = await _statusNoteRepository.GetByGoalStatusIdsAsync(new[] { id });
         foreach (var note in linkedNotes)
-        {
             note.GoalStatusId = null;
-            await _statusNoteRepository.UpdateAsync(note);
-        }
 
-        await _goalStatusRepository.DeleteAsync(goalStatus);
+        if (linkedNotes.Count > 0)
+            await _statusNoteRepository.UpdateRangeAsync(linkedNotes);
+
+        // Yumuşak silme — hiçbir kayıt veritabanından fiziksel olarak gitmiyor.
+        goalStatus.IsDeleted = true;
+        await _goalStatusRepository.UpdateAsync(goalStatus);
 
         return ServiceResult<bool>.Ok(true, "Durum kaydı silindi.");
     }

@@ -9,6 +9,8 @@ public class GoalStatus
     // Hedefin TrackingType'ı Sureli ise dolu, Yapildi ise null.
     public int? DurationMinutes { get; set; }
     public DateTime CreatedAt { get; set; }
+    // Yumuşak silme — bkz. User.IsDeleted.
+    public bool IsDeleted { get; set; }
 
     public Goal Goal { get; set; } = null!;
 }

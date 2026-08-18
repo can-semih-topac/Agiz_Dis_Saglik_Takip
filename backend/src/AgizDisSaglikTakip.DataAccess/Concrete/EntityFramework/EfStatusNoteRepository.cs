@@ -30,6 +30,14 @@ public class EfStatusNoteRepository : EfRepositoryBase<StatusNote>, IStatusNoteR
             .ToListAsync();
     }
 
+    public async Task<List<StatusNote>> GetAllByUserIdIncludingDeletedAsync(int userId)
+    {
+        return await Context.StatusNotes
+            .IgnoreQueryFilters()
+            .Where(sn => sn.UserId == userId)
+            .ToListAsync();
+    }
+
     public async Task<List<StatusNote>> GetByGoalStatusIdsAsync(IEnumerable<int> goalStatusIds)
     {
         return await Context.StatusNotes

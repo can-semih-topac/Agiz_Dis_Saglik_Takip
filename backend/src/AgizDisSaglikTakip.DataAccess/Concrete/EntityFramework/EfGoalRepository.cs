@@ -17,4 +17,12 @@ public class EfGoalRepository : EfRepositoryBase<Goal>, IGoalRepository
             .Where(g => g.UserId == userId)
             .ToListAsync();
     }
+
+    public async Task<List<Goal>> GetByUserIdIncludingDeletedAsync(int userId)
+    {
+        return await Context.Goals
+            .IgnoreQueryFilters()
+            .Where(g => g.UserId == userId)
+            .ToListAsync();
+    }
 }

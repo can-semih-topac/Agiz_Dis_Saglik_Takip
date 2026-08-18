@@ -14,6 +14,8 @@ public class Goal
     // Bu hedefe ait durum kayıtları süre girilerek mi yoksa sadece "yapıldı" işaretiyle mi tutulacak.
     public TrackingType TrackingType { get; set; }
     public DateTime CreatedAt { get; set; }
+    // Yumuşak silme — bkz. User.IsDeleted.
+    public bool IsDeleted { get; set; }
 
     public User User { get; set; } = null!;
     public ICollection<GoalStatus> GoalStatuses { get; set; } = new List<GoalStatus>();
