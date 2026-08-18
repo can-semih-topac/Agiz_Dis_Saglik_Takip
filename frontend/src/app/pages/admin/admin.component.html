@@ -23,17 +23,32 @@
   } @else if (messages.length === 0) {
     <p>Henüz mesaj yok.</p>
   } @else {
+    @if (reviewErrorMessage) {
+      <p class="error">{{ reviewErrorMessage }}</p>
+    }
     <ul class="message-list">
       @for (m of messages; track m.id) {
         <li class="message-card">
           <div class="message-card-header">
             <span class="message-card-name">{{ m.fullName }}</span>
+            <span class="status-badge" [class.is-reviewed]="m.status === ContactMessageStatus.Reviewed">
+              {{ m.status === ContactMessageStatus.Reviewed ? 'İncelendi' : 'İşlem Bekliyor' }}
+            </span>
             <span class="message-card-date">{{ formatDate(m.createdAt) }}</span>
           </div>
           <a class="message-card-email" href="mailto:{{ m.email }}">{{ m.email }}</a>
           <p class="message-card-text">{{ m.message }}</p>
           @if (m.imagePath) {
             <img [src]="apiOrigin + m.imagePath" alt="Ek görsel" />
+          }
+          @if (m.status === ContactMessageStatus.Pending) {
+            <button
+              type="button"
+              class="mark-reviewed-btn"
+              [disabled]="reviewingMessageId === m.id"
+              (click)="markAsReviewed(m)">
+              {{ reviewingMessageId === m.id ? 'İşaretleniyor...' : 'İncelendi Olarak İşaretle' }}
+            </button>
           }
         </li>
       }

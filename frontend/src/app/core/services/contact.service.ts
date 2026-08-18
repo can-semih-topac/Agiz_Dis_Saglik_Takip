@@ -25,4 +25,8 @@ export class ContactService {
   getAllMessages(): Observable<ServiceResult<ContactMessageDto[]>> {
     return this.http.get<ServiceResult<ContactMessageDto[]>>(this.baseUrl);
   }
+
+  markAsReviewed(id: number): Observable<ServiceResult> {
+    return this.http.put<ServiceResult>(`${this.baseUrl}/${id}/review`, {});
+  }
 }

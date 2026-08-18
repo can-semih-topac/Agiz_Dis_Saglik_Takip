@@ -68,6 +68,33 @@
   white-space: pre-wrap;
 }
 
+.status-badge {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.status-badge.is-reviewed {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.mark-reviewed-btn {
+  margin-top: 0.7rem;
+  background: var(--surface-alt);
+  color: var(--label);
+  font-size: 0.85rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.mark-reviewed-btn:hover:not(:disabled) {
+  background: var(--surface-alt-hover);
+}
+
 .message-card img {
   max-width: 240px;
   margin-top: 0.6rem;

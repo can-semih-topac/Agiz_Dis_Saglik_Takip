@@ -6,6 +6,7 @@ using AgizDisSaglikTakip.Core.Utilities.FileStorage;
 using AgizDisSaglikTakip.Core.Utilities.Results;
 using AgizDisSaglikTakip.DataAccess.Abstract;
 using AgizDisSaglikTakip.Entities;
+using AgizDisSaglikTakip.Entities.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace AgizDisSaglikTakip.Business.Concrete;
@@ -18,6 +19,8 @@ public class ContactManager : IContactService
     private readonly IContactFileStorageService _fileStorageService;
     private readonly IEmailService _emailService;
     private readonly EmailSettings _emailSettings;
+    private readonly IUserRepository _userRepository;
+    private readonly IAdminActionLogService _adminActionLogService;
     private readonly ILogger<ContactManager> _logger;
 
     public ContactManager(
@@ -25,12 +28,16 @@ public class ContactManager : IContactService
         IContactFileStorageService fileStorageService,
         IEmailService emailService,
         EmailSettings emailSettings,
+        IUserRepository userRepository,
+        IAdminActionLogService adminActionLogService,
         ILogger<ContactManager> logger)
     {
         _contactMessageRepository = contactMessageRepository;
         _fileStorageService = fileStorageService;
         _emailService = emailService;
         _emailSettings = emailSettings;
+        _userRepository = userRepository;
+        _adminActionLogService = adminActionLogService;
         _logger = logger;
     }
 
@@ -105,10 +112,29 @@ public class ContactManager : IContactService
                 Email = m.Email,
                 Message = m.Message,
                 ImagePath = m.ImagePath,
+                Status = m.Status,
                 CreatedAt = m.CreatedAt
             })
             .ToList();
 
         return ServiceResult<List<ContactMessageDto>>.Ok(dtos);
+    }
+
+    public async Task<ServiceResult> MarkAsReviewedAsync(int adminUserId, int messageId)
+    {
+        var message = await _contactMessageRepository.GetAsync(m => m.Id == messageId);
+        if (message == null)
+            return ServiceResult.Fail("Mesaj bulunamadı.");
+
+        if (message.Status == ContactMessageStatus.Reviewed)
+            return ServiceResult.Fail("Mesaj zaten incelendi olarak işaretlenmiş.");
+
+        message.Status = ContactMessageStatus.Reviewed;
+        await _contactMessageRepository.UpdateAsync(message);
+
+        var admin = await _userRepository.GetAsync(u => u.Id == adminUserId);
+        await _adminActionLogService.RecordAsync(admin?.Email ?? "?", "Bize Ulaşın Mesajı İncelendi", message.Email);
+
+        return ServiceResult.Ok("Mesaj incelendi olarak işaretlendi.");
     }
 }

@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ContactService } from '../../core/services/contact.service';
-import { ContactMessageDto } from '../../core/models/contact.models';
+import { ContactMessageDto, ContactMessageStatus } from '../../core/models/contact.models';
 import { LogService } from '../../core/services/log.service';
 import { LogDto } from '../../core/models/log.models';
 import { UserService } from '../../core/services/user.service';
@@ -32,12 +32,15 @@ export class AdminComponent implements OnInit {
   apiOrigin = environment.apiBaseUrl.replace('/api', '');
 
   readonly Role = Role;
+  readonly ContactMessageStatus = ContactMessageStatus;
 
   activeTab: AdminTab = 'messages';
 
   messages: ContactMessageDto[] = [];
   messagesLoading = true;
   messagesError = '';
+  reviewingMessageId: number | null = null;
+  reviewErrorMessage = '';
 
   logs: LogDto[] = [];
   logsLoading = true;
@@ -62,20 +65,7 @@ export class AdminComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.contactService.getAllMessages().subscribe({
-      next: (result) => {
-        this.messagesLoading = false;
-        if (result.success) {
-          this.messages = result.data;
-        } else {
-          this.messagesError = result.message ?? 'Mesajlar alınamadı.';
-        }
-      },
-      error: () => {
-        this.messagesLoading = false;
-        this.messagesError = 'Sunucuya ulaşılamadı.';
-      }
-    });
+    this.loadMessages();
 
     this.logService.getRecent().subscribe({
       next: (result) => {
@@ -94,6 +84,45 @@ export class AdminComponent implements OnInit {
 
     this.loadAdminActions();
     this.loadUsers();
+  }
+
+  loadMessages(): void {
+    this.messagesLoading = true;
+    this.contactService.getAllMessages().subscribe({
+      next: (result) => {
+        this.messagesLoading = false;
+        if (result.success) {
+          this.messages = result.data;
+        } else {
+          this.messagesError = result.message ?? 'Mesajlar alınamadı.';
+        }
+      },
+      error: () => {
+        this.messagesLoading = false;
+        this.messagesError = 'Sunucuya ulaşılamadı.';
+      }
+    });
+  }
+
+  markAsReviewed(message: ContactMessageDto): void {
+    this.reviewingMessageId = message.id;
+    this.reviewErrorMessage = '';
+
+    this.contactService.markAsReviewed(message.id).subscribe({
+      next: (result) => {
+        this.reviewingMessageId = null;
+        if (result.success) {
+          this.loadMessages();
+          this.loadAdminActions();
+        } else {
+          this.reviewErrorMessage = result.message ?? 'Mesaj güncellenemedi.';
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.reviewingMessageId = null;
+        this.reviewErrorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
   }
 
   loadAdminActions(): void {

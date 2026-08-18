@@ -1,3 +1,5 @@
+using AgizDisSaglikTakip.Entities.Enums;
+
 namespace AgizDisSaglikTakip.Business.DTOs.Contact;
 
 public class ContactMessageDto
@@ -7,5 +9,6 @@ public class ContactMessageDto
     public string Email { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
     public string? ImagePath { get; set; }
+    public ContactMessageStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
 }

@@ -1,3 +1,5 @@
+using AgizDisSaglikTakip.Entities.Enums;
+
 namespace AgizDisSaglikTakip.Entities;
 
 public class ContactMessage
@@ -7,5 +9,6 @@ public class ContactMessage
     public string Email { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
     public string? ImagePath { get; set; }
+    public ContactMessageStatus Status { get; set; } = ContactMessageStatus.Pending;
     public DateTime CreatedAt { get; set; }
 }

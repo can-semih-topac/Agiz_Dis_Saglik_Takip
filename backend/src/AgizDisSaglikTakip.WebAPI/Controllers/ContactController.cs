@@ -1,5 +1,6 @@
 using AgizDisSaglikTakip.Business.Abstract;
 using AgizDisSaglikTakip.Business.DTOs.Contact;
+using AgizDisSaglikTakip.WebAPI.Extensions;
 using AgizDisSaglikTakip.WebAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -52,6 +53,14 @@ public class ContactController : ControllerBase
     public async Task<IActionResult> GetAllMessages()
     {
         var result = await _contactService.GetAllMessagesAsync();
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpPut("{id}/review")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> MarkAsReviewed(int id)
+    {
+        var result = await _contactService.MarkAsReviewedAsync(this.GetUserId(), id);
         return result.Success ? Ok(result) : BadRequest(result);
     }
 }
