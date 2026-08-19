@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
@@ -17,7 +17,7 @@ import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-health',
-  imports: [ReactiveFormsModule, RouterLink, NavbarComponent, StatusDetailModalComponent],
+  imports: [ReactiveFormsModule, FormsModule, RouterLink, NavbarComponent, StatusDetailModalComponent],
   templateUrl: './health.component.html',
   styleUrl: './health.component.css'
 })
@@ -60,6 +60,12 @@ export class HealthComponent implements OnInit {
   // Tarayıcının çirkin confirm() penceresi yerine kendi modalımızı gösteriyoruz.
   pendingDeleteGoal: GoalDto | null = null;
   confirmMessage = '';
+
+  pendingPauseGoal: GoalDto | null = null;
+  pauseReasonInput = '';
+  pauseError = '';
+  pauseSubmitting = false;
+  resumingGoalId: number | null = null;
 
   periodUnits = [
     { value: PeriodUnit.Gun, label: 'Gün' },
@@ -239,6 +245,65 @@ export class HealthComponent implements OnInit {
 
   cancelDelete(): void {
     this.pendingDeleteGoal = null;
+  }
+
+  requestPauseGoal(goal: GoalDto): void {
+    this.pendingPauseGoal = goal;
+    this.pauseReasonInput = '';
+    this.pauseError = '';
+  }
+
+  cancelPauseGoal(): void {
+    this.pendingPauseGoal = null;
+  }
+
+  confirmPauseGoal(): void {
+    if (!this.pendingPauseGoal) return;
+
+    const reason = this.pauseReasonInput.trim();
+    if (!reason) {
+      this.pauseError = 'Duraklatma sebebi yazılmalı.';
+      return;
+    }
+
+    this.pauseSubmitting = true;
+    this.pauseError = '';
+
+    this.goalService.pauseGoal(this.pendingPauseGoal.id, { reason }).subscribe({
+      next: (result) => {
+        this.pauseSubmitting = false;
+        if (result.success) {
+          this.pendingPauseGoal = null;
+          this.loadGoals();
+        } else {
+          this.pauseError = result.message ?? 'Hedef duraklatılamadı.';
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.pauseSubmitting = false;
+        this.pauseError = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
+  }
+
+  resumeGoal(goal: GoalDto): void {
+    this.resumingGoalId = goal.id;
+    this.goalError = '';
+
+    this.goalService.resumeGoal(goal.id).subscribe({
+      next: (result) => {
+        this.resumingGoalId = null;
+        if (result.success) {
+          this.loadGoals();
+        } else {
+          this.goalError = result.message ?? 'Hedef tekrar aktif edilemedi.';
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.resumingGoalId = null;
+        this.goalError = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
   }
 
   onImageSelected(event: Event): void {

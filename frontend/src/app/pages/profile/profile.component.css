@@ -161,7 +161,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  /* Navbar sticky ve z-index:200 kullanıyor — daha düşük bir değer kutunun navbarın arkasında kalmasına yol açıyordu. */
+  z-index: 300;
 }
 
 .modal-box {

@@ -38,6 +38,7 @@ export class HomeComponent implements OnInit {
   readonly PeriodUnit = PeriodUnit;
   readonly TrackingType = TrackingType;
   readonly formatTurkishDateTime = formatTurkishDateTime;
+  readonly formatTurkishDate = formatTurkishDate;
 
   today = '';
 
@@ -53,6 +54,7 @@ export class HomeComponent implements OnInit {
   selectedCalendarDate: string | null = null;
   selectedStatus: GoalStatusDto | null = null;
   showWillpowerHistory = false;
+  resumingGoalId: number | null = null;
 
   // Hızlı ekleme (Bugün bölümü) — süreli hedeflerde tıklayınca küçük bir süre kutusu açılır.
   expandedQuickGoalId: number | null = null;
@@ -94,7 +96,7 @@ export class HomeComponent implements OnInit {
 
   get todoTodayList(): { goal: GoalDto; doneCount: number }[] {
     return this.goals
-      .filter(g => g.periodUnit === PeriodUnit.Gun)
+      .filter(g => g.periodUnit === PeriodUnit.Gun && !g.isPaused)
       .map(goal => ({
         goal,
         doneCount: this.todaysStatus.filter(s => s.goalId === goal.id).length
@@ -232,6 +234,28 @@ export class HomeComponent implements OnInit {
     this.loadStatusData();
     this.loadLongestStreaks();
     this.loadWillpowerScore();
+  }
+
+  // ---- Duraklatılan alışkanlıklar ----
+
+  get pausedGoals(): GoalDto[] {
+    return this.goals.filter(g => g.isPaused);
+  }
+
+  resumeGoal(goal: GoalDto): void {
+    this.resumingGoalId = goal.id;
+
+    this.goalService.resumeGoal(goal.id).subscribe({
+      next: (result) => {
+        this.resumingGoalId = null;
+        if (result.success) {
+          this.loadGoals();
+        }
+      },
+      error: () => {
+        this.resumingGoalId = null;
+      }
+    });
   }
 
   openWillpowerHistory(): void {

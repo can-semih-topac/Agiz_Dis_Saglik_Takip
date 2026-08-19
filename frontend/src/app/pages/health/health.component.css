@@ -85,6 +85,22 @@
   margin: 0 0.5rem;
 }
 
+.pause-badge {
+  display: inline-block;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  margin: 0 0.5rem;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
 .tab-inactive {
   background: var(--surface-alt);
   color: var(--label);
@@ -101,7 +117,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  /* Navbar sticky ve z-index:200 kullanıyor — daha düşük bir değer kutunun üst kısmının
+     navbarın arkasında kalmasına yol açıyordu. */
+  z-index: 300;
 }
 
 .modal-box {
@@ -116,6 +134,30 @@
 .modal-box h4 {
   margin-top: 0;
   color: var(--error-text);
+}
+
+/* Duraklatma yıkıcı bir işlem değil — silme onayındaki kırmızı başlığı burada kullanmıyoruz. */
+.pause-modal-box h4 {
+  color: var(--heading);
+}
+
+.pause-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0.75rem 0;
+}
+
+.pause-modal-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.pause-modal-actions button {
+  flex: 1;
+  margin-right: 0;
 }
 
 .modal-cancel {

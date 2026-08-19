@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Goal> Goals => Set<Goal>();
     public DbSet<GoalStatus> GoalStatuses => Set<GoalStatus>();
+    public DbSet<GoalPause> GoalPauses => Set<GoalPause>();
     public DbSet<StatusNote> StatusNotes => Set<StatusNote>();
     public DbSet<Suggestion> Suggestions => Set<Suggestion>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
@@ -56,6 +57,19 @@ public class AppDbContext : DbContext
             entity.HasOne(gs => gs.Goal)
                   .WithMany(g => g.GoalStatuses)
                   .HasForeignKey(gs => gs.GoalId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<GoalPause>(entity =>
+        {
+            entity.Property(gp => gp.Reason).HasMaxLength(300).IsRequired();
+            // Kendi IsDeleted alanı yok — bağlı olduğu hedef yumuşak silinince bu da görünmez olsun diye
+            // ebeveynin silinme durumu üzerinden filtreleniyor (Goal zaten filtreli olduğu için gerekli).
+            entity.HasQueryFilter(gp => !gp.Goal.IsDeleted);
+
+            entity.HasOne(gp => gp.Goal)
+                  .WithMany()
+                  .HasForeignKey(gp => gp.GoalId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 

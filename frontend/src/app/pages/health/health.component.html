@@ -100,6 +100,9 @@
   <div class="two-col">
     <section class="col-list">
       <h3>Hedeflerim</h3>
+      @if (goalError) {
+        <p class="error">{{ goalError }}</p>
+      }
       @if (goals.length === 0) {
         <p>Henüz hedef yok.</p>
       } @else {
@@ -108,6 +111,14 @@
             <li>
               <strong>{{ g.title }}</strong> — {{ g.description }}
               <span class="tracking-badge">{{ g.trackingType === TrackingType.Sureli ? 'Süreli' : 'Yapıldı' }}</span>
+              @if (g.isPaused) {
+                <span class="pause-badge" [title]="g.pauseReason">Duraklatıldı: {{ g.pauseReason }}</span>
+                <button (click)="resumeGoal(g)" [disabled]="resumingGoalId === g.id">
+                  {{ resumingGoalId === g.id ? 'Devam ediliyor...' : 'Devam Et' }}
+                </button>
+              } @else {
+                <button (click)="requestPauseGoal(g)">Duraklat</button>
+              }
               <button (click)="deleteGoal(g)">Sil</button>
             </li>
           }
@@ -159,6 +170,28 @@
         @if (goalSuccess) { <p class="success">{{ goalSuccess }}</p> }
       </form>
     </section>
+  </div>
+}
+
+@if (pendingPauseGoal) {
+  <div class="modal-backdrop">
+    <div class="modal-box pause-modal-box">
+      <h4>Hedefi Duraklat</h4>
+      <p>"{{ pendingPauseGoal.title }}" hedefi duraklatılsın mı? Duraklatıldığı süre boyunca serin bozulmaz ve bugünkü listede görünmez.</p>
+      <div class="pause-form-field">
+        <label for="pauseReason">Sebep (zorunlu)</label>
+        <textarea id="pauseReason" [(ngModel)]="pauseReasonInput" required placeholder="Örn. tatildeyim, hastayım..."></textarea>
+      </div>
+      @if (pauseError) {
+        <p class="error">{{ pauseError }}</p>
+      }
+      <div class="pause-modal-actions">
+        <button (click)="confirmPauseGoal()" [disabled]="pauseSubmitting || !pauseReasonInput.trim()">
+          {{ pauseSubmitting ? 'Duraklatılıyor...' : 'Duraklat' }}
+        </button>
+        <button class="modal-cancel" (click)="cancelPauseGoal()">Vazgeç</button>
+      </div>
+    </div>
   </div>
 }
 

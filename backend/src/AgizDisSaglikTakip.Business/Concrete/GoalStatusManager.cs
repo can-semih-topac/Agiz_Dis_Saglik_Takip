@@ -1,5 +1,6 @@
 using AgizDisSaglikTakip.Business.Abstract;
 using AgizDisSaglikTakip.Business.DTOs.GoalStatus;
+using AgizDisSaglikTakip.Business.Utilities;
 using AgizDisSaglikTakip.Core.Utilities.Results;
 using AgizDisSaglikTakip.DataAccess.Abstract;
 using AgizDisSaglikTakip.Entities;
@@ -11,15 +12,18 @@ public class GoalStatusManager : IGoalStatusService
 {
     private readonly IGoalStatusRepository _goalStatusRepository;
     private readonly IGoalRepository _goalRepository;
+    private readonly IGoalPauseRepository _goalPauseRepository;
     private readonly IStatusNoteRepository _statusNoteRepository;
 
     public GoalStatusManager(
         IGoalStatusRepository goalStatusRepository,
         IGoalRepository goalRepository,
+        IGoalPauseRepository goalPauseRepository,
         IStatusNoteRepository statusNoteRepository)
     {
         _goalStatusRepository = goalStatusRepository;
         _goalRepository = goalRepository;
+        _goalPauseRepository = goalPauseRepository;
         _statusNoteRepository = statusNoteRepository;
     }
 
@@ -64,9 +68,10 @@ public class GoalStatusManager : IGoalStatusService
     public async Task<ServiceResult<List<GoalStatusDto>>> GetLast7DaysAsync(int userId)
     {
         var allRecords = await _goalStatusRepository.GetAllByUserIdAsync(userId);
+        var pausedDatesByGoal = await BuildPausedDatesByGoalAsync(userId);
         var sevenDaysAgo = DateOnly.FromDateTime(DateTime.Today.AddDays(-7));
 
-        var dtos = MapToDtosWithStreak(allRecords, allRecords.Where(gs => gs.ActivityDate >= sevenDaysAgo));
+        var dtos = MapToDtosWithStreak(allRecords, allRecords.Where(gs => gs.ActivityDate >= sevenDaysAgo), pausedDatesByGoal);
 
         return ServiceResult<List<GoalStatusDto>>.Ok(dtos);
     }
@@ -75,16 +80,20 @@ public class GoalStatusManager : IGoalStatusService
     public async Task<ServiceResult<List<GoalStatusDto>>> GetAllAsync(int userId)
     {
         var allRecords = await _goalStatusRepository.GetAllByUserIdAsync(userId);
-        var dtos = MapToDtosWithStreak(allRecords, allRecords);
+        var pausedDatesByGoal = await BuildPausedDatesByGoalAsync(userId);
+        var dtos = MapToDtosWithStreak(allRecords, allRecords, pausedDatesByGoal);
 
         return ServiceResult<List<GoalStatusDto>>.Ok(dtos);
     }
 
     // Seri hesaplaması her zaman TÜM geçmişe bakmalı (aksi halde bir aylık pencerenin başındaki
     // kayıtların serisi yanlış görünür); dönen liste ise sadece "toShow" içindekilerle sınırlanır.
-    private static List<GoalStatusDto> MapToDtosWithStreak(List<GoalStatus> allRecords, IEnumerable<GoalStatus> toShow)
+    private static List<GoalStatusDto> MapToDtosWithStreak(
+        List<GoalStatus> allRecords, IEnumerable<GoalStatus> toShow, Dictionary<int, HashSet<DateOnly>> pausedDatesByGoal)
     {
-        var datesByGoal = BuildDistinctDatesByGoal(allRecords);
+        var datesByGoal = allRecords
+            .GroupBy(gs => gs.GoalId)
+            .ToDictionary(g => g.Key, g => new HashSet<DateOnly>(g.Select(gs => gs.ActivityDate)));
 
         return toShow
             .OrderByDescending(gs => gs.ActivityDate)
@@ -98,7 +107,8 @@ public class GoalStatusManager : IGoalStatusService
                 ActivityDate = gs.ActivityDate,
                 ActivityTime = gs.ActivityTime,
                 DurationMinutes = gs.DurationMinutes,
-                StreakCount = ComputeStreakAt(datesByGoal[gs.GoalId], gs.ActivityDate)
+                StreakCount = StreakCalculator.ComputeStreakAt(
+                    datesByGoal[gs.GoalId], gs.ActivityDate, pausedDatesByGoal.GetValueOrDefault(gs.GoalId))
             })
             .ToList();
     }
@@ -106,6 +116,7 @@ public class GoalStatusManager : IGoalStatusService
     public async Task<ServiceResult<List<LongestStreakDto>>> GetLongestStreaksAsync(int userId)
     {
         var allRecords = await _goalStatusRepository.GetAllByUserIdAsync(userId);
+        var pausedDatesByGoal = await BuildPausedDatesByGoalAsync(userId);
 
         var result = allRecords
             .GroupBy(gs => gs.GoalId)
@@ -113,12 +124,19 @@ public class GoalStatusManager : IGoalStatusService
             {
                 GoalId = group.Key,
                 GoalTitle = group.First().Goal.Title,
-                LongestStreak = ComputeLongestStreak(DistinctSortedDates(group))
+                LongestStreak = StreakCalculator.ComputeLongestStreak(
+                    DistinctSortedDates(group), pausedDatesByGoal.GetValueOrDefault(group.Key))
             })
             .OrderByDescending(x => x.LongestStreak)
             .ToList();
 
         return ServiceResult<List<LongestStreakDto>>.Ok(result);
+    }
+
+    private async Task<Dictionary<int, HashSet<DateOnly>>> BuildPausedDatesByGoalAsync(int userId)
+    {
+        var pauses = await _goalPauseRepository.GetAllByUserIdAsync(userId);
+        return StreakCalculator.BuildPausedDatesByGoal(pauses, DateOnly.FromDateTime(DateTime.Today));
     }
 
     public async Task<ServiceResult> UpdateGoalStatusAsync(int userId, int id, UpdateGoalStatusDto dto)
@@ -177,55 +195,6 @@ public class GoalStatusManager : IGoalStatusService
         return ServiceResult<bool>.Ok(true, "Durum kaydı silindi.");
     }
 
-    private static Dictionary<int, List<DateOnly>> BuildDistinctDatesByGoal(List<GoalStatus> allRecords)
-    {
-        return allRecords
-            .GroupBy(gs => gs.GoalId)
-            .ToDictionary(g => g.Key, g => DistinctSortedDates(g));
-    }
-
     private static List<DateOnly> DistinctSortedDates(IEnumerable<GoalStatus> records) =>
         records.Select(gs => gs.ActivityDate).Distinct().OrderBy(d => d).ToList();
-
-    // Verilen tarihten geriye doğru, boşluksuz kaç gün kayıt var (o tarih dahil).
-    private static int ComputeStreakAt(List<DateOnly> distinctSortedDates, DateOnly target)
-    {
-        var dateSet = new HashSet<DateOnly>(distinctSortedDates);
-        var current = target;
-        var streak = 0;
-
-        while (dateSet.Contains(current))
-        {
-            streak++;
-            current = current.AddDays(-1);
-        }
-
-        return streak;
-    }
-
-    // Sıralı, tekrarsız tarih listesindeki en uzun ardışık (gün bazlı) diziyi bulur.
-    private static int ComputeLongestStreak(List<DateOnly> distinctSortedDates)
-    {
-        if (distinctSortedDates.Count == 0)
-            return 0;
-
-        var longest = 1;
-        var current = 1;
-
-        for (var i = 1; i < distinctSortedDates.Count; i++)
-        {
-            if (distinctSortedDates[i] == distinctSortedDates[i - 1].AddDays(1))
-            {
-                current++;
-            }
-            else
-            {
-                current = 1;
-            }
-
-            longest = Math.Max(longest, current);
-        }
-
-        return longest;
-    }
 }

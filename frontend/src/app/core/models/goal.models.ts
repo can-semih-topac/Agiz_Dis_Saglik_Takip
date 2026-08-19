@@ -27,6 +27,9 @@ export interface GoalDto {
   importance: Importance;
   trackingType: TrackingType;
   createdAt: string;
+  isPaused: boolean;
+  pauseReason: string | null;
+  pausedSince: string | null;
 }
 
 export interface CreateGoalDto {
@@ -36,4 +39,8 @@ export interface CreateGoalDto {
   periodFrequency: number;
   importance: Importance;
   trackingType: TrackingType;
+}
+
+export interface StartGoalPauseDto {
+  reason: string;
 }

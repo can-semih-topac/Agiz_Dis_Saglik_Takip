@@ -109,13 +109,33 @@
                 <span class="status-card-icon" title="Görsel var">🖼️</span>
               }
             </div>
-            <div class="status-card-date">{{ item.activityTime.slice(0, 5) }}</div>
+            <span class="status-card-date">{{ item.activityTime.slice(0, 5) }}</span>
           </li>
         }
       </ul>
     }
   </section>
 </div>
+
+@if (pausedGoals.length > 0) {
+  <h3>Duraklatılan Alışkanlıklar</h3>
+  <ul class="paused-goal-list">
+    @for (g of pausedGoals; track g.id) {
+      <li class="paused-goal-item">
+        <div class="paused-goal-main">
+          <span class="paused-goal-title">{{ g.title }}</span>
+          <span class="paused-goal-reason">{{ g.pauseReason }}</span>
+          @if (g.pausedSince) {
+            <span class="paused-goal-date">{{ formatTurkishDate(g.pausedSince) }}</span>
+          }
+        </div>
+        <button type="button" (click)="resumeGoal(g)" [disabled]="resumingGoalId === g.id">
+          {{ resumingGoalId === g.id ? 'Devam ediliyor...' : 'Devam Et' }}
+        </button>
+      </li>
+    }
+  </ul>
+}
 
 <h3>Takvim</h3>
 <div class="calendar-grid-layout">
@@ -144,7 +164,7 @@
                   <span class="status-card-icon" title="Görsel var">🖼️</span>
                 }
               </div>
-              <div class="status-card-date">{{ item.activityTime.slice(0, 5) }}</div>
+              <span class="status-card-date">{{ item.activityTime.slice(0, 5) }}</span>
             </li>
           }
         </ul>

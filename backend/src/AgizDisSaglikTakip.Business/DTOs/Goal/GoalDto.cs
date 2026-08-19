@@ -12,4 +12,8 @@ public class GoalDto
     public Importance Importance { get; set; }
     public TrackingType TrackingType { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    public bool IsPaused { get; set; }
+    public string? PauseReason { get; set; }
+    public DateOnly? PausedSince { get; set; }
 }

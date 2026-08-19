@@ -1,5 +1,6 @@
 using AgizDisSaglikTakip.Business.Abstract;
 using AgizDisSaglikTakip.Business.DTOs.Willpower;
+using AgizDisSaglikTakip.Business.Utilities;
 using AgizDisSaglikTakip.Core.Utilities.Results;
 using AgizDisSaglikTakip.DataAccess.Abstract;
 using AgizDisSaglikTakip.Entities;
@@ -12,6 +13,7 @@ namespace AgizDisSaglikTakip.Business.Concrete;
 // 1) Her hedefin "ham puana" katkısı = önem ağırlığı (Düşük=1, Orta=2, Yüksek=3) x güncel seri uzunluğu.
 
 // 2) Günlük hedeflerde o gün eksik kalan her tekrar, önem derecesiyle orantılı puan KIRAR
+//    (hedef o gün duraklatılmışsa bu ceza hiç uygulanmaz).
 
 // 3) Toplam ham puan, aşağıdaki Tiers tablosundaki kademelere göre 0-100'e eşleniyor — (kademe ilerledikçe zorlaşıyor),
 
@@ -34,20 +36,23 @@ public class WillpowerManager : IWillpowerService
 
     private readonly IGoalRepository _goalRepository;
     private readonly IGoalStatusRepository _goalStatusRepository;
+    private readonly IGoalPauseRepository _goalPauseRepository;
 
-    public WillpowerManager(IGoalRepository goalRepository, IGoalStatusRepository goalStatusRepository)
+    public WillpowerManager(IGoalRepository goalRepository, IGoalStatusRepository goalStatusRepository, IGoalPauseRepository goalPauseRepository)
     {
         _goalRepository = goalRepository;
         _goalStatusRepository = goalStatusRepository;
+        _goalPauseRepository = goalPauseRepository;
     }
 
     public async Task<ServiceResult<WillpowerScoreDto>> GetScoreAsync(int userId)
     {
         var goals = await _goalRepository.GetByUserIdAsync(userId);
         var allStatus = await _goalStatusRepository.GetAllByUserIdAsync(userId);
+        var pausedDatesByGoal = await BuildPausedDatesByGoalAsync(userId);
         var today = DateOnly.FromDateTime(DateTime.Today);
 
-        var (score, label, rawPoints) = ComputeScoreAsOf(goals, allStatus, today);
+        var (score, label, rawPoints) = ComputeScoreAsOf(goals, allStatus, pausedDatesByGoal, today);
 
         return ServiceResult<WillpowerScoreDto>.Ok(new WillpowerScoreDto
         {
@@ -67,6 +72,7 @@ public class WillpowerManager : IWillpowerService
     {
         var goals = await _goalRepository.GetByUserIdAsync(userId);
         var allStatus = await _goalStatusRepository.GetAllByUserIdAsync(userId);
+        var pausedDatesByGoal = await BuildPausedDatesByGoalAsync(userId);
         var today = DateOnly.FromDateTime(DateTime.Today);
 
         var (count, stepBack) = granularity switch
@@ -85,46 +91,59 @@ public class WillpowerManager : IWillpowerService
             // O tarihte henüz oluşturulmamış hedefler o tarihin skoruna dahil edilmemeli.
             var goalsAtDate = goals.Where(g => DateOnly.FromDateTime(g.CreatedAt) <= pointDate).ToList();
 
-            var (score, _, _) = ComputeScoreAsOf(goalsAtDate, allStatus, pointDate);
+            var (score, _, _) = ComputeScoreAsOf(goalsAtDate, allStatus, pausedDatesByGoal, pointDate);
             points.Add(new WillpowerHistoryPointDto { Date = pointDate, Score = score });
         }
 
         return ServiceResult<List<WillpowerHistoryPointDto>>.Ok(points);
     }
 
+    private async Task<Dictionary<int, HashSet<DateOnly>>> BuildPausedDatesByGoalAsync(int userId)
+    {
+        var pauses = await _goalPauseRepository.GetAllByUserIdAsync(userId);
+        return StreakCalculator.BuildPausedDatesByGoal(pauses, DateOnly.FromDateTime(DateTime.Today));
+    }
+
     // Verilen tarihe kadarki (o tarih dahil) kayıtlara bakarak o tarih itibarıyla skoru hesaplar.
     private static (int Score, string Label, double RawPoints) ComputeScoreAsOf(
-        List<Goal> goals, List<GoalStatus> allStatus, DateOnly referenceDate)
+        List<Goal> goals, List<GoalStatus> allStatus, Dictionary<int, HashSet<DateOnly>> pausedDatesByGoal, DateOnly referenceDate)
     {
         var previousDate = referenceDate.AddDays(-1);
         double rawPoints = 0;
 
         foreach (var goal in goals)
         {
+            var pausedDates = pausedDatesByGoal.GetValueOrDefault(goal.Id);
+            var isPausedOnReferenceDate = pausedDates != null && pausedDates.Contains(referenceDate);
+
             var goalStatuses = allStatus
                 .Where(gs => gs.GoalId == goal.Id && gs.ActivityDate <= referenceDate)
                 .ToList();
             var weight = (int)goal.Importance + 1; // Dusuk=0->1, Orta=1->2, Yuksek=2->3
 
-            if (goalStatuses.Count > 0)
+            if (goalStatuses.Count > 0 || isPausedOnReferenceDate)
             {
                 var dateSet = new HashSet<DateOnly>(goalStatuses.Select(gs => gs.ActivityDate));
 
                 // O gün henüz bitmediği için o günde kayıt yoksa bir önceki günün serisiyle devam
-                // ediyoruz (1 günlük tolerans); o da yoksa seri kopmuş sayılır ve katkı sıfırlanır.
+                // ediyoruz (1 günlük tolerans); duraklatılmışsa "donmuş" seriyi geriye doğru bulmak
+                // için referans günü yine bugün kabul ediliyor (StreakCalculator duraklatılan
+                // günleri atlayarak son gerçek kayda kadar geri yürüyor).
                 DateOnly? reference = dateSet.Contains(referenceDate) ? referenceDate
                     : dateSet.Contains(previousDate) ? previousDate
+                    : isPausedOnReferenceDate ? referenceDate
                     : null;
 
                 if (reference != null)
                 {
-                    var streak = ComputeStreakAt(dateSet, reference.Value);
+                    var streak = StreakCalculator.ComputeStreakAt(dateSet, reference.Value, pausedDates);
                     rawPoints += weight * streak;
                 }
             }
 
             // Sadece günlük hedeflerde "o gün" anlamlı — haftalık/aylık hedefler her gün cezalandırılmaz.
-            if (goal.PeriodUnit == PeriodUnit.Gun)
+            // Hedef o gün duraklatılmışsa da ceza uygulanmaz — beklenti zaten yok.
+            if (goal.PeriodUnit == PeriodUnit.Gun && !isPausedOnReferenceDate)
             {
                 var doneOnDate = goalStatuses.Count(gs => gs.ActivityDate == referenceDate);
                 var missing = Math.Max(0, goal.PeriodFrequency - doneOnDate);
@@ -153,19 +172,5 @@ public class WillpowerManager : IWillpowerService
         // Ham puan en üst kademeyi de aştıysa skor 100'de kilitlenir.
         var last = Tiers[^1];
         return (100, last.Label);
-    }
-
-    private static int ComputeStreakAt(HashSet<DateOnly> dateSet, DateOnly target)
-    {
-        var current = target;
-        var streak = 0;
-
-        while (dateSet.Contains(current))
-        {
-            streak++;
-            current = current.AddDays(-1);
-        }
-
-        return streak;
     }
 }
