@@ -23,8 +23,8 @@
           }
         </div>
         <div class="profile-edit-actions">
-          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
           <button type="button" class="btn-secondary" (click)="cancelEdit('fullName')">Vazgeç</button>
+          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
         </div>
       </form>
     }
@@ -35,7 +35,7 @@
     @if (editingField !== 'birthDate') {
       <div class="profile-row-view">
         <span class="profile-label">Doğum Tarihi</span>
-        <span class="profile-value">{{ originalProfile.birthDate || 'Belirtilmemiş' }}</span>
+        <span class="profile-value">{{ formatBirthDate(originalProfile.birthDate) }}</span>
         <button type="button" class="edit-icon-btn" (click)="startEdit('birthDate')" aria-label="Doğum tarihini düzenle">✎</button>
       </div>
     } @else {
@@ -48,8 +48,8 @@
           }
         </div>
         <div class="profile-edit-actions">
-          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
           <button type="button" class="btn-secondary" (click)="cancelEdit('birthDate')">Vazgeç</button>
+          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
         </div>
       </form>
     }
@@ -76,8 +76,8 @@
           }
         </div>
         <div class="profile-edit-actions">
-          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
           <button type="button" class="btn-secondary" (click)="cancelEdit('phoneNumber')">Vazgeç</button>
+          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
         </div>
       </form>
     }
@@ -101,8 +101,8 @@
           }
         </div>
         <div class="profile-edit-actions">
-          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
           <button type="button" class="btn-secondary" (click)="cancelEdit('email')">Vazgeç</button>
+          <button type="submit" [disabled]="fieldSubmitting">Kaydet</button>
         </div>
       </form>
     }
@@ -238,10 +238,10 @@
       @if (deleteErrorMessage) {
         <p class="error">{{ deleteErrorMessage }}</p>
       }
+      <button type="button" class="modal-cancel" (click)="cancelDeleteAccount()">Vazgeç</button>
       <button type="button" class="delete-confirm-btn" [disabled]="deleteSubmitting" (click)="confirmDeleteAccount()">
         {{ deleteSubmitting ? 'Siliniyor...' : 'Evet, Hesabımı Sil' }}
       </button>
-      <button type="button" class="modal-cancel" (click)="cancelDeleteAccount()">Vazgeç</button>
     </div>
   </div>
 }

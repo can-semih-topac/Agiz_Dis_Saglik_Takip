@@ -186,10 +186,10 @@
         <p class="error">{{ pauseError }}</p>
       }
       <div class="pause-modal-actions">
+        <button class="modal-cancel" (click)="cancelPauseGoal()">Vazgeç</button>
         <button (click)="confirmPauseGoal()" [disabled]="pauseSubmitting || !pauseReasonInput.trim()">
           {{ pauseSubmitting ? 'Duraklatılıyor...' : 'Duraklat' }}
         </button>
-        <button class="modal-cancel" (click)="cancelPauseGoal()">Vazgeç</button>
       </div>
     </div>
   </div>
@@ -200,8 +200,8 @@
     <div class="modal-box">
       <h4>Silme Onayı</h4>
       <p>{{ confirmMessage }}</p>
-      <button (click)="confirmDelete()">Tamam</button>
       <button class="modal-cancel" (click)="cancelDelete()">İptal</button>
+      <button (click)="confirmDelete()">Tamam</button>
     </div>
   </div>
 }

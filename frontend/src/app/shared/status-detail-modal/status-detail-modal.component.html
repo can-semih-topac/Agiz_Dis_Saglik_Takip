@@ -79,8 +79,8 @@
         }
 
         <div class="detail-edit-actions">
-          <button type="submit" [disabled]="isSaving">{{ isSaving ? 'Kaydediliyor...' : 'Kaydet' }}</button>
           <button type="button" class="detail-cancel-btn" (click)="cancelEdit()">Vazgeç</button>
+          <button type="submit" [disabled]="isSaving">{{ isSaving ? 'Kaydediliyor...' : 'Kaydet' }}</button>
         </div>
       </form>
     }

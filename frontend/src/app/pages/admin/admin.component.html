@@ -205,10 +205,10 @@
       @if (deleteErrorMessage) {
         <p class="error">{{ deleteErrorMessage }}</p>
       }
+      <button type="button" class="modal-cancel" (click)="cancelDeleteUser()">Vazgeç</button>
       <button type="button" class="delete-confirm-btn" [disabled]="deleteSubmitting" (click)="confirmDeleteUser()">
         {{ deleteSubmitting ? 'Siliniyor...' : 'Evet, Sil' }}
       </button>
-      <button type="button" class="modal-cancel" (click)="cancelDeleteUser()">Vazgeç</button>
     </div>
   </div>
 }

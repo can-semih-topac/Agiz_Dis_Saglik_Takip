@@ -7,6 +7,7 @@ import { UserService } from '../../core/services/user.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ChangePasswordDto, UpdateProfileDto } from '../../core/models/user.models';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
+import { formatTurkishDate } from '../../shared/turkish-date';
 
 type ProfileField = 'fullName' | 'birthDate' | 'phoneNumber' | 'email';
 
@@ -97,6 +98,12 @@ export class ProfileComponent implements OnInit {
       control.clearValidators();
     }
     control.updateValueAndValidity();
+  }
+
+  // Görünüm modunda "2000-04-01" yerine "1 Nisan 2000" — <input type="date"> için gereken
+  // ISO formatı (originalProfile.birthDate) olduğu gibi kalıyor, sadece ekrana yazarken çeviriyoruz.
+  formatBirthDate(birthDate: string | null): string {
+    return birthDate ? formatTurkishDate(birthDate) : 'Belirtilmemiş';
   }
 
   startEdit(field: ProfileField): void {
