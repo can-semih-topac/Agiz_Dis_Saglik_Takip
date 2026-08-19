@@ -12,11 +12,19 @@ public class StatusNoteManager : IStatusNoteService
     private static readonly string[] AllowedImageExtensions = { ".jpg", ".jpeg", ".png" };
 
     private readonly IStatusNoteRepository _statusNoteRepository;
+    private readonly IGoalStatusRepository _goalStatusRepository;
+    private readonly IGoalRepository _goalRepository;
     private readonly IFileStorageService _fileStorageService;
 
-    public StatusNoteManager(IStatusNoteRepository statusNoteRepository, IFileStorageService fileStorageService)
+    public StatusNoteManager(
+        IStatusNoteRepository statusNoteRepository,
+        IGoalStatusRepository goalStatusRepository,
+        IGoalRepository goalRepository,
+        IFileStorageService fileStorageService)
     {
         _statusNoteRepository = statusNoteRepository;
+        _goalStatusRepository = goalStatusRepository;
+        _goalRepository = goalRepository;
         _fileStorageService = fileStorageService;
     }
 
@@ -41,6 +49,7 @@ public class StatusNoteManager : IStatusNoteService
             UserId = userId,
             Description = dto.Description,
             ImagePath = imagePath,
+            GoalStatusId = await ResolveOwnedGoalStatusIdAsync(userId, dto.GoalStatusId),
             CreatedAt = DateTime.Now
         };
 
@@ -49,18 +58,67 @@ public class StatusNoteManager : IStatusNoteService
         return ServiceResult.Ok("Not kaydedildi.");
     }
 
+    public async Task<ServiceResult> UpdateStatusNoteAsync(int userId, int id, UpdateStatusNoteDto dto)
+    {
+        var note = await _statusNoteRepository.GetAsync(sn => sn.Id == id && sn.UserId == userId);
+        if (note == null)
+            return ServiceResult.Fail("Not bulunamadı.");
+
+        if (string.IsNullOrWhiteSpace(dto.Description))
+            return ServiceResult.Fail("Açıklama boş olamaz.");
+
+        if (dto.ImageStream != null && dto.ImageExtension != null)
+        {
+            var extension = dto.ImageExtension.ToLowerInvariant();
+            if (!AllowedImageExtensions.Contains(extension))
+                return ServiceResult.Fail("Sadece .jpg, .jpeg, .png uzantılı görseller yüklenebilir.");
+
+            // Eski dosya diskte kalır (projede zaten hiçbir yüklenen dosya silinmiyor), sadece yeni yol kaydedilir.
+            note.ImagePath = await _fileStorageService.SaveFileAsync(dto.ImageStream, extension);
+        }
+        else if (dto.RemoveImage)
+        {
+            note.ImagePath = null;
+        }
+
+        note.Description = dto.Description;
+        await _statusNoteRepository.UpdateAsync(note);
+
+        return ServiceResult.Ok("Not güncellendi.");
+    }
+
     public async Task<ServiceResult<List<StatusNoteDto>>> GetLast7DaysAsync(int userId)
     {
         var records = await _statusNoteRepository.GetLast7DaysByUserIdAsync(userId);
+        return ServiceResult<List<StatusNoteDto>>.Ok(records.Select(MapToDto).ToList());
+    }
 
-        var dtos = records.Select(sn => new StatusNoteDto
-        {
-            Id = sn.Id,
-            Description = sn.Description,
-            ImagePath = sn.ImagePath,
-            CreatedAt = sn.CreatedAt
-        }).ToList();
+    public async Task<ServiceResult<List<StatusNoteDto>>> GetAllAsync(int userId)
+    {
+        var records = await _statusNoteRepository.GetAllByUserIdAsync(userId);
+        return ServiceResult<List<StatusNoteDto>>.Ok(records.Select(MapToDto).ToList());
+    }
 
-        return ServiceResult<List<StatusNoteDto>>.Ok(dtos);
+    private static StatusNoteDto MapToDto(StatusNote sn) => new()
+    {
+        Id = sn.Id,
+        Description = sn.Description,
+        ImagePath = sn.ImagePath,
+        GoalStatusId = sn.GoalStatusId,
+        CreatedAt = sn.CreatedAt
+    };
+
+    // Notu bir durum kaydına bağlamadan önce, o kaydın gerçekten bu kullanıcıya ait olduğunu doğrular.
+    private async Task<int?> ResolveOwnedGoalStatusIdAsync(int userId, int? goalStatusId)
+    {
+        if (goalStatusId == null)
+            return null;
+
+        var goalStatus = await _goalStatusRepository.GetAsync(gs => gs.Id == goalStatusId.Value);
+        if (goalStatus == null)
+            return null;
+
+        var goal = await _goalRepository.GetAsync(g => g.Id == goalStatus.GoalId && g.UserId == userId);
+        return goal != null ? goalStatus.Id : null;
     }
 }

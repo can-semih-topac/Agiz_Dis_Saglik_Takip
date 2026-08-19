@@ -1,6 +1,7 @@
 using AgizDisSaglikTakip.Core.Utilities.Email;
 using AgizDisSaglikTakip.Core.Utilities.FileStorage;
 using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
+using AgizDisSaglikTakip.Core.Utilities.Security.Google;
 using AgizDisSaglikTakip.Core.Utilities.Security.Jwt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,13 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(emailSettings);
         services.AddScoped<IEmailService, SmtpEmailService>();
 
+        var googleSettings = new GoogleSettings
+        {
+            ClientId = configuration["Google:ClientId"]!
+        };
+        services.AddSingleton(googleSettings);
+        services.AddSingleton<IGoogleAuthValidator, GoogleAuthValidator>();
+
         var fileStorageSettings = new FileStorageSettings
         {
             UploadFolderPath = Path.Combine(webRootPath, "uploads", "status-notes"),
@@ -42,6 +50,16 @@ public static class ServiceCollectionExtensions
         };
         services.AddSingleton(fileStorageSettings);
         services.AddSingleton<IFileStorageService, LocalFileStorageService>();
+
+        // Ayrı klasör (uploads/contact-messages) — status-note görselleriyle karışmasın diye
+        // kendi FileStorageSettings'iyle doğrudan new'lenip kaydediliyor (DI'ın tek FileStorageSettings
+        // singleton'ını ikinciyle çakıştırmamak için).
+        var contactFileStorageSettings = new FileStorageSettings
+        {
+            UploadFolderPath = Path.Combine(webRootPath, "uploads", "contact-messages"),
+            UploadUrlPath = "/uploads/contact-messages"
+        };
+        services.AddSingleton<IContactFileStorageService>(new ContactFileStorageService(contactFileStorageSettings));
 
         return services;
     }

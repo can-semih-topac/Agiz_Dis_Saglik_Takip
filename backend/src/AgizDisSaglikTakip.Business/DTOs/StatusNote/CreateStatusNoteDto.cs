@@ -7,4 +7,7 @@ public class CreateStatusNoteDto
     // İkisi de doluysa görsel kaydedilir, ikisi de null ise sadece metin notu oluşturulur.
     public Stream? ImageStream { get; set; }
     public string? ImageExtension { get; set; }
+
+    // Durum kaydı formuyla birlikte gönderildiyse, notu o kayda bağlamak için.
+    public int? GoalStatusId { get; set; }
 }

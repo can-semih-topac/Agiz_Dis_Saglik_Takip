@@ -2,8 +2,26 @@
   <span class="navbar-greeting">{{ displayTitle }}</span>
 
   <nav class="navbar-actions">
-    <a routerLink="/health">Ağız ve Diş Sağlığı</a>
+    <a routerLink="/health" class="navbar-btn">
+      <span class="navbar-btn-icon">🦷</span> Alışkanlık Yönetimi
+    </a>
+    <button type="button" class="navbar-btn" (click)="showContactModal = true">
+      <span class="navbar-btn-icon">✉</span> Bize Ulaşın
+    </button>
+    @if (isAdmin) {
+      <a routerLink="/admin" class="navbar-btn">
+        <span class="navbar-btn-icon">🛡️</span> Admin Paneli
+      </a>
+    }
     <a routerLink="/profile" class="navbar-avatar" title="Profil">👤</a>
+    <a routerLink="/settings" class="navbar-avatar" title="Ayarlar">⚙️</a>
     <button (click)="logout()">Çıkış Yap</button>
   </nav>
 </header>
+
+@if (showContactModal) {
+  <app-contact-modal
+    [prefillFullName]="fullName"
+    [prefillEmail]="email"
+    (closed)="showContactModal = false"></app-contact-modal>
+}

@@ -1,0 +1,53 @@
+.auth-navbar {
+  /* Ebeveyn (.auth-page) ortalanmış/dar olsa da bu şerit tüm viewport genişliğine yayılsın diye. */
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  /* Giriş Yap butonuyla aynı koyu yeşil, ama yarı saydam — arkadaki desen hafifçe görünsün. */
+  background: rgba(15, 118, 110, 0.82);
+  color: #fff;
+  padding: 0.85rem 2rem;
+  box-shadow: 0 2px 8px var(--shadow-soft);
+}
+
+.auth-navbar-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.auth-navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Oturum içi navbar'daki ikincil eylem butonlarıyla aynı görünüm. */
+.navbar-btn {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  color: #fff;
+  margin: 0;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.navbar-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.navbar-btn-icon {
+  margin-right: 0.35rem;
+}

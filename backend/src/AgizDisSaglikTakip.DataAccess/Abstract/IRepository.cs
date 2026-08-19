@@ -7,6 +7,12 @@ public interface IRepository<T> where T : class
     Task<T?> GetAsync(Expression<Func<T, bool>> filter);
     Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null);
     Task AddAsync(T entity);
+    // Çok sayıda kaydı tek SaveChanges ile eklemek için (ör. demo hesabı klonlama) — AddAsync'in
+    // her çağrıda ayrı SaveChanges yapması toplu işlemlerde ciddi performans kaybına yol açıyor.
+    Task AddRangeAsync(IEnumerable<T> entities);
     Task UpdateAsync(T entity);
+    // Toplu yumuşak silme gibi çok sayıda güncellemeyi tek SaveChanges ile yapmak için.
+    Task UpdateRangeAsync(IEnumerable<T> entities);
     Task DeleteAsync(T entity);
+    Task DeleteRangeAsync(IEnumerable<T> entities);
 }

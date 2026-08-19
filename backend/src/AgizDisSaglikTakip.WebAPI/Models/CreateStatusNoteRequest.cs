@@ -9,4 +9,5 @@ public class CreateStatusNoteRequest
     // kendimiz yapıp tutarlı bir ServiceResult mesajı döndürmek istiyoruz.
     public string? Description { get; set; }
     public IFormFile? Image { get; set; }
+    public int? GoalStatusId { get; set; }
 }

@@ -1,0 +1,33 @@
+<div class="calendar">
+  <div class="calendar-header">
+    <button type="button" class="calendar-nav" (click)="prevMonth()" aria-label="Önceki ay">‹</button>
+    <span class="calendar-title">{{ monthLabel }}</span>
+    <button type="button" class="calendar-nav" (click)="nextMonth()" aria-label="Sonraki ay">›</button>
+  </div>
+
+  <div class="calendar-grid calendar-day-headers">
+    @for (h of dayHeaders; track h) {
+      <span class="calendar-day-header">{{ h }}</span>
+    }
+  </div>
+
+  @for (week of weeks; track $index) {
+    <div class="calendar-grid">
+      @for (day of week; track day?.date ?? $index) {
+        @if (day) {
+          <button
+            type="button"
+            class="calendar-day"
+            [class.has-records]="day.hasRecords"
+            [class.is-today]="day.isToday"
+            [class.is-selected]="isSelected(day)"
+            (click)="selectDay(day)">
+            {{ day.day }}
+          </button>
+        } @else {
+          <span class="calendar-day calendar-day-empty"></span>
+        }
+      }
+    </div>
+  }
+</div>

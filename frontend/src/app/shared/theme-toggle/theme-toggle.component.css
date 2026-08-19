@@ -1,0 +1,48 @@
+/* Pill şeklinde tema anahtarı: açık temada turuncu + güneş solda,
+   koyu temada mavi + ay sağda. */
+.theme-switch {
+  position: relative;
+  flex: none;
+  width: 58px;
+  height: 30px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 999px;
+  background: #fbbf24;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+.theme-switch:hover:not(:disabled) {
+  background: #f59e0b;
+}
+
+.theme-switch.is-dark {
+  background: #2563eb;
+}
+
+.theme-switch.is-dark:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.theme-switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.25s ease;
+}
+
+.theme-switch.is-dark .theme-switch-knob {
+  transform: translateX(28px);
+}

@@ -1,0 +1,116 @@
+.detail-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Navbar sticky ve z-index:200 kullanıyor — daha düşük bir değer kutunun navbarın arkasında kalmasına yol açıyordu. */
+  z-index: 300;
+  padding: 1rem;
+}
+
+.detail-box {
+  position: relative;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.75rem 2rem 1.5rem;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px var(--shadow-strong);
+  text-align: left;
+}
+
+.history-box {
+  max-width: 660px;
+}
+
+.detail-box h3 {
+  margin: 0 0 1rem;
+  color: var(--heading);
+}
+
+.detail-close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.3rem 0.45rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.detail-close-btn:hover {
+  color: var(--text);
+  background: transparent;
+}
+
+.granularity-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.1rem;
+}
+
+.granularity-tab {
+  background: var(--surface-alt);
+  color: var(--label);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.granularity-tab:hover {
+  border-color: var(--border-strong);
+}
+
+.granularity-tab.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.history-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.history-chart {
+  width: 100%;
+  height: auto;
+}
+
+.grid-line {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.grid-label,
+.x-label {
+  fill: var(--text-muted);
+  font-size: 9px;
+}
+
+.history-line {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.history-point {
+  fill: var(--primary);
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}

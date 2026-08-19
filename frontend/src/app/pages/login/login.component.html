@@ -1,25 +1,59 @@
+<div class="auth-page">
+<app-auth-navbar></app-auth-navbar>
+<div class="auth-content">
 <h2>Giriş Yap</h2>
+
+<div class="demo-callout">
+  <p>Hesap oluşturmadan önce, örnek verilerle dolu bir hesap üzerinden uygulamayı inceleyebilirsiniz.</p>
+  <button type="button" class="demo-btn" (click)="enterDemo()" [disabled]="isEnteringDemo">
+    {{ isEnteringDemo ? 'Hazırlanıyor...' : 'Tanıtımı Göster' }}
+  </button>
+</div>
 
 <form [formGroup]="form" (ngSubmit)="submit()">
   <div>
     <label for="email">E-posta</label>
-    <input id="email" type="email" formControlName="email" />
-    @if (form.get('email')?.invalid && form.get('email')?.touched) {
+    <input id="email" type="text" formControlName="email" />
+    @if (form.get('email')?.invalid && submitted) {
       <span class="error">Geçerli bir e-posta gir.</span>
     }
   </div>
 
   <div>
-    <label for="password">Parola</label>
-    <input id="password" type="password" formControlName="password" />
-    @if (form.get('password')?.invalid && form.get('password')?.touched) {
-      <span class="error">Parola gerekli.</span>
+    <label for="password">Şifre</label>
+    <div class="password-field-wrapper">
+      <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" />
+      <button
+        type="button"
+        class="password-visibility-btn"
+        (click)="showPassword = !showPassword"
+        [attr.aria-label]="showPassword ? 'Şifreyi gizle' : 'Şifreyi göster'">
+        @if (showPassword) {
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        } @else {
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+            <circle cx="12" cy="12" r="3" />
+            <line x1="2" y1="2" x2="22" y2="22" />
+          </svg>
+        }
+      </button>
+    </div>
+    @if (form.get('password')?.invalid && submitted) {
+      <span class="error">Şifre gerekli.</span>
     }
   </div>
 
   <button type="submit" [disabled]="isSubmitting">
     {{ isSubmitting ? 'Gönderiliyor...' : 'Giriş Yap' }}
   </button>
+
+  @if (submitted && form.invalid) {
+    <p class="error">Lütfen zorunlu alanları doldurun.</p>
+  }
 
   @if (errorMessage) {
     <p class="error">{{ errorMessage }}</p>
@@ -30,4 +64,10 @@
   }
 </form>
 
-<p><a routerLink="/register">Kayıt Ol</a> | <a routerLink="/forgot-password">Parolamı Unuttum</a></p>
+<div class="divider"><span>veya</span></div>
+<div id="google-signin-button" class="google-signin-button"></div>
+
+<p><a routerLink="/register">Kayıt Ol</a></p>
+<p><a routerLink="/forgot-password">Şifremi Unuttum</a></p>
+</div>
+</div>

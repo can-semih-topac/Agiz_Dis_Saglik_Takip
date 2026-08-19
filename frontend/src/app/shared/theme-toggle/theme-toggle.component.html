@@ -1,0 +1,11 @@
+<button
+  type="button"
+  class="theme-switch"
+  [class.is-dark]="resolved() === 'dark'"
+  (click)="toggle()"
+  role="switch"
+  [attr.aria-checked]="resolved() === 'dark'"
+  [attr.aria-label]="resolved() === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'"
+  [title]="resolved() === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'">
+  <span class="theme-switch-knob">{{ resolved() === 'dark' ? '🌙' : '☀️' }}</span>
+</button>

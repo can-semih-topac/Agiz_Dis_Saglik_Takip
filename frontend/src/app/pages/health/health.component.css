@@ -25,43 +25,145 @@
   margin-bottom: 0.5rem;
 }
 
-.tab-inactive {
-  background: #e5e7eb;
-  color: #374151;
+/* Durum kaydı kartları — sade liste yerine tıklanabilir, özet bilgili kartlar. */
+.status-list {
+  display: block;
 }
 
-.tab-inactive:hover {
-  background: #d1d5db;
+.status-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.status-card:hover {
+  border-color: var(--border-strong);
+}
+
+.status-card-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-card-title {
+  font-weight: 600;
+  flex: 1;
+}
+
+.status-card-streak {
+  background: var(--surface-alt);
+  color: var(--label);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.status-card-icon {
+  font-size: 0.95rem;
+}
+
+.status-card-date {
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.tracking-badge {
+  display: inline-block;
+  background: var(--surface-alt);
+  color: var(--label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  margin: 0 0.5rem;
+}
+
+.pause-badge {
+  display: inline-block;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  margin: 0 0.5rem;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.tab-inactive {
+  background: var(--surface-alt);
+  color: var(--label);
+}
+
+.tab-inactive:hover:not(:disabled) {
+  background: var(--surface-alt-hover);
 }
 
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.55);
+  background: var(--backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  /* Navbar sticky ve z-index:200 kullanıyor — daha düşük bir değer kutunun üst kısmının
+     navbarın arkasında kalmasına yol açıyordu. */
+  z-index: 300;
 }
 
 .modal-box {
-  background: #fff;
+  background: var(--surface);
   border-radius: 10px;
   padding: 1.5rem;
   max-width: 380px;
   width: 90%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px var(--shadow-strong);
 }
 
 .modal-box h4 {
   margin-top: 0;
-  color: #b91c1c;
+  color: var(--error-text);
+}
+
+/* Duraklatma yıkıcı bir işlem değil — silme onayındaki kırmızı başlığı burada kullanmıyoruz. */
+.pause-modal-box h4 {
+  color: var(--heading);
+}
+
+.pause-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0.75rem 0;
+}
+
+.pause-modal-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.pause-modal-actions button {
+  flex: 1;
+  margin-right: 0;
 }
 
 .modal-cancel {
-  background: #6b7280;
+  background: var(--text-muted);
 }
 
-.modal-cancel:hover {
-  background: #4b5563;
+.modal-cancel:hover:not(:disabled) {
+  background: var(--label);
 }

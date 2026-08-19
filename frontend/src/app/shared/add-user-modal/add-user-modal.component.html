@@ -1,0 +1,70 @@
+<div class="contact-backdrop" (click)="close()">
+  <div class="contact-box" (click)="$event.stopPropagation()">
+    <button type="button" class="contact-close-btn" (click)="close()" aria-label="Kapat">✕</button>
+    <h3>Kullanıcı Ekle</h3>
+    <p class="contact-intro">Yeni bir kullanıcı ya da admin hesabı oluştur.</p>
+
+    <form class="contact-form" [formGroup]="form" (ngSubmit)="submit()">
+      <div>
+        <label for="addUserRole">Rol</label>
+        <select id="addUserRole" formControlName="role" (change)="onRoleChange()">
+          <option [ngValue]="Role.User">Kullanıcı</option>
+          <option [ngValue]="Role.Admin">Admin</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="addUserEmail">E-posta</label>
+        <input id="addUserEmail" type="text" formControlName="email" />
+        @if (form.get('email')?.invalid && submitted) {
+          <span class="error">Geçerli bir e-posta gir.</span>
+        }
+      </div>
+
+      <div>
+        <label for="addUserTempPassword">Geçici Şifre{{ isAdminRole ? '' : ' (opsiyonel)' }}</label>
+        <div class="password-field-wrapper">
+          <input id="addUserTempPassword" [type]="showTempPassword ? 'text' : 'password'" formControlName="temporaryPassword" />
+          <button
+            type="button"
+            class="password-visibility-btn"
+            (click)="showTempPassword = !showTempPassword"
+            [attr.aria-label]="showTempPassword ? 'Şifreyi gizle' : 'Şifreyi göster'">
+            @if (showTempPassword) {
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            } @else {
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
+                <circle cx="12" cy="12" r="3" />
+                <line x1="2" y1="2" x2="22" y2="22" />
+              </svg>
+            }
+          </button>
+        </div>
+        @if (form.get('temporaryPassword')?.invalid && submitted) {
+          <span class="error">En az 8 karakter olmalı, büyük harf, küçük harf ve rakam içermeli.</span>
+        }
+        @if (!isAdminRole) {
+          <span class="hint">Boş bırakılırsa kullanıcıya davet e-postası gönderilir.</span>
+        }
+      </div>
+
+      <button type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Ekleniyor...' : 'Ekle' }}
+      </button>
+
+      @if (submitted && form.invalid) {
+        <p class="error">Lütfen zorunlu alanları doldurun.</p>
+      }
+      @if (errorMessage) {
+        <p class="error">{{ errorMessage }}</p>
+      }
+      @if (successMessage) {
+        <p class="success">{{ successMessage }}</p>
+      }
+    </form>
+  </div>
+</div>

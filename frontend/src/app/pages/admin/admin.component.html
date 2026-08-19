@@ -1,0 +1,214 @@
+<app-navbar pageTitle="Admin Paneli"></app-navbar>
+
+<div class="admin-tabs">
+  <button type="button" class="admin-tab" [class.is-active]="activeTab === 'messages'" (click)="selectTab('messages')">
+    Bize Ulaşın Mesajları
+  </button>
+  <button type="button" class="admin-tab" [class.is-active]="activeTab === 'logs'" (click)="selectTab('logs')">
+    Loglar
+  </button>
+  <button type="button" class="admin-tab" [class.is-active]="activeTab === 'adminActions'" (click)="selectTab('adminActions')">
+    Admin İşlem Geçmişi
+  </button>
+  <button type="button" class="admin-tab" [class.is-active]="activeTab === 'users'" (click)="selectTab('users')">
+    Kayıtlı Kullanıcılar
+  </button>
+</div>
+
+@if (activeTab === 'messages') {
+  @if (messagesLoading) {
+    <p>Yükleniyor...</p>
+  } @else if (messagesError) {
+    <p class="error">{{ messagesError }}</p>
+  } @else {
+    @if (reviewErrorMessage) {
+      <p class="error">{{ reviewErrorMessage }}</p>
+    }
+    <div class="message-subtabs">
+      <button type="button" class="message-subtab" [class.is-active]="messagesSubTab === 'pending'" (click)="selectMessagesSubTab('pending')">
+        İşlem Bekleyen ({{ pendingMessages.length }})
+      </button>
+      <button type="button" class="message-subtab" [class.is-active]="messagesSubTab === 'reviewed'" (click)="selectMessagesSubTab('reviewed')">
+        İncelendi ({{ reviewedMessages.length }})
+      </button>
+    </div>
+
+    @if (visibleMessages.length === 0) {
+      <p>Bu sekmede mesaj yok.</p>
+    } @else {
+      <ul class="message-row-list">
+        @for (m of visibleMessages; track m.id) {
+          <li class="message-row" (click)="openMessageDetail(m)">
+            <span class="message-row-name">{{ m.fullName }}</span>
+            <span class="message-row-preview">{{ messagePreview(m.message) }}</span>
+            @if (m.imagePath) {
+              <span class="message-row-icon" title="Görsel var">🖼️</span>
+            }
+            <span class="message-row-date">{{ formatDate(m.createdAt) }}</span>
+          </li>
+        }
+      </ul>
+    }
+  }
+}
+
+@if (activeTab === 'logs') {
+  @if (logsLoading) {
+    <p>Yükleniyor...</p>
+  } @else if (logsError) {
+    <p class="error">{{ logsError }}</p>
+  } @else if (logs.length === 0) {
+    <p>Henüz log yok.</p>
+  } @else {
+    <ul class="log-list">
+      @for (l of logs; track l.id) {
+        <li class="log-card" [class]="levelClass(l.level)">
+          <div class="log-card-header">
+            <span class="log-card-level">{{ l.level }}</span>
+            <span class="log-card-category">{{ l.category }}</span>
+            <span class="log-card-date">{{ formatDate(l.createdAt) }}</span>
+          </div>
+          <p class="log-card-message">{{ l.message }}</p>
+          @if (l.exception) {
+            <details class="log-card-exception">
+              <summary>Hata detayı</summary>
+              <pre>{{ l.exception }}</pre>
+            </details>
+          }
+        </li>
+      }
+    </ul>
+  }
+}
+
+@if (activeTab === 'adminActions') {
+  @if (adminActionsLoading) {
+    <p>Yükleniyor...</p>
+  } @else if (adminActionsError) {
+    <p class="error">{{ adminActionsError }}</p>
+  } @else if (adminActions.length === 0) {
+    <p>Henüz işlem yok.</p>
+  } @else {
+    <div class="user-table-wrapper">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>Admin</th>
+            <th>İşlem</th>
+            <th>Hedef</th>
+            <th>Tarih</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of adminActions; track a.id) {
+            <tr>
+              <td>{{ a.adminEmail }}</td>
+              <td>{{ a.action }}</td>
+              <td>{{ a.targetEmail }}</td>
+              <td>{{ formatDate(a.createdAt) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}
+
+@if (activeTab === 'users') {
+  @if (usersLoading) {
+    <p>Yükleniyor...</p>
+  } @else if (usersError) {
+    <p class="error">{{ usersError }}</p>
+  } @else {
+    <div class="user-table-header">
+      <button type="button" (click)="openAddUserModal()">+ Kullanıcı Ekle</button>
+    </div>
+
+    @if (users.length === 0) {
+      <p>Henüz kullanıcı yok.</p>
+    } @else {
+      <div class="user-table-wrapper">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>Ad Soyad</th>
+              <th>E-posta</th>
+              <th>Telefon</th>
+              <th>Doğum Tarihi</th>
+              <th>Rol</th>
+              <th>İrade Puanı</th>
+              <th>Kayıt Tarihi</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of users; track u.id) {
+              <tr>
+                <td>{{ u.fullName }}</td>
+                <td><a href="mailto:{{ u.email }}">{{ u.email }}</a></td>
+                <td>{{ u.phoneNumber || '—' }}</td>
+                <td>{{ formatBirthDate(u.birthDate) }}</td>
+                <td>
+                  <span class="role-badge" [class.is-admin]="u.role === Role.Admin">
+                    {{ u.role === Role.Admin ? 'Admin' : 'Kullanıcı' }}
+                  </span>
+                </td>
+                <td>{{ u.willpowerScore }}</td>
+                <td>{{ formatDate(u.createdAt) }}</td>
+                <td><button type="button" class="user-delete-btn" (click)="requestDeleteUser(u)">Sil</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+}
+
+@if (showAddUserModal) {
+  <app-add-user-modal (closed)="closeAddUserModal()" (created)="onUserCreated()"></app-add-user-modal>
+}
+
+@if (selectedMessage) {
+  <div class="modal-backdrop" (click)="closeMessageDetail()">
+    <div class="modal-box message-detail-box" (click)="$event.stopPropagation()">
+      <button type="button" class="detail-close-btn" (click)="closeMessageDetail()" aria-label="Kapat">✕</button>
+      <h4>{{ selectedMessage.fullName }}</h4>
+      <a class="message-card-email" href="mailto:{{ selectedMessage.email }}">{{ selectedMessage.email }}</a>
+      <p class="message-detail-date">{{ formatDate(selectedMessage.createdAt) }}</p>
+
+      <p class="message-card-text">{{ selectedMessage.message }}</p>
+      @if (selectedMessage.imagePath) {
+        <img [src]="apiOrigin + selectedMessage.imagePath" alt="Ek görsel" />
+      }
+
+      @if (selectedMessage.status === ContactMessageStatus.Pending) {
+        <button
+          type="button"
+          class="mark-reviewed-btn"
+          [disabled]="reviewingMessageId === selectedMessage.id"
+          (click)="markAsReviewed(selectedMessage)">
+          {{ reviewingMessageId === selectedMessage.id ? 'İşaretleniyor...' : 'İncelendi Olarak İşaretle' }}
+        </button>
+      } @else {
+        <span class="status-badge is-reviewed">İncelendi</span>
+      }
+    </div>
+  </div>
+}
+
+@if (pendingDeleteUser) {
+  <div class="modal-backdrop">
+    <div class="modal-box modal-box-danger">
+      <h4>Kullanıcıyı Sil</h4>
+      <p>{{ pendingDeleteUser.fullName || pendingDeleteUser.email }} kişisini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+      @if (deleteErrorMessage) {
+        <p class="error">{{ deleteErrorMessage }}</p>
+      }
+      <button type="button" class="modal-cancel" (click)="cancelDeleteUser()">Vazgeç</button>
+      <button type="button" class="delete-confirm-btn" [disabled]="deleteSubmitting" (click)="confirmDeleteUser()">
+        {{ deleteSubmitting ? 'Siliniyor...' : 'Evet, Sil' }}
+      </button>
+    </div>
+  </div>
+}

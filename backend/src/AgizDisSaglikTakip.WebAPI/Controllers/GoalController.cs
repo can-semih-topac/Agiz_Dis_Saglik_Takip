@@ -32,10 +32,24 @@ public class GoalController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
-    [HttpDelete("{id}")] 
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteGoal(int id, [FromQuery] bool confirmed = false) // hedef sil
     {
         var result = await _goalService.DeleteGoalAsync(this.GetUserId(), id, confirmed);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpPost("{id}/pause")]
+    public async Task<IActionResult> PauseGoal(int id, StartGoalPauseDto dto)
+    {
+        var result = await _goalService.PauseGoalAsync(this.GetUserId(), id, dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpPost("{id}/resume")]
+    public async Task<IActionResult> ResumeGoal(int id)
+    {
+        var result = await _goalService.ResumeGoalAsync(this.GetUserId(), id);
         return result.Success ? Ok(result) : BadRequest(result);
     }
 }

@@ -1,0 +1,363 @@
+.password-banner {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.password-banner p {
+  margin: 0;
+  color: var(--warning-text);
+}
+
+/* İrade puanı — önem derecesi x seri uzunluğuna dayalı, 0-100 arası doygunluklu skor. */
+.willpower-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+}
+
+.willpower-card:hover {
+  border-color: var(--border-strong);
+}
+
+.willpower-summary {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.willpower-badge {
+  display: inline-block;
+  background: var(--surface-alt);
+  color: var(--label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
+.willpower-tiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+.willpower-tier {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+
+.willpower-tier.is-current {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.willpower-ring {
+  position: relative;
+  flex: none;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+}
+
+.willpower-ring-inner {
+  position: absolute;
+  inset: 8px;
+  background: var(--surface);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--heading);
+}
+
+.willpower-text h4 {
+  margin: 0 0 0.25rem;
+}
+
+.willpower-text p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Durum kaydı kartları — sade liste yerine tıklanabilir, özet bilgili kartlar. */
+.status-list {
+  display: block;
+}
+
+/* En Uzun Seriler — metin uzunluğu ne olursa olsun kutucuklar eşit genişlikte kalsın,
+   uzun başlıklar kutunun genişliğini büyütmek yerine içeride satır kırsın. */
+.streak-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.6rem;
+}
+
+.streak-item {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.streak-item-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.streak-item-value {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* 1 günlük seriler gerçek başarıların (5+ gün) yanında gürültü yapmasın diye soluklaştırılıyor. */
+.streak-item.is-low {
+  opacity: 0.55;
+}
+
+/* "Yapılması Gerekenler" (.todo-item) ile aynı tek satırlık yükseklikte olsun diye
+   aynı padding/flex düzeni kullanılıyor — iki sütun yan yana dururken hizalı görünsün. */
+.status-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-sizing: border-box;
+  min-height: 3.75rem;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.status-card:hover {
+  border-color: var(--border-strong);
+}
+
+.status-card-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-card-title {
+  font-weight: 600;
+}
+
+.status-card-streak {
+  background: var(--surface-alt);
+  color: var(--label);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.status-card-icon {
+  font-size: 0.95rem;
+}
+
+.status-card-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Bugün bölümü — solda yapılması gerekenler, sağda bugün yapılanlar. */
+.today-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.today-column h4 {
+  margin-top: 0;
+}
+
+.today-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Yanlışlıkla işaretlenen bir kaydı geri almak için sürükle-bırak hedefi. */
+.todo-drop-zone {
+  border-radius: 8px;
+  transition: background-color 0.15s ease, outline-color 0.15s ease;
+  outline: 2px dashed transparent;
+  outline-offset: 4px;
+}
+
+.todo-drop-zone.is-drop-target {
+  background: var(--surface-alt);
+  outline-color: var(--primary);
+}
+
+.status-card[draggable="true"] {
+  cursor: grab;
+}
+
+.status-card.is-dragging {
+  opacity: 0.4;
+}
+
+.todo-list {
+  display: block;
+}
+
+.todo-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-sizing: border-box;
+  min-height: 3.75rem;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.todo-item-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.todo-item-title {
+  font-weight: 600;
+}
+
+.todo-item-count {
+  background: var(--surface-alt);
+  color: var(--label);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.todo-quick-btn {
+  white-space: nowrap;
+}
+
+.todo-quick-form {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.paused-goal-list {
+  display: block;
+}
+
+.paused-goal-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.paused-goal-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.paused-goal-title {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.paused-goal-reason {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paused-goal-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.todo-quick-form input {
+  width: 70px;
+  padding: 0.4rem 0.5rem;
+}
+
+.btn-secondary {
+  background: var(--surface-alt);
+  color: var(--label);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--surface-alt-hover);
+}
+
+/* Takvim — solda ay görünümü, sağda seçilen günün kayıtları. */
+.calendar-grid-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+.calendar-day-panel h4 {
+  margin-top: 0;
+}
+
+@media (max-width: 700px) {
+  .calendar-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}

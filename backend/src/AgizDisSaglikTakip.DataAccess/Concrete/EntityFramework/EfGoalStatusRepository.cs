@@ -27,4 +27,12 @@ public class EfGoalStatusRepository : EfRepositoryBase<GoalStatus>, IGoalStatusR
             .Where(gs => gs.Goal.UserId == userId && gs.ActivityDate >= sevenDaysAgo)
             .ToListAsync();
     }
+
+    public async Task<List<GoalStatus>> GetAllByUserIdAsync(int userId)
+    {
+        return await Context.GoalStatuses
+            .Include(gs => gs.Goal)
+            .Where(gs => gs.Goal.UserId == userId)
+            .ToListAsync();
+    }
 }

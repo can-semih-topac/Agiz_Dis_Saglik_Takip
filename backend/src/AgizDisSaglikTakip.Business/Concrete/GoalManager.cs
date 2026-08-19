@@ -11,29 +11,91 @@ public class GoalManager : IGoalService
 {
     private readonly IGoalRepository _goalRepository;
     private readonly IGoalStatusRepository _goalStatusRepository;
+    private readonly IGoalPauseRepository _goalPauseRepository;
+    private readonly IStatusNoteRepository _statusNoteRepository;
 
-    public GoalManager(IGoalRepository goalRepository, IGoalStatusRepository goalStatusRepository)
+    public GoalManager(
+        IGoalRepository goalRepository,
+        IGoalStatusRepository goalStatusRepository,
+        IGoalPauseRepository goalPauseRepository,
+        IStatusNoteRepository statusNoteRepository)
     {
         _goalRepository = goalRepository;
         _goalStatusRepository = goalStatusRepository;
+        _goalPauseRepository = goalPauseRepository;
+        _statusNoteRepository = statusNoteRepository;
     }
 
     public async Task<ServiceResult<List<GoalDto>>> GetGoalsAsync(int userId)
     {
         var goals = await _goalRepository.GetByUserIdAsync(userId);
+        var activePausesByGoalId = (await _goalPauseRepository.GetAllByUserIdAsync(userId))
+            .Where(p => p.EndDate == null)
+            .ToDictionary(p => p.GoalId);
 
-        var goalDtos = goals.Select(g => new GoalDto
+        var goalDtos = goals.Select(g =>
         {
-            Id = g.Id,
-            Title = g.Title,
-            Description = g.Description,
-            PeriodUnit = g.PeriodUnit,
-            PeriodFrequency = g.PeriodFrequency,
-            Importance = g.Importance,
-            CreatedAt = g.CreatedAt
+            activePausesByGoalId.TryGetValue(g.Id, out var activePause);
+            return new GoalDto
+            {
+                Id = g.Id,
+                Title = g.Title,
+                Description = g.Description,
+                PeriodUnit = g.PeriodUnit,
+                PeriodFrequency = g.PeriodFrequency,
+                Importance = g.Importance,
+                TrackingType = g.TrackingType,
+                CreatedAt = g.CreatedAt,
+                IsPaused = activePause != null,
+                PauseReason = activePause?.Reason,
+                PausedSince = activePause?.StartDate
+            };
         }).ToList();
 
         return ServiceResult<List<GoalDto>>.Ok(goalDtos);
+    }
+
+    public async Task<ServiceResult> PauseGoalAsync(int userId, int goalId, StartGoalPauseDto dto)
+    {
+        var goal = await _goalRepository.GetAsync(g => g.Id == goalId && g.UserId == userId);
+        if (goal == null)
+            return ServiceResult.Fail("Hedef bulunamadı.");
+
+        if (string.IsNullOrWhiteSpace(dto.Reason))
+            return ServiceResult.Fail("Duraklatma sebebi yazılmalı.");
+
+        var existingActive = await _goalPauseRepository.GetActivePauseAsync(goalId);
+        if (existingActive != null)
+            return ServiceResult.Fail("Bu hedef zaten duraklatılmış.");
+
+        var pause = new GoalPause
+        {
+            GoalId = goalId,
+            Reason = dto.Reason,
+            StartDate = DateOnly.FromDateTime(DateTime.Today),
+            EndDate = null,
+            CreatedAt = DateTime.Now
+        };
+
+        await _goalPauseRepository.AddAsync(pause);
+
+        return ServiceResult.Ok("Hedef duraklatıldı.");
+    }
+
+    public async Task<ServiceResult> ResumeGoalAsync(int userId, int goalId)
+    {
+        var goal = await _goalRepository.GetAsync(g => g.Id == goalId && g.UserId == userId);
+        if (goal == null)
+            return ServiceResult.Fail("Hedef bulunamadı.");
+
+        var activePause = await _goalPauseRepository.GetActivePauseAsync(goalId);
+        if (activePause == null)
+            return ServiceResult.Fail("Bu hedef zaten duraklatılmış değil.");
+
+        activePause.EndDate = DateOnly.FromDateTime(DateTime.Today);
+        await _goalPauseRepository.UpdateAsync(activePause);
+
+        return ServiceResult.Ok("Hedef tekrar aktif edildi.");
     }
 
     public async Task<ServiceResult> CreateGoalAsync(int userId, CreateGoalDto dto) // yeni hedef oluşturma
@@ -53,6 +115,9 @@ public class GoalManager : IGoalService
         if (!Enum.IsDefined(typeof(Importance), dto.Importance))
             return ServiceResult.Fail("Geçersiz önem derecesi.");
 
+        if (!Enum.IsDefined(typeof(TrackingType), dto.TrackingType))
+            return ServiceResult.Fail("Geçersiz takip türü.");
+
         var goal = new Goal
         {
             UserId = userId,
@@ -61,6 +126,7 @@ public class GoalManager : IGoalService
             PeriodUnit = dto.PeriodUnit,
             PeriodFrequency = dto.PeriodFrequency,
             Importance = dto.Importance,
+            TrackingType = dto.TrackingType,
             CreatedAt = DateTime.Now
         };
 
@@ -81,7 +147,26 @@ public class GoalManager : IGoalService
             return ServiceResult<bool>.Ok(true, "Bu hedefe ait durum kayıtları var. Silmek istediğinize emin misiniz?");
         }
 
-        await _goalRepository.DeleteAsync(goal);
+        // StatusNote->GoalStatus ilişkisi NO ACTION (SQL Server çoklu cascade yoluna izin vermiyor) —
+        // hedefi silmeden önce bağlı notların bağlantısını elle koparıyoruz, notların kendisi silinmez.
+        if (statusRecords.Count > 0)
+        {
+            var linkedNotes = await _statusNoteRepository.GetByGoalStatusIdsAsync(statusRecords.Select(gs => gs.Id));
+            foreach (var note in linkedNotes)
+                note.GoalStatusId = null;
+
+            if (linkedNotes.Count > 0)
+                await _statusNoteRepository.UpdateRangeAsync(linkedNotes);
+
+            foreach (var gs in statusRecords)
+                gs.IsDeleted = true;
+
+            await _goalStatusRepository.UpdateRangeAsync(statusRecords);
+        }
+
+        // Yumuşak silme — hiçbir kayıt veritabanından fiziksel olarak gitmiyor.
+        goal.IsDeleted = true;
+        await _goalRepository.UpdateAsync(goal);
 
         return ServiceResult<bool>.Ok(false, "Hedef silindi.");
     }

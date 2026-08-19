@@ -1,0 +1,153 @@
+.detail-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Navbar sticky ve z-index:200 kullanıyor — daha düşük bir değer, uzun (düzenleme) içerikte
+     kutunun üst kısmının navbarın arkasında kalmasına yol açıyordu. */
+  z-index: 300;
+  padding: 1rem;
+}
+
+.detail-box {
+  position: relative;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.75rem 2rem 1.5rem;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px var(--shadow-strong);
+  text-align: left;
+}
+
+.detail-box h3 {
+  margin: 0;
+  color: var(--heading);
+}
+
+.detail-date {
+  margin: 0.35rem 0 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.detail-close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.3rem 0.45rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.detail-close-btn:hover {
+  color: var(--text);
+  background: transparent;
+}
+
+.detail-facts {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.detail-streak,
+.detail-duration {
+  background: var(--surface-alt);
+  color: var(--label);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+}
+
+.detail-note {
+  border-top: 1px solid var(--border);
+  padding-top: 0.9rem;
+}
+
+.detail-note h4 {
+  margin: 0 0 0.4rem;
+}
+
+.detail-note img {
+  max-width: 100%;
+  margin-top: 0.6rem;
+}
+
+.detail-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.9rem;
+}
+
+.detail-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  background: var(--surface-alt);
+  color: var(--label);
+}
+
+.detail-edit-btn:hover:not(:disabled) {
+  background: var(--surface-alt-hover);
+}
+
+.detail-edit-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-current-image {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.3rem 0 0.5rem;
+}
+
+.detail-current-image img {
+  max-width: 90px;
+  border-radius: 6px;
+}
+
+.detail-remove-image-btn {
+  background: var(--surface-alt);
+  color: var(--label);
+  font-size: 0.8rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.detail-remove-image-btn:hover:not(:disabled) {
+  background: var(--surface-alt-hover);
+}
+
+.detail-edit-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.detail-edit-actions button {
+  flex: 1;
+  margin-right: 0;
+}
+
+.detail-cancel-btn {
+  background: var(--text-muted);
+}
+
+.detail-cancel-btn:hover:not(:disabled) {
+  background: var(--label);
+}

@@ -11,6 +11,13 @@ export enum Importance {
   Yuksek = 2
 }
 
+// Hedefin durum kayıtları süre girilerek mi (Sureli) yoksa sadece "yapıldı"
+// işaretiyle mi (Yapildi) tutulacağını belirler.
+export enum TrackingType {
+  Sureli = 0,
+  Yapildi = 1
+}
+
 export interface GoalDto {
   id: number;
   title: string;
@@ -18,7 +25,11 @@ export interface GoalDto {
   periodUnit: PeriodUnit;
   periodFrequency: number;
   importance: Importance;
+  trackingType: TrackingType;
   createdAt: string;
+  isPaused: boolean;
+  pauseReason: string | null;
+  pausedSince: string | null;
 }
 
 export interface CreateGoalDto {
@@ -27,4 +38,9 @@ export interface CreateGoalDto {
   periodUnit: PeriodUnit;
   periodFrequency: number;
   importance: Importance;
+  trackingType: TrackingType;
+}
+
+export interface StartGoalPauseDto {
+  reason: string;
 }

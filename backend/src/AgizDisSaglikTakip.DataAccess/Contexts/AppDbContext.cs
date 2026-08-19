@@ -12,23 +12,36 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Goal> Goals => Set<Goal>();
     public DbSet<GoalStatus> GoalStatuses => Set<GoalStatus>();
+    public DbSet<GoalPause> GoalPauses => Set<GoalPause>();
     public DbSet<StatusNote> StatusNotes => Set<StatusNote>();
     public DbSet<Suggestion> Suggestions => Set<Suggestion>();
+    public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
+    public DbSet<Log> Logs => Set<Log>();
+    public DbSet<AdminActionLog> AdminActionLogs => Set<AdminActionLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(entity =>
         {
             entity.Property(u => u.Email).HasMaxLength(256).IsRequired();
-            entity.HasIndex(u => u.Email).IsUnique();
-            entity.Property(u => u.PasswordEncrypted).IsRequired();
+            // Filtreli: sadece silinmemiş kayıtlar arasında tekil — yumuşak silinen bir hesabın
+            // e-postası aksi halde bir daha hiç kayıt/davet için kullanılamazdı.
+            entity.HasIndex(u => u.Email).IsUnique().HasFilter("[IsDeleted] = 0");
+            entity.Property(u => u.PasswordEncrypted).IsRequired(false);
             entity.Property(u => u.FullName).HasMaxLength(150).IsRequired();
+            // Mevcut kayıtlarda (migration öncesi) bu alan yoktu, boş metin varsayılanıyla dolduruluyor.
+            entity.Property(u => u.PhoneNumber).HasMaxLength(15).IsRequired().HasDefaultValue(string.Empty);
+            entity.Property(u => u.PasswordResetCode).HasMaxLength(6);
+            entity.Property(u => u.IsDeleted).HasDefaultValue(false);
+            entity.HasQueryFilter(u => !u.IsDeleted);
         });
 
         modelBuilder.Entity<Goal>(entity =>
         {
             entity.Property(g => g.Title).HasMaxLength(150).IsRequired();
             entity.Property(g => g.Description).HasMaxLength(500).IsRequired();
+            entity.Property(g => g.IsDeleted).HasDefaultValue(false);
+            entity.HasQueryFilter(g => !g.IsDeleted);
 
             entity.HasOne(g => g.User)
                   .WithMany(u => u.Goals)
@@ -38,9 +51,25 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<GoalStatus>(entity =>
         {
+            entity.Property(gs => gs.IsDeleted).HasDefaultValue(false);
+            entity.HasQueryFilter(gs => !gs.IsDeleted);
+
             entity.HasOne(gs => gs.Goal)
                   .WithMany(g => g.GoalStatuses)
                   .HasForeignKey(gs => gs.GoalId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<GoalPause>(entity =>
+        {
+            entity.Property(gp => gp.Reason).HasMaxLength(300).IsRequired();
+            // Kendi IsDeleted alanı yok — bağlı olduğu hedef yumuşak silinince bu da görünmez olsun diye
+            // ebeveynin silinme durumu üzerinden filtreleniyor (Goal zaten filtreli olduğu için gerekli).
+            entity.HasQueryFilter(gp => !gp.Goal.IsDeleted);
+
+            entity.HasOne(gp => gp.Goal)
+                  .WithMany()
+                  .HasForeignKey(gp => gp.GoalId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -48,11 +77,43 @@ public class AppDbContext : DbContext
         {
             entity.Property(sn => sn.Description).HasMaxLength(1000).IsRequired();
             entity.Property(sn => sn.ImagePath).HasMaxLength(500);
+            entity.Property(sn => sn.IsDeleted).HasDefaultValue(false);
+            entity.HasQueryFilter(sn => !sn.IsDeleted);
 
             entity.HasOne(sn => sn.User)
                   .WithMany(u => u.StatusNotes)
                   .HasForeignKey(sn => sn.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            // Restrict (NO ACTION): User->StatusNote zaten cascade olduğu için buraya Cascade/SetNull
+            // eklemek SQL Server'da "multiple cascade paths" hatası veriyor (User->Goal->GoalStatus->StatusNote).
+            // Bağlantı, GoalManager.DeleteGoalAsync içinde hedef silinmeden önce elle koparılıyor.
+            entity.HasOne(sn => sn.GoalStatus)
+                  .WithMany()
+                  .HasForeignKey(sn => sn.GoalStatusId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ContactMessage>(entity =>
+        {
+            entity.Property(c => c.FullName).HasMaxLength(150).IsRequired();
+            entity.Property(c => c.Email).HasMaxLength(256).IsRequired();
+            entity.Property(c => c.Message).HasMaxLength(2000).IsRequired();
+            entity.Property(c => c.ImagePath).HasMaxLength(500);
+        });
+
+        modelBuilder.Entity<Log>(entity =>
+        {
+            entity.Property(l => l.Level).HasMaxLength(20).IsRequired();
+            entity.Property(l => l.Category).HasMaxLength(300).IsRequired();
+            entity.Property(l => l.Message).IsRequired();
+        });
+
+        modelBuilder.Entity<AdminActionLog>(entity =>
+        {
+            entity.Property(a => a.AdminEmail).HasMaxLength(256).IsRequired();
+            entity.Property(a => a.Action).HasMaxLength(200).IsRequired();
+            entity.Property(a => a.TargetEmail).HasMaxLength(256).IsRequired();
         });
 
         modelBuilder.Entity<Suggestion>(entity =>

@@ -1,0 +1,201 @@
+.profile-page {
+  max-width: 480px;
+  margin: 1.5rem auto;
+}
+
+.profile-page h2 {
+  text-align: center;
+}
+
+.profile-card,
+.password-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1.4rem;
+}
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.password-card {
+  margin-top: 1rem;
+}
+
+.profile-row {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-row:last-of-type {
+  border-bottom: none;
+}
+
+.profile-row-view {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profile-label {
+  min-width: 140px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.profile-value {
+  flex: 1;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.edit-icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--heading);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+  margin: 0;
+}
+
+.edit-icon-btn:hover {
+  color: var(--heading-alt);
+  background: transparent;
+}
+
+/* Alan düzenleme formu, sayfadaki genel `form` kart/grid stilini miras almasın —
+   zaten .profile-card'ın içinde tek satırlık bir satır olarak duruyor. */
+.profile-edit-form {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-edit-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  margin-bottom: 0;
+}
+
+.btn-secondary {
+  background: var(--surface-alt);
+  color: var(--label);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--surface-alt-hover);
+}
+
+.password-toggle-btn {
+  width: 100%;
+  background: transparent;
+  color: var(--heading);
+  border: none;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.2rem 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* Genel button:hover kuralı bunu yeşile boyamasın — bu bir metin/akordeon başlığı. */
+.password-toggle-btn:hover:not(:disabled) {
+  background: transparent;
+  color: var(--heading-alt);
+}
+
+.password-form {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-top: 0.9rem;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.password-form button[type="submit"] {
+  width: 100%;
+}
+
+.forgot-password-link {
+  align-self: flex-end;
+  font-size: 0.85rem;
+  margin: -0.3rem 0 0.7rem;
+}
+
+.danger-zone {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.delete-account-btn {
+  background: var(--surface);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.delete-account-btn:hover:not(:disabled) {
+  background: var(--error-bg);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Navbar sticky ve z-index:200 kullanıyor — daha düşük bir değer kutunun navbarın arkasında kalmasına yol açıyordu. */
+  z-index: 300;
+}
+
+.modal-box {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 1.5rem;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 10px 30px var(--shadow-strong);
+}
+
+.modal-box-danger {
+  border: 2px solid var(--danger);
+}
+
+.modal-box h4 {
+  margin-top: 0;
+  color: var(--error-text);
+}
+
+.delete-confirm-btn {
+  background: var(--danger);
+  margin-right: 0.5rem;
+}
+
+.delete-confirm-btn:hover:not(:disabled) {
+  background: var(--danger-hover);
+}
+
+.modal-cancel {
+  background: var(--text-muted);
+}
+
+.modal-cancel:hover:not(:disabled) {
+  background: var(--label);
+}

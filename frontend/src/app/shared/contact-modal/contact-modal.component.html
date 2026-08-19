@@ -1,0 +1,71 @@
+@if (showSuccessDialog) {
+  <div class="contact-backdrop" (click)="closeSuccessDialog()">
+    <div class="contact-success-box" (click)="$event.stopPropagation()">
+      <p>{{ successMessage }}</p>
+      <button type="button" (click)="closeSuccessDialog()">Tamam</button>
+    </div>
+  </div>
+} @else {
+<div class="contact-backdrop" (click)="close()">
+  <div class="contact-box" (click)="$event.stopPropagation()">
+    <button type="button" class="contact-close-btn" (click)="close()" aria-label="Kapat">✕</button>
+    <h3>Bize Ulaşın</h3>
+    <p class="contact-intro">Görüş, öneri ve sorunlarınızı bize iletebilirsiniz.</p>
+
+    <form class="contact-form" [formGroup]="form" (ngSubmit)="submit()">
+      <div>
+        <label for="contactFullName">Ad Soyad</label>
+        <input id="contactFullName" type="text" formControlName="fullName" />
+        @if (form.get('fullName')?.invalid && submitted) {
+          <span class="error">Bu alan zorunlu.</span>
+        }
+      </div>
+
+      <div>
+        <label for="contactEmail">E-posta</label>
+        <input id="contactEmail" type="text" formControlName="email" />
+        @if (form.get('email')?.invalid && submitted) {
+          <span class="error">Geçerli bir e-posta gir.</span>
+        }
+      </div>
+
+      <div>
+        <label for="contactMessage">Mesajınız</label>
+        <textarea id="contactMessage" formControlName="message" rows="7"></textarea>
+        @if (form.get('message')?.invalid && submitted) {
+          <span class="error">Bu alan zorunlu.</span>
+        }
+      </div>
+
+      <div>
+        <label for="contactImage">Fotoğraf ekle (opsiyonel, .jpg/.png)</label>
+        <input id="contactImage" type="file" accept=".jpg,.jpeg,.png" (change)="onImageSelected($event)" />
+        @if (imageWarning) {
+          <span class="warning">{{ imageWarning }}</span>
+        }
+      </div>
+
+      <button type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Gönderiliyor...' : 'Gönder' }}
+      </button>
+
+      @if (submitted && form.invalid) {
+        <p class="error">Lütfen zorunlu alanları doldurun.</p>
+      }
+      @if (errorMessage) {
+        <p class="error">{{ errorMessage }}</p>
+      }
+    </form>
+
+    <p class="contact-direct">
+      Dilerseniz doğrudan e-posta da gönderebilirsiniz:
+      <button type="button" class="contact-email-copy" (click)="copyEmail()" title="Panoya kopyalamak için tıkla">
+        {{ supportEmail }}
+      </button>
+      @if (emailCopied) {
+        <span class="contact-email-copied">Panoya kopyalandı</span>
+      }
+    </p>
+  </div>
+</div>
+}

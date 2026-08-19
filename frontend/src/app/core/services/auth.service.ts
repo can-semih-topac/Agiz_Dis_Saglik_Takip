@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthSession, LoginDto, LoginResultDto, RegisterDto, ResetPasswordDto, VerifyEmailDto } from '../models/auth.models';
+import { AuthSession, GoogleLoginDto, LoginDto, LoginResultDto, RegisterDto, ResetPasswordDto, VerifyEmailDto, VerifyResetCodeDto } from '../models/auth.models';
 import { ServiceResult } from '../models/service-result';
 
 @Injectable({
@@ -21,8 +21,21 @@ export class AuthService {
     return this.http.post<ServiceResult<LoginResultDto>>(`${this.baseUrl}/login`, dto);
   }
 
-  verifyEmail(dto: VerifyEmailDto): Observable<ServiceResult> {
-    return this.http.post<ServiceResult>(`${this.baseUrl}/forgot-password/verify`, dto);
+  googleLogin(dto: GoogleLoginDto): Observable<ServiceResult<LoginResultDto>> {
+    return this.http.post<ServiceResult<LoginResultDto>>(`${this.baseUrl}/google`, dto);
+  }
+
+  // Demo hesabının verilerini sıfırlayıp tazeler ve o hesaba giriş token'ı döner.
+  enterDemo(): Observable<ServiceResult<LoginResultDto>> {
+    return this.http.post<ServiceResult<LoginResultDto>>(`${this.baseUrl}/demo`, {});
+  }
+
+  requestResetCode(dto: VerifyEmailDto): Observable<ServiceResult> {
+    return this.http.post<ServiceResult>(`${this.baseUrl}/forgot-password/request-code`, dto);
+  }
+
+  verifyResetCode(dto: VerifyResetCodeDto): Observable<ServiceResult> {
+    return this.http.post<ServiceResult>(`${this.baseUrl}/forgot-password/verify-code`, dto);
   }
 
   resetPassword(dto: ResetPasswordDto): Observable<ServiceResult> {
@@ -31,7 +44,12 @@ export class AuthService {
 
   // Giriş başarılı olunca component bunu çağırıp token'ı kalıcı hale getirecek.
   saveSession(result: LoginResultDto): void {
-    const session: AuthSession = { token: result.token, email: result.email, fullName: result.fullName };
+    const session: AuthSession = {
+      token: result.token,
+      email: result.email,
+      fullName: result.fullName,
+      isAdmin: result.isAdmin
+    };
     localStorage.setItem(this.storageKey, JSON.stringify(session));
   }
 
@@ -46,6 +64,10 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.getToken();
+  }
+
+  isAdmin(): boolean {
+    return this.getSession()?.isAdmin ?? false;
   }
 
   logout(): void {

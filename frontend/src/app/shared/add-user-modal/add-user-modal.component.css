@@ -1,0 +1,76 @@
+.contact-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.contact-box {
+  position: relative;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 1.75rem 2rem 1.25rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 10px 30px var(--shadow-strong);
+  text-align: left;
+}
+
+.contact-box h3 {
+  margin: 0;
+  color: var(--heading);
+}
+
+.contact-intro {
+  margin: 0.35rem 0 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.contact-close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.3rem 0.45rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.contact-close-btn:hover {
+  color: var(--text);
+  background: transparent;
+}
+
+/* Genel `form` kart/grid stilini burada iptal ediyoruz — zaten modal kutusunun içindeyiz. */
+.contact-form {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-form button[type="submit"] {
+  width: 100%;
+  margin: 0.2rem 0 0;
+}
+
+.hint {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
