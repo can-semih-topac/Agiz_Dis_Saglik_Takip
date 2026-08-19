@@ -1,7 +1,7 @@
 <div class="detail-backdrop" (click)="close()">
   <div class="detail-box history-box" (click)="$event.stopPropagation()">
-    <button type="button" class="detail-close-btn" (click)="close()" aria-label="Kapat">✕</button>
-    <h3>İrade Puanı Geçmişi</h3>
+    <button type="button" class="detail-close-btn" (click)="close()" [attr.aria-label]="'common.close' | transloco">✕</button>
+    <h3>{{ 'willpowerHistoryModal.title' | transloco }}</h3>
 
     <div class="granularity-tabs">
       @for (opt of granularityOptions; track opt.value) {
@@ -10,15 +10,15 @@
           class="granularity-tab"
           [class.is-active]="granularity === opt.value"
           (click)="selectGranularity(opt.value)">
-          {{ opt.label }}
+          {{ opt.label | transloco }}
         </button>
       }
     </div>
 
     @if (loading) {
-      <p class="history-empty">Yükleniyor...</p>
+      <p class="history-empty">{{ 'common.loading' | transloco }}</p>
     } @else if (points.length === 0) {
-      <p class="history-empty">Henüz veri yok.</p>
+      <p class="history-empty">{{ 'common.noData' | transloco }}</p>
     } @else {
       <svg class="history-chart" [attr.viewBox]="'0 0 ' + chartWidth + ' ' + chartHeight" preserveAspectRatio="xMidYMid meet">
         @for (g of gridLines; track g) {

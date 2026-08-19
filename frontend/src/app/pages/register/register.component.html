@@ -1,32 +1,32 @@
 <div class="auth-page">
 <app-auth-navbar></app-auth-navbar>
 <div class="auth-content">
-<h2>Kayıt Ol</h2>
+<h2>{{ 'register.title' | transloco }}</h2>
 
 <form [formGroup]="form" (ngSubmit)="submit()">
   <div>
-    <label for="fullName">Ad Soyad</label>
+    <label for="fullName">{{ 'common.fullNameLabel' | transloco }}</label>
     <input id="fullName" type="text" formControlName="fullName" />
     @if (form.get('fullName')?.invalid && submitted) {
-      <span class="error">Bu alan zorunlu.</span>
+      <span class="error">{{ 'common.fieldRequired' | transloco }}</span>
     }
   </div>
 
   <div>
-    <label for="birthDate">Doğum Tarihi</label>
+    <label for="birthDate">{{ 'common.birthDateLabel' | transloco }}</label>
     <input id="birthDate" type="date" formControlName="birthDate" [max]="maxDate" />
     @if (form.get('birthDate')?.invalid && submitted) {
-      <span class="error">Bu alan zorunlu.</span>
+      <span class="error">{{ 'common.fieldRequired' | transloco }}</span>
     }
   </div>
 
   <div>
-    <label for="phoneNumber">Telefon Numarası</label>
+    <label for="phoneNumber">{{ 'common.phoneLabel' | transloco }}</label>
     <div class="phone-input-row">
       <span class="country-badge-wrapper">
         <button type="button" class="country-badge" (click)="toggleCountryInfo()">🇹🇷 +90</button>
         @if (showCountryInfo) {
-          <span class="info-note">Şu an için sadece Türkiye telefon numaraları kabul ediyoruz.</span>
+          <span class="info-note">{{ 'register.countryInfoNote' | transloco }}</span>
         }
       </span>
       <input
@@ -38,30 +38,30 @@
         (input)="onPhoneInput()" />
     </div>
     @if (phoneInvalidCharWarning) {
-      <span class="warning">Telefon numarası sadece sayılardan oluşmalı.</span>
+      <span class="warning">{{ 'register.phoneInvalidChar' | transloco }}</span>
     }
     @if (form.get('phoneNumber')?.invalid && submitted) {
-      <span class="error">10 veya 11 haneli, sadece rakam.</span>
+      <span class="error">{{ 'register.phoneError' | transloco }}</span>
     }
   </div>
 
   <div>
-    <label for="email">E-posta</label>
+    <label for="email">{{ 'common.emailLabel' | transloco }}</label>
     <input id="email" type="text" formControlName="email" />
     @if (form.get('email')?.invalid && submitted) {
-      <span class="error">Geçerli bir e-posta gir.</span>
+      <span class="error">{{ 'common.emailError' | transloco }}</span>
     }
   </div>
 
   <div>
-    <label for="password">Şifre</label>
+    <label for="password">{{ 'common.passwordLabel' | transloco }}</label>
     <div class="password-field-wrapper">
       <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" />
       <button
         type="button"
         class="password-visibility-btn"
         (click)="showPassword = !showPassword"
-        [attr.aria-label]="showPassword ? 'Şifreyi gizle' : 'Şifreyi göster'">
+        [attr.aria-label]="(showPassword ? 'common.hidePassword' : 'common.showPassword') | transloco">
         @if (showPassword) {
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
@@ -77,19 +77,19 @@
       </button>
     </div>
     @if (form.get('password')?.invalid && submitted) {
-      <span class="error">En az 8 karakter, büyük/küçük harf ve rakam içermeli.</span>
+      <span class="error">{{ 'common.passwordRules' | transloco }}</span>
     }
   </div>
 
   <div>
-    <label for="passwordConfirm">Şifre (tekrar)</label>
+    <label for="passwordConfirm">{{ 'register.passwordConfirmLabel' | transloco }}</label>
     <div class="password-field-wrapper">
       <input id="passwordConfirm" [type]="showPasswordConfirm ? 'text' : 'password'" formControlName="passwordConfirm" />
       <button
         type="button"
         class="password-visibility-btn"
         (click)="showPasswordConfirm = !showPasswordConfirm"
-        [attr.aria-label]="showPasswordConfirm ? 'Şifreyi gizle' : 'Şifreyi göster'">
+        [attr.aria-label]="(showPasswordConfirm ? 'common.hidePassword' : 'common.showPassword') | transloco">
         @if (showPasswordConfirm) {
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
@@ -105,16 +105,16 @@
       </button>
     </div>
     @if (form.get('passwordConfirm')?.invalid && submitted) {
-      <span class="error">Bu alan zorunlu.</span>
+      <span class="error">{{ 'common.fieldRequired' | transloco }}</span>
     }
   </div>
 
   <button type="submit" [disabled]="isSubmitting">
-    {{ isSubmitting ? 'Gönderiliyor...' : 'Kayıt Ol' }}
+    {{ isSubmitting ? ('common.submitting' | transloco) : ('register.submit' | transloco) }}
   </button>
 
   @if (submitted && form.invalid) {
-    <p class="error">Lütfen zorunlu alanları doldurun.</p>
+    <p class="error">{{ 'common.fillRequiredFields' | transloco }}</p>
   }
 
   @if (errorMessage) {
@@ -126,6 +126,6 @@
   }
 </form>
 
-<p><a routerLink="/login">Zaten hesabın var mı? Giriş Yap</a></p>
+<p><a routerLink="/login">{{ 'register.loginLink' | transloco }}</a></p>
 </div>
 </div>

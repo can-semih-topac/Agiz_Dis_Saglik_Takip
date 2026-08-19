@@ -6,10 +6,11 @@ import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { RegisterDto } from '../../core/models/auth.models';
 import { AuthNavbarComponent } from '../../shared/auth-navbar/auth-navbar.component';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, AuthNavbarComponent],
+  imports: [ReactiveFormsModule, RouterLink, AuthNavbarComponent, TranslocoPipe],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })

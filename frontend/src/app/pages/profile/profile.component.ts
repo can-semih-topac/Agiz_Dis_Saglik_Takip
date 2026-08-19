@@ -8,12 +8,13 @@ import { AuthService } from '../../core/services/auth.service';
 import { ChangePasswordDto, UpdateProfileDto } from '../../core/models/user.models';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
 import { formatTurkishDate } from '../../shared/turkish-date';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 type ProfileField = 'fullName' | 'birthDate' | 'phoneNumber' | 'email';
 
 @Component({
   selector: 'app-profile',
-  imports: [ReactiveFormsModule, RouterLink, NavbarComponent],
+  imports: [ReactiveFormsModule, RouterLink, NavbarComponent, TranslocoPipe],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -102,8 +103,9 @@ export class ProfileComponent implements OnInit {
 
   // Görünüm modunda "2000-04-01" yerine "1 Nisan 2000" — <input type="date"> için gereken
   // ISO formatı (originalProfile.birthDate) olduğu gibi kalıyor, sadece ekrana yazarken çeviriyoruz.
-  formatBirthDate(birthDate: string | null): string {
-    return birthDate ? formatTurkishDate(birthDate) : 'Belirtilmemiş';
+  // null durumu (profile.notSet çeviri anahtarı) şablonda ayrıca ele alınıyor.
+  formatBirthDate(birthDate: string): string {
+    return formatTurkishDate(birthDate);
   }
 
   startEdit(field: ProfileField): void {

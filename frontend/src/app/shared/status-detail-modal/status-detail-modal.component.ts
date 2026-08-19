@@ -8,10 +8,11 @@ import { TrackingType } from '../../core/models/goal.models';
 import { GoalStatusService } from '../../core/services/goal-status.service';
 import { StatusNoteService } from '../../core/services/status-note.service';
 import { formatTurkishDateTime } from '../turkish-date';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-status-detail-modal',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslocoPipe],
   templateUrl: './status-detail-modal.component.html',
   styleUrl: './status-detail-modal.component.css'
 })

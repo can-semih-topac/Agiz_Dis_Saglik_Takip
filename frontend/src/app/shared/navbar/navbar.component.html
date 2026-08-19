@@ -1,21 +1,21 @@
 <header class="navbar">
-  <span class="navbar-greeting">{{ displayTitle }}</span>
+  <span class="navbar-greeting">{{ pageTitle || ('navbar.greeting' | transloco: { name: fullName }) }}</span>
 
   <nav class="navbar-actions">
     <a routerLink="/health" class="navbar-btn">
-      <span class="navbar-btn-icon">🦷</span> Alışkanlık Yönetimi
+      <span class="navbar-btn-icon">🦷</span> {{ 'navbar.habitManagement' | transloco }}
     </a>
     <button type="button" class="navbar-btn" (click)="showContactModal = true">
-      <span class="navbar-btn-icon">✉</span> Bize Ulaşın
+      <span class="navbar-btn-icon">✉</span> {{ 'common.contactUs' | transloco }}
     </button>
     @if (isAdmin) {
       <a routerLink="/admin" class="navbar-btn">
-        <span class="navbar-btn-icon">🛡️</span> Admin Paneli
+        <span class="navbar-btn-icon">🛡️</span> {{ 'navbar.adminPanel' | transloco }}
       </a>
     }
-    <a routerLink="/profile" class="navbar-avatar" title="Profil">👤</a>
-    <a routerLink="/settings" class="navbar-avatar" title="Ayarlar">⚙️</a>
-    <button (click)="logout()">Çıkış Yap</button>
+    <a routerLink="/profile" class="navbar-avatar" [title]="'navbar.profileTitle' | transloco">👤</a>
+    <a routerLink="/settings" class="navbar-avatar" [title]="'navbar.settingsTitle' | transloco">⚙️</a>
+    <button (click)="logout()">{{ 'navbar.logout' | transloco }}</button>
   </nav>
 </header>
 

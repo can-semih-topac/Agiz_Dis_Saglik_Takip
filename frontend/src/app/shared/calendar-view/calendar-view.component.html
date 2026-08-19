@@ -1,13 +1,13 @@
 <div class="calendar">
   <div class="calendar-header">
-    <button type="button" class="calendar-nav" (click)="prevMonth()" aria-label="Önceki ay">‹</button>
-    <span class="calendar-title">{{ monthLabel }}</span>
-    <button type="button" class="calendar-nav" (click)="nextMonth()" aria-label="Sonraki ay">›</button>
+    <button type="button" class="calendar-nav" (click)="prevMonth()" [attr.aria-label]="'calendarView.prevAria' | transloco">‹</button>
+    <span class="calendar-title">{{ monthNames[viewMonth] | transloco }} {{ viewYear }}</span>
+    <button type="button" class="calendar-nav" (click)="nextMonth()" [attr.aria-label]="'calendarView.nextAria' | transloco">›</button>
   </div>
 
   <div class="calendar-grid calendar-day-headers">
     @for (h of dayHeaders; track h) {
-      <span class="calendar-day-header">{{ h }}</span>
+      <span class="calendar-day-header">{{ h | transloco }}</span>
     }
   </div>
 

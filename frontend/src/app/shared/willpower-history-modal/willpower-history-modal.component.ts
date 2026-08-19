@@ -2,10 +2,11 @@ import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
 import { WillpowerService } from '../../core/services/willpower.service';
 import { WillpowerGranularity, WillpowerHistoryPointDto } from '../../core/models/willpower.models';
 import { TURKISH_MONTHS } from '../turkish-date';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-willpower-history-modal',
-  imports: [],
+  imports: [TranslocoPipe],
   templateUrl: './willpower-history-modal.component.html',
   styleUrl: './willpower-history-modal.component.css'
 })
@@ -18,11 +19,12 @@ export class WillpowerHistoryModalComponent implements OnInit {
   points: WillpowerHistoryPointDto[] = [];
   loading = false;
 
+  // label burada çeviri anahtarı olarak tutuluyor, gerçek metin şablonda transloco pipe'ıyla çözülüyor.
   readonly granularityOptions: { value: WillpowerGranularity; label: string }[] = [
-    { value: 'day', label: 'Gün' },
-    { value: 'week', label: 'Hafta' },
-    { value: 'month', label: 'Ay' },
-    { value: 'year', label: 'Yıl' }
+    { value: 'day', label: 'common.day' },
+    { value: 'week', label: 'common.week' },
+    { value: 'month', label: 'common.month' },
+    { value: 'year', label: 'willpowerHistoryModal.year' }
   ];
 
   // SVG viewBox koordinatları — çizim tamamen bu sabitlere göre hesaplanıyor.

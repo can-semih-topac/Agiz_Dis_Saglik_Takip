@@ -2,55 +2,55 @@
   <div class="contact-backdrop" (click)="closeSuccessDialog()">
     <div class="contact-success-box" (click)="$event.stopPropagation()">
       <p>{{ successMessage }}</p>
-      <button type="button" (click)="closeSuccessDialog()">Tamam</button>
+      <button type="button" (click)="closeSuccessDialog()">{{ 'common.ok' | transloco }}</button>
     </div>
   </div>
 } @else {
 <div class="contact-backdrop" (click)="close()">
   <div class="contact-box" (click)="$event.stopPropagation()">
-    <button type="button" class="contact-close-btn" (click)="close()" aria-label="Kapat">✕</button>
-    <h3>Bize Ulaşın</h3>
-    <p class="contact-intro">Görüş, öneri ve sorunlarınızı bize iletebilirsiniz.</p>
+    <button type="button" class="contact-close-btn" (click)="close()" [attr.aria-label]="'common.close' | transloco">✕</button>
+    <h3>{{ 'common.contactUs' | transloco }}</h3>
+    <p class="contact-intro">{{ 'contactModal.intro' | transloco }}</p>
 
     <form class="contact-form" [formGroup]="form" (ngSubmit)="submit()">
       <div>
-        <label for="contactFullName">Ad Soyad</label>
+        <label for="contactFullName">{{ 'common.fullNameLabel' | transloco }}</label>
         <input id="contactFullName" type="text" formControlName="fullName" />
         @if (form.get('fullName')?.invalid && submitted) {
-          <span class="error">Bu alan zorunlu.</span>
+          <span class="error">{{ 'common.fieldRequired' | transloco }}</span>
         }
       </div>
 
       <div>
-        <label for="contactEmail">E-posta</label>
+        <label for="contactEmail">{{ 'common.emailLabel' | transloco }}</label>
         <input id="contactEmail" type="text" formControlName="email" />
         @if (form.get('email')?.invalid && submitted) {
-          <span class="error">Geçerli bir e-posta gir.</span>
+          <span class="error">{{ 'common.emailError' | transloco }}</span>
         }
       </div>
 
       <div>
-        <label for="contactMessage">Mesajınız</label>
+        <label for="contactMessage">{{ 'contactModal.messageLabel' | transloco }}</label>
         <textarea id="contactMessage" formControlName="message" rows="7"></textarea>
         @if (form.get('message')?.invalid && submitted) {
-          <span class="error">Bu alan zorunlu.</span>
+          <span class="error">{{ 'common.fieldRequired' | transloco }}</span>
         }
       </div>
 
       <div>
-        <label for="contactImage">Fotoğraf ekle (opsiyonel, .jpg/.png)</label>
+        <label for="contactImage">{{ 'contactModal.imageLabel' | transloco }}</label>
         <input id="contactImage" type="file" accept=".jpg,.jpeg,.png" (change)="onImageSelected($event)" />
-        @if (imageWarning) {
-          <span class="warning">{{ imageWarning }}</span>
+        @if (showImageWarning) {
+          <span class="warning">{{ 'contactModal.imageWarning' | transloco }}</span>
         }
       </div>
 
       <button type="submit" [disabled]="isSubmitting">
-        {{ isSubmitting ? 'Gönderiliyor...' : 'Gönder' }}
+        {{ isSubmitting ? ('common.submitting' | transloco) : ('contactModal.sendButton' | transloco) }}
       </button>
 
       @if (submitted && form.invalid) {
-        <p class="error">Lütfen zorunlu alanları doldurun.</p>
+        <p class="error">{{ 'common.fillRequiredFields' | transloco }}</p>
       }
       @if (errorMessage) {
         <p class="error">{{ errorMessage }}</p>
@@ -58,12 +58,12 @@
     </form>
 
     <p class="contact-direct">
-      Dilerseniz doğrudan e-posta da gönderebilirsiniz:
-      <button type="button" class="contact-email-copy" (click)="copyEmail()" title="Panoya kopyalamak için tıkla">
+      {{ 'contactModal.directContact' | transloco }}
+      <button type="button" class="contact-email-copy" (click)="copyEmail()" [title]="'contactModal.copyTooltip' | transloco">
         {{ supportEmail }}
       </button>
       @if (emailCopied) {
-        <span class="contact-email-copied">Panoya kopyalandı</span>
+        <span class="contact-email-copied">{{ 'contactModal.copied' | transloco }}</span>
       }
     </p>
   </div>

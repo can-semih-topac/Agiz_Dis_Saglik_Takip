@@ -1,12 +1,12 @@
 <header class="auth-navbar">
-  <span class="auth-navbar-title">Ağız ve Diş Sağlığı Takip</span>
+  <span class="auth-navbar-title">{{ 'common.appName' | transloco }}</span>
 
   <div class="auth-navbar-actions">
     <app-language-toggle></app-language-toggle>
     <app-theme-toggle></app-theme-toggle>
 
     <button type="button" class="navbar-btn" (click)="showContactModal = true">
-      <span class="navbar-btn-icon">✉</span> Bize Ulaşın
+      <span class="navbar-btn-icon">✉</span> {{ 'common.contactUs' | transloco }}
     </button>
   </div>
 </header>

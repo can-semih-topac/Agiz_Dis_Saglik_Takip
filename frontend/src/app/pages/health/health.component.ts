@@ -14,10 +14,11 @@ import { NavbarComponent } from '../../shared/navbar/navbar.component';
 import { StatusDetailModalComponent } from '../../shared/status-detail-modal/status-detail-modal.component';
 import { formatTurkishDateTime } from '../../shared/turkish-date';
 import { Title } from '@angular/platform-browser';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-health',
-  imports: [ReactiveFormsModule, FormsModule, RouterLink, NavbarComponent, StatusDetailModalComponent],
+  imports: [ReactiveFormsModule, FormsModule, RouterLink, NavbarComponent, StatusDetailModalComponent, TranslocoPipe],
   templateUrl: './health.component.html',
   styleUrl: './health.component.css'
 })
@@ -67,21 +68,22 @@ export class HealthComponent implements OnInit {
   pauseSubmitting = false;
   resumingGoalId: number | null = null;
 
+  // label burada çeviri anahtarı olarak tutuluyor, gerçek metin şablonda transloco pipe'ıyla çözülüyor.
   periodUnits = [
-    { value: PeriodUnit.Gun, label: 'Gün' },
-    { value: PeriodUnit.Hafta, label: 'Hafta' },
-    { value: PeriodUnit.Ay, label: 'Ay' }
+    { value: PeriodUnit.Gun, label: 'common.day' },
+    { value: PeriodUnit.Hafta, label: 'common.week' },
+    { value: PeriodUnit.Ay, label: 'common.month' }
   ];
 
   importanceLevels = [
-    { value: Importance.Dusuk, label: 'Düşük' },
-    { value: Importance.Orta, label: 'Orta' },
-    { value: Importance.Yuksek, label: 'Yüksek' }
+    { value: Importance.Dusuk, label: 'health.importanceLow' },
+    { value: Importance.Orta, label: 'health.importanceMedium' },
+    { value: Importance.Yuksek, label: 'health.importanceHigh' }
   ];
 
   trackingTypes = [
-    { value: TrackingType.Sureli, label: 'Süreli Kaydet' },
-    { value: TrackingType.Yapildi, label: 'Sadece Yapıldı Olarak İşaretle' }
+    { value: TrackingType.Sureli, label: 'health.trackingSureliOption' },
+    { value: TrackingType.Yapildi, label: 'health.trackingYapildiOption' }
   ];
 
   goalForm = this.fb.group({

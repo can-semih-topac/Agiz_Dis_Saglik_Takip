@@ -2,26 +2,26 @@
 
 @if (showPasswordBanner) {
   <div class="password-banner">
-    <p>🔒 Güvenliğinizi artırmak için lütfen bir şifre belirleyin.</p>
-    <button type="button" (click)="goToSetPassword()">Şifre Belirle</button>
+    <p>{{ 'home.securityBanner' | transloco }}</p>
+    <button type="button" (click)="goToSetPassword()">{{ 'common.setPasswordButton' | transloco }}</button>
   </div>
 }
 
 @if (showTempPasswordBanner) {
   <div class="password-banner">
-    <p>🔒 Geçici şifrenizi değiştirmenizi öneririz.</p>
-    <button type="button" (click)="goToSetPassword()">Şifre Değiştir</button>
+    <p>{{ 'home.tempPasswordBanner' | transloco }}</p>
+    <button type="button" (click)="goToSetPassword()">{{ 'home.changePasswordButton' | transloco }}</button>
   </div>
 }
 
-<div class="willpower-card" (click)="openWillpowerHistory()" title="Geçmiş grafiğini görmek için tıkla">
+<div class="willpower-card" (click)="openWillpowerHistory()" [title]="'home.willpowerCardTooltip' | transloco">
   <div class="willpower-summary">
     <div class="willpower-ring" [style.background]="'conic-gradient(var(--primary) ' + willpowerScore + '%, var(--surface-alt) 0)'">
       <div class="willpower-ring-inner">{{ willpowerScore }}</div>
     </div>
     <div class="willpower-text">
-      <h4>İrade Puanı <span class="willpower-badge">{{ willpowerLabel }}</span></h4>
-      <p>Hedeflerinin önem derecesine ve seri uzunluğuna göre hesaplanır; tamamlanmayan günlük hedefler puan kırar. Yükseldikçe bir sonraki kademeye geçmek zorlaşır.</p>
+      <h4>{{ 'home.willpowerTitle' | transloco }} <span class="willpower-badge">{{ willpowerLabel }}</span></h4>
+      <p>{{ 'home.willpowerDescription' | transloco }}</p>
     </div>
   </div>
 
@@ -36,7 +36,7 @@
   }
 </div>
 
-<h3>Bugün</h3>
+<h3>{{ 'home.todaySection' | transloco }}</h3>
 <div class="today-grid">
   <section
     class="today-column todo-drop-zone"
@@ -44,13 +44,13 @@
     (dragover)="onTodoDragOver($event)"
     (dragleave)="onTodoDragLeave()"
     (drop)="onTodoDrop($event)">
-    <h4>Yapılması Gerekenler</h4>
+    <h4>{{ 'home.todoHeading' | transloco }}</h4>
     @if (todoTodayList.length === 0) {
       <p class="today-empty">
         @if (isTodoDropTarget) {
-          Bırakınca bu kayıt silinir ve hedef tekrar buraya döner.
+          {{ 'home.dropHint' | transloco }}
         } @else {
-          Bugün için bekleyen bir şey yok 🎉
+          {{ 'home.todoEmpty' | transloco }}
         }
       </p>
     } @else {
@@ -65,15 +65,15 @@
             </div>
 
             @if (item.goal.trackingType === TrackingType.Yapildi) {
-              <button type="button" class="todo-quick-btn" (click)="quickAddYapildi(item.goal)">✓ Yapıldı İşaretle</button>
+              <button type="button" class="todo-quick-btn" (click)="quickAddYapildi(item.goal)">{{ 'home.markDoneButton' | transloco }}</button>
             } @else if (expandedQuickGoalId === item.goal.id) {
               <div class="todo-quick-form">
-                <input type="number" min="0" [(ngModel)]="quickDuration" placeholder="dk" />
-                <button type="button" class="btn-secondary" (click)="cancelQuickAdd()">Vazgeç</button>
-                <button type="button" class="todo-quick-btn" (click)="confirmQuickAddSureli(item.goal)">Kaydet</button>
+                <input type="number" min="0" [(ngModel)]="quickDuration" [placeholder]="'common.minutesAbbrev' | transloco" />
+                <button type="button" class="btn-secondary" (click)="cancelQuickAdd()">{{ 'common.cancel' | transloco }}</button>
+                <button type="button" class="todo-quick-btn" (click)="confirmQuickAddSureli(item.goal)">{{ 'common.save' | transloco }}</button>
               </div>
             } @else {
-              <button type="button" class="todo-quick-btn" (click)="startQuickAddSureli(item.goal)">+ Ekle</button>
+              <button type="button" class="todo-quick-btn" (click)="startQuickAddSureli(item.goal)">{{ 'home.addButton' | transloco }}</button>
             }
           </li>
         }
@@ -85,9 +85,9 @@
   </section>
 
   <section class="today-column">
-    <h4>Bugün Yapılanlar</h4>
+    <h4>{{ 'home.doneHeading' | transloco }}</h4>
     @if (todaysStatus.length === 0) {
-      <p class="today-empty">Bugün henüz kayıt yok.</p>
+      <p class="today-empty">{{ 'home.todayNoRecords' | transloco }}</p>
     } @else {
       <ul class="status-list">
         @for (item of todaysStatus; track item.id) {
@@ -98,15 +98,15 @@
             (dragstart)="onStatusDragStart($event, item)"
             (dragend)="onStatusDragEnd()"
             (click)="openDetail(item)"
-            title="Yanlışlıkla mı işaretledin? Yapılması gerekenlere sürükleyip bırak.">
+            [title]="'home.dragHint' | transloco">
             <div class="status-card-main">
               <span class="status-card-title">{{ item.goalTitle }}</span>
               <span class="status-card-streak">🔥 {{ item.streakCount }}</span>
               @if (noteFor(item)?.description) {
-                <span class="status-card-icon" title="Not var">📝</span>
+                <span class="status-card-icon" [title]="'common.hasNoteTooltip' | transloco">📝</span>
               }
               @if (noteFor(item)?.imagePath) {
-                <span class="status-card-icon" title="Görsel var">🖼️</span>
+                <span class="status-card-icon" [title]="'common.hasImageTooltip' | transloco">🖼️</span>
               }
             </div>
             <span class="status-card-date">{{ item.activityTime.slice(0, 5) }}</span>
@@ -118,7 +118,7 @@
 </div>
 
 @if (pausedGoals.length > 0) {
-  <h3>Duraklatılan Alışkanlıklar</h3>
+  <h3>{{ 'home.pausedSection' | transloco }}</h3>
   <ul class="paused-goal-list">
     @for (g of pausedGoals; track g.id) {
       <li class="paused-goal-item">
@@ -130,14 +130,14 @@
           }
         </div>
         <button type="button" (click)="resumeGoal(g)" [disabled]="resumingGoalId === g.id">
-          {{ resumingGoalId === g.id ? 'Devam ediliyor...' : 'Devam Et' }}
+          {{ resumingGoalId === g.id ? ('common.resuming' | transloco) : ('common.resumeButton' | transloco) }}
         </button>
       </li>
     }
   </ul>
 }
 
-<h3>Takvim</h3>
+<h3>{{ 'home.calendarSection' | transloco }}</h3>
 <div class="calendar-grid-layout">
   <app-calendar-view
     [recordDates]="recordDates"
@@ -149,7 +149,7 @@
     @if (selectedCalendarDate) {
       <h4>{{ selectedDateLabel }}</h4>
       @if (selectedDateRecords.length === 0) {
-        <p class="today-empty">Bu günde kayıt yok.</p>
+        <p class="today-empty">{{ 'home.noRecordsForDate' | transloco }}</p>
       } @else {
         <ul class="status-list">
           @for (item of selectedDateRecords; track item.id) {
@@ -158,10 +158,10 @@
                 <span class="status-card-title">{{ item.goalTitle }}</span>
                 <span class="status-card-streak">🔥 {{ item.streakCount }}</span>
                 @if (noteFor(item)?.description) {
-                  <span class="status-card-icon" title="Not var">📝</span>
+                  <span class="status-card-icon" [title]="'common.hasNoteTooltip' | transloco">📝</span>
                 }
                 @if (noteFor(item)?.imagePath) {
-                  <span class="status-card-icon" title="Görsel var">🖼️</span>
+                  <span class="status-card-icon" [title]="'common.hasImageTooltip' | transloco">🖼️</span>
                 }
               </div>
               <span class="status-card-date">{{ item.activityTime.slice(0, 5) }}</span>
@@ -173,23 +173,23 @@
   </div>
 </div>
 
-<h3>En Uzun Seriler</h3>
+<h3>{{ 'home.longestStreaksSection' | transloco }}</h3>
 @if (longestStreaks.length === 0) {
-  <p>Henüz veri yok.</p>
+  <p>{{ 'common.noData' | transloco }}</p>
 } @else {
   <ul class="streak-list">
     @for (s of longestStreaks.slice(0, 5); track s.goalId) {
       <li class="streak-item" [class.is-low]="s.longestStreak <= 1" [title]="s.goalTitle">
         <span class="streak-item-title">{{ s.goalTitle }}</span>
-        <span class="streak-item-value">🔥 {{ s.longestStreak }} gün</span>
+        <span class="streak-item-value">{{ 'home.streakDays' | transloco: { count: s.longestStreak } }}</span>
       </li>
     }
   </ul>
 }
 
-<h3>Öneri</h3>
+<h3>{{ 'home.suggestionSection' | transloco }}</h3>
 <p>{{ suggestionText }}</p>
-<button (click)="loadSuggestion()">Başka Öneri</button>
+<button (click)="loadSuggestion()">{{ 'home.anotherSuggestionButton' | transloco }}</button>
 
 @if (selectedStatus) {
   <app-status-detail-modal

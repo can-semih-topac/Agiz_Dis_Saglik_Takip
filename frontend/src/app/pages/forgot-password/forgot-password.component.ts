@@ -5,10 +5,11 @@ import { Router, RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { AuthService } from '../../core/services/auth.service';
 import { AuthNavbarComponent } from '../../shared/auth-navbar/auth-navbar.component';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-forgot-password',
-  imports: [ReactiveFormsModule, RouterLink, AuthNavbarComponent],
+  imports: [ReactiveFormsModule, RouterLink, AuthNavbarComponent, TranslocoPipe],
   templateUrl: './forgot-password.component.html',
   styleUrl: './forgot-password.component.css'
 })
