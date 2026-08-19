@@ -355,6 +355,14 @@
   background: var(--danger-hover);
 }
 
+/* p-dialog kendi içeriğini sarmalamıyor — vazgeç/sil butonlarını sağa yaslı, yan yana dizmek için. */
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 .modal-cancel {
   background: var(--text-muted);
 }

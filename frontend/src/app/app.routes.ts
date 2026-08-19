@@ -6,7 +6,6 @@ import { ProfileComponent } from './pages/profile/profile.component';
 import { HealthComponent } from './pages/health/health.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 import { SettingsComponent } from './pages/settings/settings.component';
-import { AdminComponent } from './pages/admin/admin.component';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 
@@ -18,6 +17,12 @@ export const routes: Routes = [
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'health', component: HealthComponent, canActivate: [authGuard] },
   { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
-  { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
+  {
+    path: 'admin',
+    // Lazy loading: bu satır çalışana kadar AdminComponent'in (ve içindeki PrimeNG tablosunun)
+    // kodu hiç indirilmiyor — sadece birisi gerçekten /admin'e girdiğinde ayrı bir dosya olarak çekiliyor.
+    loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent),
+    canActivate: [adminGuard]
+  },
   { path: '', redirectTo: 'login', pathMatch: 'full' }
 ];

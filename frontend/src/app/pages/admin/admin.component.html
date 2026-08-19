@@ -128,38 +128,36 @@
       <p>Henüz kullanıcı yok.</p>
     } @else {
       <div class="user-table-wrapper">
-        <table class="user-table">
-          <thead>
+        <p-table [value]="users" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" sortMode="single">
+          <ng-template pTemplate="header">
             <tr>
-              <th>Ad Soyad</th>
-              <th>E-posta</th>
+              <th pSortableColumn="fullName">Ad Soyad <p-sortIcon field="fullName" /></th>
+              <th pSortableColumn="email">E-posta <p-sortIcon field="email" /></th>
               <th>Telefon</th>
-              <th>Doğum Tarihi</th>
-              <th>Rol</th>
-              <th>İrade Puanı</th>
-              <th>Kayıt Tarihi</th>
+              <th pSortableColumn="birthDate">Doğum Tarihi <p-sortIcon field="birthDate" /></th>
+              <th pSortableColumn="role">Rol <p-sortIcon field="role" /></th>
+              <th pSortableColumn="willpowerScore">İrade Puanı <p-sortIcon field="willpowerScore" /></th>
+              <th pSortableColumn="createdAt">Kayıt Tarihi <p-sortIcon field="createdAt" /></th>
               <th></th>
             </tr>
-          </thead>
-          <tbody>
-            @for (u of users; track u.id) {
-              <tr>
-                <td>{{ u.fullName }}</td>
-                <td><a href="mailto:{{ u.email }}">{{ u.email }}</a></td>
-                <td>{{ u.phoneNumber || '—' }}</td>
-                <td>{{ formatBirthDate(u.birthDate) }}</td>
-                <td>
-                  <span class="role-badge" [class.is-admin]="u.role === Role.Admin">
-                    {{ u.role === Role.Admin ? 'Admin' : 'Kullanıcı' }}
-                  </span>
-                </td>
-                <td>{{ u.willpowerScore }}</td>
-                <td>{{ formatDate(u.createdAt) }}</td>
-                <td><button type="button" class="user-delete-btn" (click)="requestDeleteUser(u)">Sil</button></td>
-              </tr>
-            }
-          </tbody>
-        </table>
+          </ng-template>
+          <ng-template pTemplate="body" let-u>
+            <tr>
+              <td>{{ u.fullName }}</td>
+              <td><a href="mailto:{{ u.email }}">{{ u.email }}</a></td>
+              <td>{{ u.phoneNumber || '—' }}</td>
+              <td>{{ formatBirthDate(u.birthDate) }}</td>
+              <td>
+                <span class="role-badge" [class.is-admin]="u.role === Role.Admin">
+                  {{ u.role === Role.Admin ? 'Admin' : 'Kullanıcı' }}
+                </span>
+              </td>
+              <td>{{ u.willpowerScore }}</td>
+              <td>{{ formatDate(u.createdAt) }}</td>
+              <td><button type="button" class="user-delete-btn" (click)="requestDeleteUser(u)">Sil</button></td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
     }
   }
@@ -198,17 +196,16 @@
 }
 
 @if (pendingDeleteUser) {
-  <div class="modal-backdrop">
-    <div class="modal-box modal-box-danger">
-      <h4>Kullanıcıyı Sil</h4>
-      <p>{{ pendingDeleteUser.fullName || pendingDeleteUser.email }} kişisini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
-      @if (deleteErrorMessage) {
-        <p class="error">{{ deleteErrorMessage }}</p>
-      }
+  <p-dialog header="Kullanıcıyı Sil" [visible]="true" (visibleChange)="cancelDeleteUser()" [modal]="true" [style]="{ width: '25rem' }">
+    <p>{{ pendingDeleteUser.fullName || pendingDeleteUser.email }} kişisini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+    @if (deleteErrorMessage) {
+      <p class="error">{{ deleteErrorMessage }}</p>
+    }
+    <div class="dialog-actions">
       <button type="button" class="modal-cancel" (click)="cancelDeleteUser()">Vazgeç</button>
       <button type="button" class="delete-confirm-btn" [disabled]="deleteSubmitting" (click)="confirmDeleteUser()">
         {{ deleteSubmitting ? 'Siliniyor...' : 'Evet, Sil' }}
       </button>
     </div>
-  </div>
+  </p-dialog>
 }

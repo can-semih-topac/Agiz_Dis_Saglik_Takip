@@ -13,12 +13,14 @@ import { AdminActionLogDto } from '../../core/models/admin-action-log.models';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
 import { AddUserModalComponent } from '../../shared/add-user-modal/add-user-modal.component';
 import { formatTurkishDate, formatTurkishDateTime } from '../../shared/turkish-date';
+import { TableModule } from 'primeng/table';
+import { DialogModule } from 'primeng/dialog';
 
 type AdminTab = 'messages' | 'logs' | 'adminActions' | 'users';
 
 @Component({
   selector: 'app-admin',
-  imports: [NavbarComponent, AddUserModalComponent],
+  imports: [NavbarComponent, AddUserModalComponent, TableModule, DialogModule],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.css'
 })
