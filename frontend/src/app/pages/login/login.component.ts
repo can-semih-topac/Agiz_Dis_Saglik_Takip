@@ -7,10 +7,11 @@ import { AuthService } from '../../core/services/auth.service';
 import { LoginDto } from '../../core/models/auth.models';
 import { environment } from '../../../environments/environment';
 import { AuthNavbarComponent } from '../../shared/auth-navbar/auth-navbar.component';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, AuthNavbarComponent],
+  imports: [ReactiveFormsModule, RouterLink, AuthNavbarComponent, TranslocoPipe],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })

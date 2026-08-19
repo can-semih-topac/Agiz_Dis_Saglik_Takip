@@ -1,0 +1,8 @@
+<button
+  type="button"
+  class="lang-switch"
+  (click)="toggle()"
+  [attr.aria-label]="activeLang() === 'tr' ? 'Switch to English' : 'Türkçe\'ye geç'"
+  [title]="activeLang() === 'tr' ? 'Switch to English' : 'Türkçe\'ye geç'">
+  {{ activeLang() === 'tr' ? 'TR' : 'EN' }}
+</button>

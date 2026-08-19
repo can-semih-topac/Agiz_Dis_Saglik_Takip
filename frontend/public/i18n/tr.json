@@ -1,0 +1,14 @@
+{
+  "login": {
+    "title": "Giriş Yap",
+    "emailLabel": "E-posta",
+    "emailError": "Geçerli bir e-posta gir.",
+    "passwordLabel": "Şifre",
+    "passwordError": "Şifre gerekli.",
+    "submit": "Giriş Yap",
+    "submitting": "Gönderiliyor...",
+    "or": "veya",
+    "registerLink": "Kayıt Ol",
+    "forgotPasswordLink": "Şifremi Unuttum"
+  }
+}

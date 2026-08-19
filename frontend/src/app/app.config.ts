@@ -4,9 +4,12 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
+import { provideTransloco } from '@jsverse/transloco';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { TranslocoHttpLoader } from './core/i18n/transloco-loader';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,6 +24,16 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: Aura
       }
+    }),
+    provideTransloco({
+      config: {
+        availableLangs: ['tr', 'en'],
+        defaultLang: 'tr',
+        // Dil değişince ekrandaki metinler anında güncellensin diye.
+        reRenderOnLangChange: true,
+        prodMode: environment.production
+      },
+      loader: TranslocoHttpLoader
     })
   ]
 };

@@ -1,0 +1,14 @@
+{
+  "login": {
+    "title": "Log In",
+    "emailLabel": "Email",
+    "emailError": "Enter a valid email.",
+    "passwordLabel": "Password",
+    "passwordError": "Password is required.",
+    "submit": "Log In",
+    "submitting": "Submitting...",
+    "or": "or",
+    "registerLink": "Sign Up",
+    "forgotPasswordLink": "Forgot Password"
+  }
+}
