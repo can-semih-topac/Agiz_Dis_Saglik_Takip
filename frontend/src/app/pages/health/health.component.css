@@ -12,6 +12,21 @@
   margin-top: 0;
 }
 
+/* Mobilde tek sütuna inince "Durum Kaydı Ekle" formu, listeden önce görünsün. */
+@media (max-width: 700px) {
+  .two-col-status > section:nth-child(1) {
+    order: 2;
+  }
+
+  .two-col-status > section:nth-child(2) {
+    order: 1;
+  }
+
+  .two-col-status > section:nth-child(3) {
+    order: 3;
+  }
+}
+
 .col-form form {
   max-width: none;
 }

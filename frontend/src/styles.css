@@ -97,6 +97,14 @@ body {
   line-height: 1.5;
 }
 
+/* Site geneli rem birimiyle ölçekleniyor — kök font-size'ı biraz küçültmek
+   mobilde tüm yazı/boşlukları orantılı olarak sadeleştiriyor. */
+@media (max-width: 700px) {
+  html {
+    font-size: 93.75%;
+  }
+}
+
 app-root {
   display: block;
   max-width: 1800px;
