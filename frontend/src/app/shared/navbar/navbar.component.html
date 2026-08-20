@@ -1,20 +1,29 @@
 <header class="navbar">
   <span class="navbar-greeting">{{ pageTitle || ('navbar.greeting' | transloco: { name: fullName }) }}</span>
 
-  <nav class="navbar-actions">
-    <a routerLink="/health" class="navbar-btn">
+  <button
+    type="button"
+    class="navbar-menu-toggle"
+    (click)="toggleMenu()"
+    [attr.aria-label]="'navbar.menuToggle' | transloco"
+    [attr.aria-expanded]="isMenuOpen">
+    ☰
+  </button>
+
+  <nav class="navbar-actions" [class.is-open]="isMenuOpen">
+    <a routerLink="/health" class="navbar-btn" (click)="closeMenu()">
       <span class="navbar-btn-icon">🦷</span> {{ 'navbar.habitManagement' | transloco }}
     </a>
-    <button type="button" class="navbar-btn" (click)="showContactModal = true">
+    <button type="button" class="navbar-btn" (click)="showContactModal = true; closeMenu()">
       <span class="navbar-btn-icon">✉</span> {{ 'common.contactUs' | transloco }}
     </button>
     @if (isAdmin) {
-      <a routerLink="/admin" class="navbar-btn">
+      <a routerLink="/admin" class="navbar-btn" (click)="closeMenu()">
         <span class="navbar-btn-icon">🛡️</span> {{ 'navbar.adminPanel' | transloco }}
       </a>
     }
-    <a routerLink="/profile" class="navbar-avatar" [title]="'navbar.profileTitle' | transloco">👤</a>
-    <a routerLink="/settings" class="navbar-avatar" [title]="'navbar.settingsTitle' | transloco">⚙️</a>
+    <a routerLink="/profile" class="navbar-avatar" [title]="'navbar.profileTitle' | transloco" (click)="closeMenu()">👤</a>
+    <a routerLink="/settings" class="navbar-avatar" [title]="'navbar.settingsTitle' | transloco" (click)="closeMenu()">⚙️</a>
     <button (click)="logout()">{{ 'navbar.logout' | transloco }}</button>
   </nav>
 </header>

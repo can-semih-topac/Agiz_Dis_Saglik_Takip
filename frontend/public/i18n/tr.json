@@ -84,6 +84,7 @@
     "profileTitle": "Profil",
     "settingsTitle": "Ayarlar",
     "logout": "Çıkış Yap",
+    "menuToggle": "Menü",
     "greeting": "Hoş geldin, {{name}}!"
   },
   "contactModal": {

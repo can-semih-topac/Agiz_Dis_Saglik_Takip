@@ -84,6 +84,7 @@
     "profileTitle": "Profile",
     "settingsTitle": "Settings",
     "logout": "Log Out",
+    "menuToggle": "Menu",
     "greeting": "Welcome, {{name}}!"
   },
   "contactModal": {

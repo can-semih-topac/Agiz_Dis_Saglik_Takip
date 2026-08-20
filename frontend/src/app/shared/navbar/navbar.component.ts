@@ -24,6 +24,17 @@ export class NavbarComponent {
 
   showContactModal = false;
 
+  // Dar ekranda buton satırı taşıyor — hamburger menüyle aç/kapa yapılıyor.
+  isMenuOpen = false;
+
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  closeMenu(): void {
+    this.isMenuOpen = false;
+  }
+
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
