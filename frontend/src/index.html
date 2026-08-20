@@ -6,7 +6,7 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async="" defer=""></script>
   <script>
     // Angular yüklenmeden ÖNCE temayı uygula — aksi halde koyu tema seçiliyken
     // sayfa bir an beyaz yanıp sönüyor. ThemeService ile aynı localStorage anahtarı.
@@ -17,8 +17,11 @@
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
     })();
   </script>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0f766e">
 </head>
 <body>
   <app-root></app-root>
+  <noscript>Please enable JavaScript to continue using this application.</noscript>
 </body>
 </html>
