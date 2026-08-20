@@ -1,23 +1,23 @@
-<app-navbar pageTitle="Admin Paneli"></app-navbar>
+<app-navbar [pageTitle]="'navbar.adminPanel' | transloco"></app-navbar>
 
 <div class="admin-tabs">
   <button type="button" class="admin-tab" [class.is-active]="activeTab === 'messages'" (click)="selectTab('messages')">
-    Bize Ulaşın Mesajları
+    {{ 'admin.messagesTab' | transloco }}
   </button>
   <button type="button" class="admin-tab" [class.is-active]="activeTab === 'logs'" (click)="selectTab('logs')">
-    Loglar
+    {{ 'admin.logsTab' | transloco }}
   </button>
   <button type="button" class="admin-tab" [class.is-active]="activeTab === 'adminActions'" (click)="selectTab('adminActions')">
-    Admin İşlem Geçmişi
+    {{ 'admin.adminActionsTab' | transloco }}
   </button>
   <button type="button" class="admin-tab" [class.is-active]="activeTab === 'users'" (click)="selectTab('users')">
-    Kayıtlı Kullanıcılar
+    {{ 'admin.usersTab' | transloco }}
   </button>
 </div>
 
 @if (activeTab === 'messages') {
   @if (messagesLoading) {
-    <p>Yükleniyor...</p>
+    <p>{{ 'common.loading' | transloco }}</p>
   } @else if (messagesError) {
     <p class="error">{{ messagesError }}</p>
   } @else {
@@ -26,15 +26,15 @@
     }
     <div class="message-subtabs">
       <button type="button" class="message-subtab" [class.is-active]="messagesSubTab === 'pending'" (click)="selectMessagesSubTab('pending')">
-        İşlem Bekleyen ({{ pendingMessages.length }})
+        {{ 'admin.pendingSubtab' | transloco: { count: pendingMessages.length } }}
       </button>
       <button type="button" class="message-subtab" [class.is-active]="messagesSubTab === 'reviewed'" (click)="selectMessagesSubTab('reviewed')">
-        İncelendi ({{ reviewedMessages.length }})
+        {{ 'admin.reviewedSubtab' | transloco: { count: reviewedMessages.length } }}
       </button>
     </div>
 
     @if (visibleMessages.length === 0) {
-      <p>Bu sekmede mesaj yok.</p>
+      <p>{{ 'admin.noMessagesInTab' | transloco }}</p>
     } @else {
       <ul class="message-row-list">
         @for (m of visibleMessages; track m.id) {
@@ -42,7 +42,7 @@
             <span class="message-row-name">{{ m.fullName }}</span>
             <span class="message-row-preview">{{ messagePreview(m.message) }}</span>
             @if (m.imagePath) {
-              <span class="message-row-icon" title="Görsel var">🖼️</span>
+              <span class="message-row-icon" [title]="'common.hasImageTooltip' | transloco">🖼️</span>
             }
             <span class="message-row-date">{{ formatDate(m.createdAt) }}</span>
           </li>
@@ -54,11 +54,11 @@
 
 @if (activeTab === 'logs') {
   @if (logsLoading) {
-    <p>Yükleniyor...</p>
+    <p>{{ 'common.loading' | transloco }}</p>
   } @else if (logsError) {
     <p class="error">{{ logsError }}</p>
   } @else if (logs.length === 0) {
-    <p>Henüz log yok.</p>
+    <p>{{ 'admin.noLogs' | transloco }}</p>
   } @else {
     <ul class="log-list">
       @for (l of logs; track l.id) {
@@ -71,7 +71,7 @@
           <p class="log-card-message">{{ l.message }}</p>
           @if (l.exception) {
             <details class="log-card-exception">
-              <summary>Hata detayı</summary>
+              <summary>{{ 'admin.exceptionDetails' | transloco }}</summary>
               <pre>{{ l.exception }}</pre>
             </details>
           }
@@ -83,20 +83,20 @@
 
 @if (activeTab === 'adminActions') {
   @if (adminActionsLoading) {
-    <p>Yükleniyor...</p>
+    <p>{{ 'common.loading' | transloco }}</p>
   } @else if (adminActionsError) {
     <p class="error">{{ adminActionsError }}</p>
   } @else if (adminActions.length === 0) {
-    <p>Henüz işlem yok.</p>
+    <p>{{ 'admin.noActions' | transloco }}</p>
   } @else {
     <div class="user-table-wrapper">
       <table class="user-table">
         <thead>
           <tr>
-            <th>Admin</th>
-            <th>İşlem</th>
-            <th>Hedef</th>
-            <th>Tarih</th>
+            <th>{{ 'admin.adminColumn' | transloco }}</th>
+            <th>{{ 'admin.actionColumn' | transloco }}</th>
+            <th>{{ 'admin.targetColumn' | transloco }}</th>
+            <th>{{ 'common.dateLabel' | transloco }}</th>
           </tr>
         </thead>
         <tbody>
@@ -116,28 +116,28 @@
 
 @if (activeTab === 'users') {
   @if (usersLoading) {
-    <p>Yükleniyor...</p>
+    <p>{{ 'common.loading' | transloco }}</p>
   } @else if (usersError) {
     <p class="error">{{ usersError }}</p>
   } @else {
     <div class="user-table-header">
-      <button type="button" (click)="openAddUserModal()">+ Kullanıcı Ekle</button>
+      <button type="button" (click)="openAddUserModal()">{{ 'admin.addUserButton' | transloco }}</button>
     </div>
 
     @if (users.length === 0) {
-      <p>Henüz kullanıcı yok.</p>
+      <p>{{ 'admin.noUsers' | transloco }}</p>
     } @else {
       <div class="user-table-wrapper">
         <p-table [value]="users" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10, 25, 50]" sortMode="single">
           <ng-template pTemplate="header">
             <tr>
-              <th pSortableColumn="fullName">Ad Soyad <p-sortIcon field="fullName" /></th>
-              <th pSortableColumn="email">E-posta <p-sortIcon field="email" /></th>
-              <th>Telefon</th>
-              <th pSortableColumn="birthDate">Doğum Tarihi <p-sortIcon field="birthDate" /></th>
-              <th pSortableColumn="role">Rol <p-sortIcon field="role" /></th>
-              <th pSortableColumn="willpowerScore">İrade Puanı <p-sortIcon field="willpowerScore" /></th>
-              <th pSortableColumn="createdAt">Kayıt Tarihi <p-sortIcon field="createdAt" /></th>
+              <th pSortableColumn="fullName">{{ 'common.fullNameLabel' | transloco }} <p-sortIcon field="fullName" /></th>
+              <th pSortableColumn="email">{{ 'common.emailLabel' | transloco }} <p-sortIcon field="email" /></th>
+              <th>{{ 'admin.phoneColumn' | transloco }}</th>
+              <th pSortableColumn="birthDate">{{ 'common.birthDateLabel' | transloco }} <p-sortIcon field="birthDate" /></th>
+              <th pSortableColumn="role">{{ 'admin.roleColumn' | transloco }} <p-sortIcon field="role" /></th>
+              <th pSortableColumn="willpowerScore">{{ 'admin.willpowerColumn' | transloco }} <p-sortIcon field="willpowerScore" /></th>
+              <th pSortableColumn="createdAt">{{ 'admin.registeredDateColumn' | transloco }} <p-sortIcon field="createdAt" /></th>
               <th></th>
             </tr>
           </ng-template>
@@ -149,12 +149,12 @@
               <td>{{ formatBirthDate(u.birthDate) }}</td>
               <td>
                 <span class="role-badge" [class.is-admin]="u.role === Role.Admin">
-                  {{ u.role === Role.Admin ? 'Admin' : 'Kullanıcı' }}
+                  {{ (u.role === Role.Admin ? 'common.roleAdmin' : 'common.roleUser') | transloco }}
                 </span>
               </td>
               <td>{{ u.willpowerScore }}</td>
               <td>{{ formatDate(u.createdAt) }}</td>
-              <td><button type="button" class="user-delete-btn" (click)="requestDeleteUser(u)">Sil</button></td>
+              <td><button type="button" class="user-delete-btn" (click)="requestDeleteUser(u)">{{ 'admin.deleteButton' | transloco }}</button></td>
             </tr>
           </ng-template>
         </p-table>
@@ -170,14 +170,14 @@
 @if (selectedMessage) {
   <div class="modal-backdrop" (click)="closeMessageDetail()">
     <div class="modal-box message-detail-box" (click)="$event.stopPropagation()">
-      <button type="button" class="detail-close-btn" (click)="closeMessageDetail()" aria-label="Kapat">✕</button>
+      <button type="button" class="detail-close-btn" (click)="closeMessageDetail()" [attr.aria-label]="'common.close' | transloco">✕</button>
       <h4>{{ selectedMessage.fullName }}</h4>
       <a class="message-card-email" href="mailto:{{ selectedMessage.email }}">{{ selectedMessage.email }}</a>
       <p class="message-detail-date">{{ formatDate(selectedMessage.createdAt) }}</p>
 
       <p class="message-card-text">{{ selectedMessage.message }}</p>
       @if (selectedMessage.imagePath) {
-        <img [src]="apiOrigin + selectedMessage.imagePath" alt="Ek görsel" />
+        <img [src]="apiOrigin + selectedMessage.imagePath" [alt]="'admin.attachmentAlt' | transloco" />
       }
 
       @if (selectedMessage.status === ContactMessageStatus.Pending) {
@@ -186,25 +186,25 @@
           class="mark-reviewed-btn"
           [disabled]="reviewingMessageId === selectedMessage.id"
           (click)="markAsReviewed(selectedMessage)">
-          {{ reviewingMessageId === selectedMessage.id ? 'İşaretleniyor...' : 'İncelendi Olarak İşaretle' }}
+          {{ (reviewingMessageId === selectedMessage.id ? 'admin.marking' : 'admin.markReviewedButton') | transloco }}
         </button>
       } @else {
-        <span class="status-badge is-reviewed">İncelendi</span>
+        <span class="status-badge is-reviewed">{{ 'admin.reviewedBadge' | transloco }}</span>
       }
     </div>
   </div>
 }
 
 @if (pendingDeleteUser) {
-  <p-dialog header="Kullanıcıyı Sil" [visible]="true" (visibleChange)="cancelDeleteUser()" [modal]="true" [style]="{ width: '25rem' }">
-    <p>{{ pendingDeleteUser.fullName || pendingDeleteUser.email }} kişisini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</p>
+  <p-dialog [header]="'admin.deleteUserDialogTitle' | transloco" [visible]="true" (visibleChange)="cancelDeleteUser()" [modal]="true" [style]="{ width: '25rem' }">
+    <p>{{ 'admin.deleteUserConfirm' | transloco: { name: (pendingDeleteUser.fullName || pendingDeleteUser.email) } }}</p>
     @if (deleteErrorMessage) {
       <p class="error">{{ deleteErrorMessage }}</p>
     }
     <div class="dialog-actions">
-      <button type="button" class="modal-cancel" (click)="cancelDeleteUser()">Vazgeç</button>
+      <button type="button" class="modal-cancel" (click)="cancelDeleteUser()">{{ 'common.cancel' | transloco }}</button>
       <button type="button" class="delete-confirm-btn" [disabled]="deleteSubmitting" (click)="confirmDeleteUser()">
-        {{ deleteSubmitting ? 'Siliniyor...' : 'Evet, Sil' }}
+        {{ (deleteSubmitting ? 'admin.deleting' : 'admin.deleteConfirmButton') | transloco }}
       </button>
     </div>
   </p-dialog>

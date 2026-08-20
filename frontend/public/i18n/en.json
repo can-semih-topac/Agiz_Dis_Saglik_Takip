@@ -41,7 +41,11 @@
     "setPasswordButton": "Set Password",
     "newPasswordLabel": "New Password",
     "newPasswordConfirmLabel": "Confirm New Password",
-    "updating": "Updating..."
+    "updating": "Updating...",
+    "roleUser": "User",
+    "roleAdmin": "Admin",
+    "switchToLightTheme": "Switch to light theme",
+    "switchToDarkTheme": "Switch to dark theme"
   },
   "login": {
     "title": "Log In",
@@ -192,5 +196,60 @@
     "deleteAccountConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
     "deleting": "Deleting...",
     "deleteConfirmButton": "Yes, Delete My Account"
+  },
+  "settings": {
+    "appearanceHeading": "Appearance",
+    "hint": "Choose the app's color theme.",
+    "lightLabel": "Light Theme",
+    "lightDesc": "Always use light mode.",
+    "autoLabel": "Automatic",
+    "autoDesc": "Follows your device's theme.",
+    "darkLabel": "Dark Theme",
+    "darkDesc": "Always use dark mode.",
+    "activeHintPrefix": "Your device's preference is currently applied: ",
+    "languageHeading": "Language",
+    "languageHint": "Choose the app language.",
+    "comingSoonBadge": "Coming Soon"
+  },
+  "admin": {
+    "messagesTab": "Contact Messages",
+    "logsTab": "Logs",
+    "adminActionsTab": "Admin Action History",
+    "usersTab": "Registered Users",
+    "pendingSubtab": "Pending ({{count}})",
+    "reviewedSubtab": "Reviewed ({{count}})",
+    "noMessagesInTab": "No messages in this tab.",
+    "noLogs": "No logs yet.",
+    "exceptionDetails": "Error details",
+    "adminColumn": "Admin",
+    "actionColumn": "Action",
+    "targetColumn": "Target",
+    "noActions": "No actions yet.",
+    "addUserButton": "+ Add User",
+    "noUsers": "No users yet.",
+    "phoneColumn": "Phone",
+    "roleColumn": "Role",
+    "willpowerColumn": "Willpower Score",
+    "registeredDateColumn": "Registered On",
+    "deleteButton": "Delete",
+    "deleteUserDialogTitle": "Delete User",
+    "deleteUserConfirm": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+    "deleting": "Deleting...",
+    "deleteConfirmButton": "Yes, Delete",
+    "marking": "Marking...",
+    "markReviewedButton": "Mark as Reviewed",
+    "reviewedBadge": "Reviewed",
+    "attachmentAlt": "Attached image"
+  },
+  "addUserModal": {
+    "title": "Add User",
+    "intro": "Create a new user or admin account.",
+    "roleLabel": "Role",
+    "tempPasswordLabel": "Temporary Password",
+    "tempPasswordLabelOptional": "Temporary Password (optional)",
+    "tempPasswordError": "At least 8 characters, with uppercase, lowercase letters and a number.",
+    "inviteHint": "If left empty, an invitation email is sent to the user.",
+    "addingButton": "Adding...",
+    "addButton": "Add"
   }
 }

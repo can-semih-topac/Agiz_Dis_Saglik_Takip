@@ -5,7 +5,7 @@
   (click)="toggle()"
   role="switch"
   [attr.aria-checked]="resolved() === 'dark'"
-  [attr.aria-label]="resolved() === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'"
-  [title]="resolved() === 'dark' ? 'Açık temaya geç' : 'Koyu temaya geç'">
+  [attr.aria-label]="(resolved() === 'dark' ? 'common.switchToLightTheme' : 'common.switchToDarkTheme') | transloco"
+  [title]="(resolved() === 'dark' ? 'common.switchToLightTheme' : 'common.switchToDarkTheme') | transloco">
   <span class="theme-switch-knob">{{ resolved() === 'dark' ? '🌙' : '☀️' }}</span>
 </button>

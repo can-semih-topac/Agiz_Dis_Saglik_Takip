@@ -1,35 +1,35 @@
 <div class="contact-backdrop" (click)="close()">
   <div class="contact-box" (click)="$event.stopPropagation()">
-    <button type="button" class="contact-close-btn" (click)="close()" aria-label="Kapat">✕</button>
-    <h3>Kullanıcı Ekle</h3>
-    <p class="contact-intro">Yeni bir kullanıcı ya da admin hesabı oluştur.</p>
+    <button type="button" class="contact-close-btn" (click)="close()" [attr.aria-label]="'common.close' | transloco">✕</button>
+    <h3>{{ 'addUserModal.title' | transloco }}</h3>
+    <p class="contact-intro">{{ 'addUserModal.intro' | transloco }}</p>
 
     <form class="contact-form" [formGroup]="form" (ngSubmit)="submit()">
       <div>
-        <label for="addUserRole">Rol</label>
+        <label for="addUserRole">{{ 'addUserModal.roleLabel' | transloco }}</label>
         <select id="addUserRole" formControlName="role" (change)="onRoleChange()">
-          <option [ngValue]="Role.User">Kullanıcı</option>
-          <option [ngValue]="Role.Admin">Admin</option>
+          <option [ngValue]="Role.User">{{ 'common.roleUser' | transloco }}</option>
+          <option [ngValue]="Role.Admin">{{ 'common.roleAdmin' | transloco }}</option>
         </select>
       </div>
 
       <div>
-        <label for="addUserEmail">E-posta</label>
+        <label for="addUserEmail">{{ 'common.emailLabel' | transloco }}</label>
         <input id="addUserEmail" type="text" formControlName="email" />
         @if (form.get('email')?.invalid && submitted) {
-          <span class="error">Geçerli bir e-posta gir.</span>
+          <span class="error">{{ 'common.emailError' | transloco }}</span>
         }
       </div>
 
       <div>
-        <label for="addUserTempPassword">Geçici Şifre{{ isAdminRole ? '' : ' (opsiyonel)' }}</label>
+        <label for="addUserTempPassword">{{ (isAdminRole ? 'addUserModal.tempPasswordLabel' : 'addUserModal.tempPasswordLabelOptional') | transloco }}</label>
         <div class="password-field-wrapper">
           <input id="addUserTempPassword" [type]="showTempPassword ? 'text' : 'password'" formControlName="temporaryPassword" />
           <button
             type="button"
             class="password-visibility-btn"
             (click)="showTempPassword = !showTempPassword"
-            [attr.aria-label]="showTempPassword ? 'Şifreyi gizle' : 'Şifreyi göster'">
+            [attr.aria-label]="(showTempPassword ? 'common.hidePassword' : 'common.showPassword') | transloco">
             @if (showTempPassword) {
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
@@ -45,19 +45,19 @@
           </button>
         </div>
         @if (form.get('temporaryPassword')?.invalid && submitted) {
-          <span class="error">En az 8 karakter olmalı, büyük harf, küçük harf ve rakam içermeli.</span>
+          <span class="error">{{ 'addUserModal.tempPasswordError' | transloco }}</span>
         }
         @if (!isAdminRole) {
-          <span class="hint">Boş bırakılırsa kullanıcıya davet e-postası gönderilir.</span>
+          <span class="hint">{{ 'addUserModal.inviteHint' | transloco }}</span>
         }
       </div>
 
       <button type="submit" [disabled]="isSubmitting">
-        {{ isSubmitting ? 'Ekleniyor...' : 'Ekle' }}
+        {{ (isSubmitting ? 'addUserModal.addingButton' : 'addUserModal.addButton') | transloco }}
       </button>
 
       @if (submitted && form.invalid) {
-        <p class="error">Lütfen zorunlu alanları doldurun.</p>
+        <p class="error">{{ 'common.fillRequiredFields' | transloco }}</p>
       }
       @if (errorMessage) {
         <p class="error">{{ errorMessage }}</p>

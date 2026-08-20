@@ -15,12 +15,13 @@ import { AddUserModalComponent } from '../../shared/add-user-modal/add-user-moda
 import { formatTurkishDate, formatTurkishDateTime } from '../../shared/turkish-date';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 type AdminTab = 'messages' | 'logs' | 'adminActions' | 'users';
 
 @Component({
   selector: 'app-admin',
-  imports: [NavbarComponent, AddUserModalComponent, TableModule, DialogModule],
+  imports: [NavbarComponent, AddUserModalComponent, TableModule, DialogModule, TranslocoPipe],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.css'
 })

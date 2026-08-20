@@ -1,12 +1,12 @@
-<app-navbar pageTitle="Ayarlar"></app-navbar>
+<app-navbar [pageTitle]="'navbar.settingsTitle' | transloco"></app-navbar>
 
 <div class="settings-page">
-  <a routerLink="/home" class="back-link">← Ana Sayfaya Dön</a>
-  <h2>Ayarlar</h2>
+  <a routerLink="/home" class="back-link">{{ 'common.backToHome' | transloco }}</a>
+  <h2>{{ 'navbar.settingsTitle' | transloco }}</h2>
 
   <div class="settings-card">
-    <h4>Görünüm</h4>
-    <p class="settings-hint">Uygulamanın renk temasını seçin.</p>
+    <h4>{{ 'settings.appearanceHeading' | transloco }}</h4>
+    <p class="settings-hint">{{ 'settings.hint' | transloco }}</p>
 
     <div class="theme-options">
       @for (option of themeOptions; track option.value) {
@@ -16,16 +16,39 @@
           [class.is-selected]="preference() === option.value"
           (click)="selectTheme(option.value)">
           <span class="theme-option-icon">{{ option.icon }}</span>
-          <span class="theme-option-label">{{ option.label }}</span>
-          <span class="theme-option-desc">{{ option.description }}</span>
+          <span class="theme-option-label">{{ ('settings.' + option.value + 'Label') | transloco }}</span>
+          <span class="theme-option-desc">{{ ('settings.' + option.value + 'Desc') | transloco }}</span>
         </button>
       }
     </div>
 
     @if (preference() === 'auto') {
       <p class="settings-hint settings-hint-active">
-        Şu an cihazınızın tercihi uygulanıyor: {{ resolved() === 'dark' ? 'Koyu Tema' : 'Açık Tema' }}
+        {{ 'settings.activeHintPrefix' | transloco }}{{ (resolved() === 'dark' ? 'settings.darkLabel' : 'settings.lightLabel') | transloco }}
       </p>
     }
+  </div>
+
+  <div class="settings-card">
+    <h4>{{ 'settings.languageHeading' | transloco }}</h4>
+    <p class="settings-hint">{{ 'settings.languageHint' | transloco }}</p>
+
+    <div class="language-options">
+      @for (lang of activeLanguages; track lang.code) {
+        <button
+          type="button"
+          class="language-option"
+          [class.is-selected]="activeLang() === lang.code"
+          (click)="selectLanguage(lang.code)">
+          <span class="language-option-label">{{ lang.nativeLabel }}</span>
+        </button>
+      }
+      @for (lang of comingSoonLanguages; track lang) {
+        <button type="button" class="language-option is-coming-soon" disabled>
+          <span class="language-option-label">{{ lang }}</span>
+          <span class="language-option-badge">{{ 'settings.comingSoonBadge' | transloco }}</span>
+        </button>
+      }
+    </div>
   </div>
 </div>

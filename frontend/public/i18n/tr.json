@@ -41,7 +41,11 @@
     "setPasswordButton": "Şifre Belirle",
     "newPasswordLabel": "Yeni Şifre",
     "newPasswordConfirmLabel": "Yeni Şifre (tekrar)",
-    "updating": "Güncelleniyor..."
+    "updating": "Güncelleniyor...",
+    "roleUser": "Kullanıcı",
+    "roleAdmin": "Admin",
+    "switchToLightTheme": "Açık temaya geç",
+    "switchToDarkTheme": "Koyu temaya geç"
   },
   "login": {
     "title": "Giriş Yap",
@@ -192,5 +196,60 @@
     "deleteAccountConfirm": "Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
     "deleting": "Siliniyor...",
     "deleteConfirmButton": "Evet, Hesabımı Sil"
+  },
+  "settings": {
+    "appearanceHeading": "Görünüm",
+    "hint": "Uygulamanın renk temasını seçin.",
+    "lightLabel": "Açık Tema",
+    "lightDesc": "Her zaman açık görünüm.",
+    "autoLabel": "Otomatik",
+    "autoDesc": "Cihazınızın temasını takip eder.",
+    "darkLabel": "Koyu Tema",
+    "darkDesc": "Her zaman koyu görünüm.",
+    "activeHintPrefix": "Şu an cihazınızın tercihi uygulanıyor: ",
+    "languageHeading": "Dil",
+    "languageHint": "Uygulama dilini seçin.",
+    "comingSoonBadge": "Çok Yakında"
+  },
+  "admin": {
+    "messagesTab": "Bize Ulaşın Mesajları",
+    "logsTab": "Loglar",
+    "adminActionsTab": "Admin İşlem Geçmişi",
+    "usersTab": "Kayıtlı Kullanıcılar",
+    "pendingSubtab": "İşlem Bekleyen ({{count}})",
+    "reviewedSubtab": "İncelendi ({{count}})",
+    "noMessagesInTab": "Bu sekmede mesaj yok.",
+    "noLogs": "Henüz log yok.",
+    "exceptionDetails": "Hata detayı",
+    "adminColumn": "Admin",
+    "actionColumn": "İşlem",
+    "targetColumn": "Hedef",
+    "noActions": "Henüz işlem yok.",
+    "addUserButton": "+ Kullanıcı Ekle",
+    "noUsers": "Henüz kullanıcı yok.",
+    "phoneColumn": "Telefon",
+    "roleColumn": "Rol",
+    "willpowerColumn": "İrade Puanı",
+    "registeredDateColumn": "Kayıt Tarihi",
+    "deleteButton": "Sil",
+    "deleteUserDialogTitle": "Kullanıcıyı Sil",
+    "deleteUserConfirm": "{{name}} kişisini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "deleting": "Siliniyor...",
+    "deleteConfirmButton": "Evet, Sil",
+    "marking": "İşaretleniyor...",
+    "markReviewedButton": "İncelendi Olarak İşaretle",
+    "reviewedBadge": "İncelendi",
+    "attachmentAlt": "Ek görsel"
+  },
+  "addUserModal": {
+    "title": "Kullanıcı Ekle",
+    "intro": "Yeni bir kullanıcı ya da admin hesabı oluştur.",
+    "roleLabel": "Rol",
+    "tempPasswordLabel": "Geçici Şifre",
+    "tempPasswordLabelOptional": "Geçici Şifre (opsiyonel)",
+    "tempPasswordError": "En az 8 karakter olmalı, büyük harf, küçük harf ve rakam içermeli.",
+    "inviteHint": "Boş bırakılırsa kullanıcıya davet e-postası gönderilir.",
+    "addingButton": "Ekleniyor...",
+    "addButton": "Ekle"
   }
 }
