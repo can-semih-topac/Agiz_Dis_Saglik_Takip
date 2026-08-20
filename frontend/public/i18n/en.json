@@ -14,6 +14,8 @@
     "appName": "Oral and Dental Health Tracker",
     "close": "Close",
     "ok": "OK",
+    "offlineMessage": "You're offline",
+    "onlineMessage": "You're back online",
     "cancel": "Cancel",
     "save": "Save",
     "saving": "Saving...",
