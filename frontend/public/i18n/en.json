@@ -85,6 +85,7 @@
     "settingsTitle": "Settings",
     "logout": "Log Out",
     "menuToggle": "Menu",
+    "viewProfile": "View Profile",
     "greeting": "Welcome, {{name}}!"
   },
   "contactModal": {
@@ -144,7 +145,7 @@
     "year": "Year"
   },
   "health": {
-    "pageTitle": "Oral and Dental Health",
+    "pageTitle": "Habit Management",
     "statusTab": "Status",
     "goalTab": "Goal",
     "last7DaysHeading": "Last 7 Days of Goal Records",

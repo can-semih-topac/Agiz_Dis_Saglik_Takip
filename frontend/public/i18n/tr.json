@@ -85,6 +85,7 @@
     "settingsTitle": "Ayarlar",
     "logout": "Çıkış Yap",
     "menuToggle": "Menü",
+    "viewProfile": "Profil Görüntüle",
     "greeting": "Hoş geldin, {{name}}!"
   },
   "contactModal": {
@@ -144,7 +145,7 @@
     "year": "Yıl"
   },
   "health": {
-    "pageTitle": "Ağız ve Diş Sağlığı",
+    "pageTitle": "Alışkanlık Yönetimi",
     "statusTab": "Durum",
     "goalTab": "Hedef",
     "last7DaysHeading": "Son 7 Günün Hedef Verileri",

@@ -41,6 +41,11 @@
   text-decoration: none !important;
 }
 
+/* Masaüstünde sadece simge yeterli — metin sadece mobil menüde görünür. */
+.navbar-avatar-label {
+  display: none;
+}
+
 .navbar-actions button {
   background: var(--danger);
   margin: 0;
@@ -123,5 +128,11 @@
     border: 1px solid rgba(255, 255, 255, 0.45);
     border-radius: 6px;
     padding: 0.4rem 0.9rem;
+    font-size: 0.9rem;
+  }
+
+  .navbar-avatar-label {
+    display: inline;
+    font-weight: 600;
   }
 }

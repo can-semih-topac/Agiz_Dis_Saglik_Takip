@@ -22,8 +22,12 @@
         <span class="navbar-btn-icon">🛡️</span> {{ 'navbar.adminPanel' | transloco }}
       </a>
     }
-    <a routerLink="/profile" class="navbar-avatar" [title]="'navbar.profileTitle' | transloco" (click)="closeMenu()">👤</a>
-    <a routerLink="/settings" class="navbar-avatar" [title]="'navbar.settingsTitle' | transloco" (click)="closeMenu()">⚙️</a>
+    <a routerLink="/profile" class="navbar-avatar" [title]="'navbar.profileTitle' | transloco" (click)="closeMenu()">
+      👤 <span class="navbar-avatar-label">{{ 'navbar.viewProfile' | transloco }}</span>
+    </a>
+    <a routerLink="/settings" class="navbar-avatar" [title]="'navbar.settingsTitle' | transloco" (click)="closeMenu()">
+      ⚙️ <span class="navbar-avatar-label">{{ 'navbar.settingsTitle' | transloco }}</span>
+    </a>
     <button (click)="logout()">{{ 'navbar.logout' | transloco }}</button>
   </nav>
 </header>

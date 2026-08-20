@@ -47,13 +47,15 @@
             }
           </select>
         </div>
-        <div>
-          <label for="activityDate">{{ 'common.dateLabel' | transloco }}</label>
-          <input id="activityDate" type="date" formControlName="activityDate" />
-        </div>
-        <div>
-          <label for="activityTime">{{ 'common.timeLabel' | transloco }}</label>
-          <input id="activityTime" type="time" formControlName="activityTime" />
+        <div class="date-time-row">
+          <div>
+            <label for="activityDate">{{ 'common.dateLabel' | transloco }}</label>
+            <input id="activityDate" type="date" formControlName="activityDate" />
+          </div>
+          <div>
+            <label for="activityTime">{{ 'common.timeLabel' | transloco }}</label>
+            <input id="activityTime" type="time" formControlName="activityTime" />
+          </div>
         </div>
         @if (selectedGoalForStatus?.trackingType === TrackingType.Sureli) {
           <div>

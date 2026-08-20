@@ -101,6 +101,26 @@
   vertical-align: middle;
 }
 
+/* Tarih ve saat kısa alanlar — dar ekranda bile tek tek satır kaplamasınlar diye yan yana. */
+.date-time-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+}
+
+.date-time-row > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.date-time-row input {
+  width: 100%;
+  min-width: 0;
+}
+
 .tab-inactive {
   background: var(--surface-alt);
   color: var(--label);

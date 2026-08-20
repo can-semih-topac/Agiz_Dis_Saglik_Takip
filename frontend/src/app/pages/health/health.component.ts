@@ -30,7 +30,7 @@ export class HealthComponent implements OnInit {
   private suggestionService = inject(SuggestionService);
 
   constructor(title: Title) {
-    title.setTitle('Ağız ve Diş Sağlığı | ADS');
+    title.setTitle('Alışkanlık Yönetimi | ADS');
   }
 
   // Görsellerin yolu backend'den "/uploads/..." olarak geliyor, başına backend adresini eklememiz lazım.
