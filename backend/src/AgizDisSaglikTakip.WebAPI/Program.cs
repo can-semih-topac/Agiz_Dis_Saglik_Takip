@@ -14,8 +14,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseSentry(options =>
 {
     options.Dsn = builder.Configuration["Sentry:Dsn"];
-    // Release Health: uygulamanın "sağlıklı" oturum/istek oranını izlemek için.
+    // Release Health: uygulamanın "sağlıklı" oturum/istek oranını izlemek için. (sentry)
     options.AutoSessionTracking = true;
+});
+
+// Redis: şifre sıfırlama kodu gibi kısa ömürlü verileri SQL Server yerine burada,
+// kendiliğinden süresi dolacak şekilde tutacağız (bkz. AuthManager).
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["Redis:Configuration"] ?? "localhost:6379";
 });
 
 // Add services to the container.
