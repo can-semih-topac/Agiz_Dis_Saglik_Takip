@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 
+// telefondan kontrol - pusula
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Sentry: işlenmemiş exception'ları ve ASP.NET Core isteklerini otomatik yakalayıp
