@@ -8,6 +8,16 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Sentry: işlenmemiş exception'ları ve ASP.NET Core isteklerini otomatik yakalayıp
+// sentry.io'ya gönderiyor. DSN, JWT/AES anahtarları gibi user-secrets'ta duruyor —
+// koda veya appsettings.json'a gömülmüyor.
+builder.WebHost.UseSentry(options =>
+{
+    options.Dsn = builder.Configuration["Sentry:Dsn"];
+    // Release Health: uygulamanın "sağlıklı" oturum/istek oranını izlemek için.
+    options.AutoSessionTracking = true;
+});
+
 // Add services to the container.
 
 builder.Services.AddControllers();

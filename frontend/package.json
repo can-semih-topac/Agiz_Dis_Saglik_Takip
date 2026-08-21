@@ -22,6 +22,7 @@
     "@angular/service-worker": "^19.2.0",
     "@jsverse/transloco": "^8.4.0",
     "@primeuix/themes": "1.2.1",
+    "@sentry/angular": "^10.70.0",
     "primeicons": "^8.0.0",
     "primeng": "19.1.4",
     "rxjs": "~7.8.0",
