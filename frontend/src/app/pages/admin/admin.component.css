@@ -31,6 +31,21 @@
   display: block;
 }
 
+.log-search-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.log-search-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.log-search-row button {
+  flex: none;
+}
+
 .message-subtabs {
   display: flex;
   gap: 0.5rem;

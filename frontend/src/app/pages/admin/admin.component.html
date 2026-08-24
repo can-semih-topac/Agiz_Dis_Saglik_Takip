@@ -53,15 +53,30 @@
 }
 
 @if (activeTab === 'logs') {
-  @if (logsLoading) {
+  <div class="log-search-row">
+    <input
+      type="text"
+      [(ngModel)]="logSearchTerm"
+      (keyup.enter)="searchLogs()"
+      [placeholder]="'admin.logSearchPlaceholder' | transloco" />
+    <button type="button" (click)="searchLogs()">{{ 'admin.logSearchButton' | transloco }}</button>
+    @if (logSearchResults) {
+      <button type="button" class="btn-secondary" (click)="clearLogSearch()">{{ 'common.cancel' | transloco }}</button>
+    }
+  </div>
+  @if (logSearchError) {
+    <p class="error">{{ logSearchError }}</p>
+  }
+
+  @if (logsLoading || logSearchLoading) {
     <p>{{ 'common.loading' | transloco }}</p>
   } @else if (logsError) {
     <p class="error">{{ logsError }}</p>
-  } @else if (logs.length === 0) {
-    <p>{{ 'admin.noLogs' | transloco }}</p>
+  } @else if (displayedLogs.length === 0) {
+    <p>{{ (logSearchResults ? 'admin.noSearchResults' : 'admin.noLogs') | transloco }}</p>
   } @else {
     <ul class="log-list">
-      @for (l of logs; track l.id) {
+      @for (l of displayedLogs; track l.id) {
         <li class="log-card" [class]="levelClass(l.level)">
           <div class="log-card-header">
             <span class="log-card-level">{{ l.level }}</span>

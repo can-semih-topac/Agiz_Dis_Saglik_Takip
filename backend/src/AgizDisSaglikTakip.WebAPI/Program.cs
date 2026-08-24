@@ -2,11 +2,10 @@ using System.Text;
 using AgizDisSaglikTakip.Business;
 using AgizDisSaglikTakip.Core;
 using AgizDisSaglikTakip.DataAccess;
+using Elastic.Clients.Elasticsearch;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-
-// telefondan kontrol - pusula
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseSentry(options =>
 {
     options.Dsn = builder.Configuration["Sentry:Dsn"];
-    // Release Health: uygulamanın "sağlıklı" oturum/istek oranını izlemek için. (sentry)
+    // Release Health: uygulamanın "sağlıklı" oturum/istek oranını izlemek için.
     options.AutoSessionTracking = true;
 });
 
@@ -26,6 +25,11 @@ builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration["Redis:Configuration"] ?? "localhost:6379";
 });
+
+// ElasticSearch: admin panelindeki loglarda tam metin arama yapabilmek için (bkz. LogManager).
+// ElasticsearchClient thread-safe ve oluşturulması maliyetli — tek bir örnek (singleton) yeterli.
+builder.Services.AddSingleton(new ElasticsearchClient(
+    new Uri(builder.Configuration["Elasticsearch:Uri"] ?? "http://127.0.0.1:9200")));
 
 // Add services to the container.
 
