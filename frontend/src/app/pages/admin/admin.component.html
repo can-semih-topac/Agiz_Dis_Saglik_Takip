@@ -68,6 +68,13 @@
     <p class="error">{{ logSearchError }}</p>
   }
 
+  <button type="button" class="btn-secondary log-reindex-btn" [disabled]="logReindexing" (click)="reindexLogs()">
+    {{ (logReindexing ? 'admin.reindexing' : 'admin.reindexButton') | transloco }}
+  </button>
+  @if (logReindexMessage) {
+    <p class="log-reindex-message">{{ logReindexMessage }}</p>
+  }
+
   @if (logsLoading || logSearchLoading) {
     <p>{{ 'common.loading' | transloco }}</p>
   } @else if (logsError) {

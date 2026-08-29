@@ -34,4 +34,11 @@ public class LogController : ControllerBase
         var result = await _logService.SearchAsync(q);
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    [HttpPost("reindex")]
+    public async Task<IActionResult> Reindex()
+    {
+        var result = await _logService.ReindexAsync();
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
 }

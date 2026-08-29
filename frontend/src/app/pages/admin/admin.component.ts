@@ -62,6 +62,9 @@ export class AdminComponent implements OnInit {
   logSearchLoading = false;
   logSearchError = '';
 
+  logReindexing = false;
+  logReindexMessage = '';
+
   adminActions: AdminActionLogDto[] = [];
   adminActionsLoading = true;
   adminActionsError = '';
@@ -204,6 +207,24 @@ export class AdminComponent implements OnInit {
     this.logSearchTerm = '';
     this.logSearchResults = null;
     this.logSearchError = '';
+  }
+
+  // ElasticSearch bir süre erişilemez olmuşsa SQL'deki loglarla arasında fark oluşabilir —
+  // bu buton SQL'deki tüm logları ElasticSearch'e yeniden yazıp aradaki farkı kapatıyor.
+  reindexLogs(): void {
+    this.logReindexing = true;
+    this.logReindexMessage = '';
+
+    this.logService.reindex().subscribe({
+      next: (result) => {
+        this.logReindexing = false;
+        this.logReindexMessage = result.message ?? '';
+      },
+      error: (err: HttpErrorResponse) => {
+        this.logReindexing = false;
+        this.logReindexMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
   }
 
   loadAdminActions(): void {

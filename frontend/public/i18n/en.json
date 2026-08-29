@@ -227,6 +227,8 @@
     "logSearchPlaceholder": "Search logs...",
     "logSearchButton": "Search",
     "noSearchResults": "No logs match your search.",
+    "reindexButton": "Refresh Search Index",
+    "reindexing": "Refreshing...",
     "exceptionDetails": "Error details",
     "adminColumn": "Admin",
     "actionColumn": "Action",

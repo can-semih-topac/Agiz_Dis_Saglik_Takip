@@ -227,6 +227,8 @@
     "logSearchPlaceholder": "Loglarda ara...",
     "logSearchButton": "Ara",
     "noSearchResults": "Aramanla eşleşen log bulunamadı.",
+    "reindexButton": "Arama İndeksini Yenile",
+    "reindexing": "Yenileniyor...",
     "exceptionDetails": "Hata detayı",
     "adminColumn": "Admin",
     "actionColumn": "İşlem",

@@ -69,4 +69,25 @@ public class LogManager : ILogService
 
         return ServiceResult<List<LogDto>>.Ok(dtos);
     }
+
+    // SQL Server'daki TÜM logları ElasticSearch'e yeniden yazar. Normal akışta her log ikisine
+    // birden aynı anda yazılıyor (bkz. DbLogger) ama ElasticSearch bir süre kapalı/erişilemez
+    // olursa o sıradaki loglar sadece SQL'de kalır — bu metod aradaki farkı kapatır.
+    public async Task<ServiceResult> ReindexAsync()
+    {
+        var logs = await _logRepository.GetAllAsync();
+
+        if (logs.Count == 0)
+            return ServiceResult.Ok("Yeniden indekslenecek log yok.");
+
+        var response = await _esClient.BulkAsync(b => b
+            .Index(LogsIndex)
+            .IndexMany(logs, (descriptor, log) => descriptor.Id(log.Id))
+        );
+
+        if (!response.IsValidResponse)
+            return ServiceResult.Fail("Yeniden indeksleme başarısız.");
+
+        return ServiceResult.Ok($"{logs.Count} log ElasticSearch'e yeniden indekslendi.");
+    }
 }
