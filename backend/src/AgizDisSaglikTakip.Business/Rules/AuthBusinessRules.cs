@@ -5,7 +5,9 @@ namespace AgizDisSaglikTakip.Business.Rules;
 
 public static class AuthBusinessRules
 {
-    private static readonly Regex PhoneRegex = new(@"^[0-9]{10,11}$", RegexOptions.Compiled);
+    // Bu desen basit olduğu için gerçekte "catastrophic backtracking" riski yok, ama SonarQube
+    // her regex'e savunma amaçlı bir zaman aşımı konmasını istiyor (ReDoS'a karşı genel kural).
+    private static readonly Regex PhoneRegex = new(@"^[0-9]{10,11}$", RegexOptions.Compiled, TimeSpan.FromMilliseconds(500));
 
     public static bool IsValidPhoneNumber(string phoneNumber) => PhoneRegex.IsMatch(phoneNumber);
 

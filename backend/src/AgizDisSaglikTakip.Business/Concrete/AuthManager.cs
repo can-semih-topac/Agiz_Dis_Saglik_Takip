@@ -1,4 +1,5 @@
 using AgizDisSaglikTakip.Business.Abstract;
+using AgizDisSaglikTakip.Business.Constants;
 using AgizDisSaglikTakip.Business.DTOs.Auth;
 using AgizDisSaglikTakip.Business.Rules;
 using AgizDisSaglikTakip.Core.Utilities.Email;
@@ -97,7 +98,7 @@ public class AuthManager : IAuthService
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
-            return ServiceResult<LoginResultDto>.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult<LoginResultDto>.Fail(ErrorMessages.UserNotFound);
 
         // Google ile oluşturulmuş ve henüz şifre belirlememiş hesaplarda PasswordEncrypted boştur.
         if (string.IsNullOrEmpty(user.PasswordEncrypted))
@@ -182,7 +183,7 @@ public class AuthManager : IAuthService
     {
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
-            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
         var code = Random.Shared.Next(100000, 1000000).ToString();
         await _cache.SetStringAsync(
@@ -212,7 +213,7 @@ public class AuthManager : IAuthService
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
-            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
         if (!await IsResetCodeValidAsync(dto.Email, dto.Code))
             return ServiceResult.Fail("Kod hatalı ya da süresi dolmuş.");
@@ -226,7 +227,7 @@ public class AuthManager : IAuthService
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
-            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
         if (!await IsResetCodeValidAsync(dto.Email, dto.Code))
             return ServiceResult.Fail("Kod hatalı ya da süresi dolmuş.");

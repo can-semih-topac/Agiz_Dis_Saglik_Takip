@@ -1,4 +1,5 @@
 using AgizDisSaglikTakip.Business.Abstract;
+using AgizDisSaglikTakip.Business.Constants;
 using AgizDisSaglikTakip.Business.DTOs.User;
 using AgizDisSaglikTakip.Business.Rules;
 using AgizDisSaglikTakip.Core.Utilities.Email;
@@ -52,7 +53,7 @@ public class UserManager : IUserService
     {
         var user = await _userRepository.GetAsync(u => u.Id == userId);
         if (user == null)
-            return ServiceResult<UserProfileDto>.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult<UserProfileDto>.Fail(ErrorMessages.UserNotFound);
 
         var profile = new UserProfileDto
         {
@@ -71,7 +72,7 @@ public class UserManager : IUserService
     {
         var user = await _userRepository.GetAsync(u => u.Id == userId);
         if (user == null)
-            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
         if (!AuthBusinessRules.IsValidEmailFormat(dto.Email))
             return ServiceResult.Fail("Geçersiz e-posta formatı.");
@@ -105,7 +106,7 @@ public class UserManager : IUserService
     {
         var user = await _userRepository.GetAsync(u => u.Id == userId);
         if (user == null)
-            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
         // Google ile oluşturulmuş hesaplarda henüz şifre yok — bu durumda eski şifre istemeden
         // doğrudan yeni şifreyi kaydediyoruz (ilk kez şifre belirleme).
@@ -148,7 +149,7 @@ public class UserManager : IUserService
     {
         var user = await _userRepository.GetAsync(u => u.Id == userId);
         if (user == null)
-            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
         await SoftDeleteUserDataAsync(user);
 
@@ -283,7 +284,7 @@ public class UserManager : IUserService
 
         var user = await _userRepository.GetAsync(u => u.Id == targetUserId);
         if (user == null)
-            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
         var admin = await _userRepository.GetAsync(u => u.Id == adminUserId);
         var targetEmail = user.Email;
