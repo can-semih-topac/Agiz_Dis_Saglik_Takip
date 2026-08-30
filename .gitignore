@@ -4,6 +4,9 @@ obj/
 *.user
 *.suo
 
+# SonarQube tarayıcısının oluşturduğu geçici çalışma klasörü
+.sonarqube/
+
 # Visual Studio / Rider / VS Code
 .vs/
 .vscode/
