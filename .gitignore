@@ -3,6 +3,7 @@ bin/
 obj/
 *.user
 *.suo
+ci-build/
 
 # SonarQube tarayıcısının oluşturduğu geçici çalışma klasörü
 .sonarqube/
