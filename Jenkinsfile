@@ -22,6 +22,17 @@ pipeline {
             }
         }
 
+        stage('Frontend Bağımlılıklarını Kur') {
+            steps {
+                dir('frontend') {
+                    // Jenkins'in çalışma klasörü .git'ten temiz bir checkout — node_modules
+                    // hiç yok (zaten .gitignore'da, olması da gerekmiyor). "npm ci",
+                    // package-lock.json'a birebir uyan, CI için önerilen kurulum komutu.
+                    bat 'npm ci'
+                }
+            }
+        }
+
         stage('Frontend Test Sunucusunu Başlat') {
             steps {
                 dir('frontend') {
