@@ -1,3 +1,4 @@
+using Elastic.Clients.Elasticsearch;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -9,13 +10,15 @@ namespace AgizDisSaglikTakip.DataAccess.Logging;
 public class DbLoggerProvider : ILoggerProvider
 {
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ElasticsearchClient _esClient;
 
-    public DbLoggerProvider(IServiceScopeFactory scopeFactory)
+    public DbLoggerProvider(IServiceScopeFactory scopeFactory, ElasticsearchClient esClient)
     {
         _scopeFactory = scopeFactory;
+        _esClient = esClient;
     }
 
-    public ILogger CreateLogger(string categoryName) => new DbLogger(categoryName, _scopeFactory);
+    public ILogger CreateLogger(string categoryName) => new DbLogger(categoryName, _scopeFactory, _esClient);
 
     public void Dispose()
     {

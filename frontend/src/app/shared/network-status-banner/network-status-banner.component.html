@@ -1,0 +1,5 @@
+@if (state() !== 'hidden') {
+  <div class="network-banner" [class.is-offline]="state() === 'offline'" [class.is-online]="state() === 'online'">
+    {{ (state() === 'offline' ? 'common.offlineMessage' : 'common.onlineMessage') | transloco }}
+  </div>
+}

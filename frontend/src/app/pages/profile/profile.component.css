@@ -48,6 +48,8 @@
 
 .profile-value {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 1rem;
   color: var(--text);
 }

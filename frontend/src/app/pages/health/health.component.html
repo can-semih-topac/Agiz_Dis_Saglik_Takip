@@ -1,19 +1,19 @@
-<app-navbar pageTitle="Ağız ve Diş Sağlığı"></app-navbar>
+<app-navbar [pageTitle]="'health.pageTitle' | transloco"></app-navbar>
 
-<a routerLink="/home" class="back-link">← Ana Sayfaya Dön</a>
-<h2>Ağız ve Diş Sağlığı</h2>
+<a routerLink="/home" class="back-link">{{ 'common.backToHome' | transloco }}</a>
+<h2>{{ 'health.pageTitle' | transloco }}</h2>
 
 <div>
-  <button (click)="setTab('durum')" [class.tab-inactive]="activeTab !== 'durum'">Durum</button>
-  <button (click)="setTab('hedef')" [class.tab-inactive]="activeTab !== 'hedef'">Hedef</button>
+  <button (click)="setTab('durum')" [class.tab-inactive]="activeTab !== 'durum'">{{ 'health.statusTab' | transloco }}</button>
+  <button (click)="setTab('hedef')" [class.tab-inactive]="activeTab !== 'hedef'">{{ 'health.goalTab' | transloco }}</button>
 </div>
 
 @if (activeTab === 'durum') {
-  <div class="two-col">
+  <div class="two-col two-col-status">
     <section class="col-list">
-      <h3>Son 7 Günün Hedef Verileri</h3>
+      <h3>{{ 'health.last7DaysHeading' | transloco }}</h3>
       @if (last7DaysStatus.length === 0) {
-        <p>Kayıt yok.</p>
+        <p>{{ 'health.noRecords' | transloco }}</p>
       } @else {
         <ul class="status-list">
           @for (item of last7DaysStatus; track item.id) {
@@ -22,10 +22,10 @@
                 <span class="status-card-title">{{ item.goalTitle }}</span>
                 <span class="status-card-streak">🔥 {{ item.streakCount }}</span>
                 @if (noteFor(item)?.description) {
-                  <span class="status-card-icon" title="Not var">📝</span>
+                  <span class="status-card-icon" [title]="'common.hasNoteTooltip' | transloco">📝</span>
                 }
                 @if (noteFor(item)?.imagePath) {
-                  <span class="status-card-icon" title="Görsel var">🖼️</span>
+                  <span class="status-card-icon" [title]="'common.hasImageTooltip' | transloco">🖼️</span>
                 }
               </div>
               <div class="status-card-date">{{ formatTurkishDateTime(item.activityDate, item.activityTime) }}</div>
@@ -36,40 +36,42 @@
     </section>
 
     <section class="col-form">
-      <h3>Durum Kaydı Ekle</h3>
+      <h3>{{ 'health.addStatusHeading' | transloco }}</h3>
       <form [formGroup]="statusForm" (ngSubmit)="submitStatus()">
         <div>
-          <label for="statusGoal">Hedef</label>
+          <label for="statusGoal">{{ 'health.goalLabel' | transloco }}</label>
           <select id="statusGoal" formControlName="goalId" (change)="onStatusGoalChange()">
-            <option [ngValue]="null">Seçiniz</option>
+            <option [ngValue]="null">{{ 'health.selectPlaceholder' | transloco }}</option>
             @for (g of goals; track g.id) {
               <option [ngValue]="g.id">{{ g.title }}</option>
             }
           </select>
         </div>
-        <div>
-          <label for="activityDate">Tarih</label>
-          <input id="activityDate" type="date" formControlName="activityDate" />
-        </div>
-        <div>
-          <label for="activityTime">Saat</label>
-          <input id="activityTime" type="time" formControlName="activityTime" />
+        <div class="date-time-row">
+          <div>
+            <label for="activityDate">{{ 'common.dateLabel' | transloco }}</label>
+            <input id="activityDate" type="date" formControlName="activityDate" />
+          </div>
+          <div>
+            <label for="activityTime">{{ 'common.timeLabel' | transloco }}</label>
+            <input id="activityTime" type="time" formControlName="activityTime" />
+          </div>
         </div>
         @if (selectedGoalForStatus?.trackingType === TrackingType.Sureli) {
           <div>
-            <label for="durationMinutes">Süre (dk)</label>
+            <label for="durationMinutes">{{ 'common.durationLabel' | transloco }} ({{ 'common.minutesAbbrev' | transloco }})</label>
             <input id="durationMinutes" type="number" formControlName="durationMinutes" />
           </div>
         }
         <div>
-          <label for="noteDescription">Açıklama (opsiyonel)</label>
+          <label for="noteDescription">{{ 'common.descriptionLabelOptional' | transloco }}</label>
           <textarea id="noteDescription" formControlName="noteDescription"></textarea>
         </div>
         <div>
-          <label for="noteImage">Görsel (.jpg/.png, opsiyonel)</label>
+          <label for="noteImage">{{ 'health.imageLabelOptional' | transloco }}</label>
           <input id="noteImage" type="file" accept=".jpg,.jpeg,.png" (change)="onImageSelected($event)" />
         </div>
-        <button type="submit">Kaydet</button>
+        <button type="submit">{{ 'common.save' | transloco }}</button>
         @if (statusError) { <p class="error">{{ statusError }}</p> }
         @if (statusSuccess) { <p class="success">{{ statusSuccess }}</p> }
       </form>
@@ -77,7 +79,7 @@
 
     <section class="col-list">
       @if (last7DaysNotes.length > 0) {
-        <h3>Son 7 Günün Notları</h3>
+        <h3>{{ 'health.last7DaysNotesHeading' | transloco }}</h3>
         <ul class="stack-list">
           @for (n of last7DaysNotes; track n.id) {
             <li>
@@ -90,7 +92,7 @@
         </ul>
       }
 
-      <h3>Öneri <button (click)="loadSuggestion()">Yeni Öneri</button></h3>
+      <h3>{{ 'common.suggestion' | transloco }} <button (click)="loadSuggestion()">{{ 'health.newSuggestionButton' | transloco }}</button></h3>
       <p>{{ suggestionText }}</p>
     </section>
   </div>
@@ -99,27 +101,27 @@
 @if (activeTab === 'hedef') {
   <div class="two-col">
     <section class="col-list">
-      <h3>Hedeflerim</h3>
+      <h3>{{ 'health.myGoalsHeading' | transloco }}</h3>
       @if (goalError) {
         <p class="error">{{ goalError }}</p>
       }
       @if (goals.length === 0) {
-        <p>Henüz hedef yok.</p>
+        <p>{{ 'health.noGoals' | transloco }}</p>
       } @else {
         <ul class="stack-list">
           @for (g of goals; track g.id) {
             <li>
               <strong>{{ g.title }}</strong> — {{ g.description }}
-              <span class="tracking-badge">{{ g.trackingType === TrackingType.Sureli ? 'Süreli' : 'Yapıldı' }}</span>
+              <span class="tracking-badge">{{ g.trackingType === TrackingType.Sureli ? ('health.trackingSureli' | transloco) : ('common.doneLabel' | transloco) }}</span>
               @if (g.isPaused) {
-                <span class="pause-badge" [title]="g.pauseReason">Duraklatıldı: {{ g.pauseReason }}</span>
+                <span class="pause-badge" [title]="g.pauseReason">{{ 'health.pausedBadge' | transloco: { reason: g.pauseReason } }}</span>
                 <button (click)="resumeGoal(g)" [disabled]="resumingGoalId === g.id">
-                  {{ resumingGoalId === g.id ? 'Devam ediliyor...' : 'Devam Et' }}
+                  {{ resumingGoalId === g.id ? ('common.resuming' | transloco) : ('common.resumeButton' | transloco) }}
                 </button>
               } @else {
-                <button (click)="requestPauseGoal(g)">Duraklat</button>
+                <button (click)="requestPauseGoal(g)">{{ 'health.pauseButton' | transloco }}</button>
               }
-              <button (click)="deleteGoal(g)">Sil</button>
+              <button (click)="deleteGoal(g)">{{ 'health.deleteButton' | transloco }}</button>
             </li>
           }
         </ul>
@@ -127,45 +129,45 @@
     </section>
 
     <section class="col-form">
-      <h3>Yeni Hedef</h3>
+      <h3>{{ 'health.newGoalHeading' | transloco }}</h3>
       <form [formGroup]="goalForm" (ngSubmit)="createGoal()">
         <div>
-          <label for="title">Başlık</label>
+          <label for="title">{{ 'health.titleLabel' | transloco }}</label>
           <input id="title" type="text" formControlName="title" />
         </div>
         <div>
-          <label for="description">Açıklama</label>
+          <label for="description">{{ 'common.descriptionLabel' | transloco }}</label>
           <textarea id="description" formControlName="description"></textarea>
         </div>
         <div>
-          <label for="periodUnit">Periyot Birimi</label>
+          <label for="periodUnit">{{ 'health.periodUnitLabel' | transloco }}</label>
           <select id="periodUnit" formControlName="periodUnit">
             @for (p of periodUnits; track p.value) {
-              <option [ngValue]="p.value">{{ p.label }}</option>
+              <option [ngValue]="p.value">{{ p.label | transloco }}</option>
             }
           </select>
         </div>
         <div>
-          <label for="periodFrequency">Sıklık</label>
+          <label for="periodFrequency">{{ 'health.frequencyLabel' | transloco }}</label>
           <input id="periodFrequency" type="number" formControlName="periodFrequency" />
         </div>
         <div>
-          <label for="importance">Önem Derecesi</label>
+          <label for="importance">{{ 'health.importanceLabel' | transloco }}</label>
           <select id="importance" formControlName="importance">
             @for (i of importanceLevels; track i.value) {
-              <option [ngValue]="i.value">{{ i.label }}</option>
+              <option [ngValue]="i.value">{{ i.label | transloco }}</option>
             }
           </select>
         </div>
         <div>
-          <label for="trackingType">Takip Türü</label>
+          <label for="trackingType">{{ 'health.trackingTypeLabel' | transloco }}</label>
           <select id="trackingType" formControlName="trackingType">
             @for (t of trackingTypes; track t.value) {
-              <option [ngValue]="t.value">{{ t.label }}</option>
+              <option [ngValue]="t.value">{{ t.label | transloco }}</option>
             }
           </select>
         </div>
-        <button type="submit">Ekle</button>
+        <button type="submit">{{ 'health.addButton' | transloco }}</button>
         @if (goalError) { <p class="error">{{ goalError }}</p> }
         @if (goalSuccess) { <p class="success">{{ goalSuccess }}</p> }
       </form>
@@ -176,19 +178,19 @@
 @if (pendingPauseGoal) {
   <div class="modal-backdrop">
     <div class="modal-box pause-modal-box">
-      <h4>Hedefi Duraklat</h4>
-      <p>"{{ pendingPauseGoal.title }}" hedefi duraklatılsın mı? Duraklatıldığı süre boyunca serin bozulmaz ve bugünkü listede görünmez.</p>
+      <h4>{{ 'health.pauseModalTitle' | transloco }}</h4>
+      <p>{{ 'health.pauseModalConfirm' | transloco: { title: pendingPauseGoal.title } }}</p>
       <div class="pause-form-field">
-        <label for="pauseReason">Sebep (zorunlu)</label>
-        <textarea id="pauseReason" [(ngModel)]="pauseReasonInput" required placeholder="Örn. tatildeyim, hastayım..."></textarea>
+        <label for="pauseReason">{{ 'health.pauseReasonLabel' | transloco }}</label>
+        <textarea id="pauseReason" [(ngModel)]="pauseReasonInput" required [placeholder]="'health.pauseReasonPlaceholder' | transloco"></textarea>
       </div>
       @if (pauseError) {
         <p class="error">{{ pauseError }}</p>
       }
       <div class="pause-modal-actions">
-        <button class="modal-cancel" (click)="cancelPauseGoal()">Vazgeç</button>
+        <button class="modal-cancel" (click)="cancelPauseGoal()">{{ 'common.cancel' | transloco }}</button>
         <button (click)="confirmPauseGoal()" [disabled]="pauseSubmitting || !pauseReasonInput.trim()">
-          {{ pauseSubmitting ? 'Duraklatılıyor...' : 'Duraklat' }}
+          {{ pauseSubmitting ? ('health.pausing' | transloco) : ('health.pauseButton' | transloco) }}
         </button>
       </div>
     </div>
@@ -198,10 +200,10 @@
 @if (pendingDeleteGoal) {
   <div class="modal-backdrop">
     <div class="modal-box">
-      <h4>Silme Onayı</h4>
+      <h4>{{ 'health.deleteModalTitle' | transloco }}</h4>
       <p>{{ confirmMessage }}</p>
-      <button class="modal-cancel" (click)="cancelDelete()">İptal</button>
-      <button (click)="confirmDelete()">Tamam</button>
+      <button class="modal-cancel" (click)="cancelDelete()">{{ 'common.cancel' | transloco }}</button>
+      <button (click)="confirmDelete()">{{ 'common.ok' | transloco }}</button>
     </div>
   </div>
 }

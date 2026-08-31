@@ -13,4 +13,12 @@ export class LogService {
   getRecent(): Observable<ServiceResult<LogDto[]>> {
     return this.http.get<ServiceResult<LogDto[]>>(this.baseUrl);
   }
+
+  search(keyword: string): Observable<ServiceResult<LogDto[]>> {
+    return this.http.get<ServiceResult<LogDto[]>>(`${this.baseUrl}/search`, { params: { q: keyword } });
+  }
+
+  reindex(): Observable<ServiceResult> {
+    return this.http.post<ServiceResult>(`${this.baseUrl}/reindex`, {});
+  }
 }

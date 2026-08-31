@@ -2,10 +2,11 @@ import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ContactService } from '../../core/services/contact.service';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-contact-modal',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslocoPipe],
   templateUrl: './contact-modal.component.html',
   styleUrl: './contact-modal.component.css'
 })
@@ -26,7 +27,7 @@ export class ContactModalComponent implements OnInit {
   successMessage = '';
   showSuccessDialog = false;
   selectedImage: File | null = null;
-  imageWarning = '';
+  showImageWarning = false;
   emailCopied = false;
   private emailCopiedTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -46,10 +47,10 @@ export class ContactModalComponent implements OnInit {
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
-    this.imageWarning = '';
+    this.showImageWarning = false;
 
     if (file && !/\.(jpe?g|png)$/i.test(file.name)) {
-      this.imageWarning = 'Sadece .jpg, .jpeg veya .png yükleyebilirsiniz.';
+      this.showImageWarning = true;
       input.value = '';
       this.selectedImage = null;
       return;

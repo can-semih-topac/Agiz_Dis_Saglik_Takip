@@ -3,10 +3,11 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { UserService } from '../../core/services/user.service';
 import { Role } from '../../core/models/user.models';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-add-user-modal',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslocoPipe],
   templateUrl: './add-user-modal.component.html',
   styleUrl: './add-user-modal.component.css'
 })

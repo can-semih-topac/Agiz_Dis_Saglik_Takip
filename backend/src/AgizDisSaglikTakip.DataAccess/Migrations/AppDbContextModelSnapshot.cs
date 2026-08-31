@@ -387,13 +387,6 @@ namespace AgizDisSaglikTakip.DataAccess.Migrations
                     b.Property<string>("PasswordEncrypted")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PasswordResetCode")
-                        .HasMaxLength(6)
-                        .HasColumnType("nvarchar(6)");
-
-                    b.Property<DateTime?>("PasswordResetCodeExpiresAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .ValueGeneratedOnAdd()

@@ -1,4 +1,5 @@
 using AgizDisSaglikTakip.Business.Abstract;
+using AgizDisSaglikTakip.Business.Constants;
 using AgizDisSaglikTakip.Business.DTOs.Auth;
 using AgizDisSaglikTakip.Business.Rules;
 using AgizDisSaglikTakip.Core.Utilities.Email;
@@ -9,6 +10,7 @@ using AgizDisSaglikTakip.Core.Utilities.Security.Jwt;
 using AgizDisSaglikTakip.DataAccess.Abstract;
 using AgizDisSaglikTakip.Entities;
 using AgizDisSaglikTakip.Entities.Enums;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 
 namespace AgizDisSaglikTakip.Business.Concrete;
@@ -20,6 +22,7 @@ public class AuthManager : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IEmailService _emailService;
     private readonly IGoogleAuthValidator _googleAuthValidator;
+    private readonly IDistributedCache _cache;
     private readonly ILogger<AuthManager> _logger;
 
     public AuthManager(
@@ -28,6 +31,7 @@ public class AuthManager : IAuthService
         ITokenService tokenService,
         IEmailService emailService,
         IGoogleAuthValidator googleAuthValidator,
+        IDistributedCache cache,
         ILogger<AuthManager> logger)
     {
         _userRepository = userRepository;
@@ -35,6 +39,7 @@ public class AuthManager : IAuthService
         _tokenService = tokenService;
         _emailService = emailService;
         _googleAuthValidator = googleAuthValidator;
+        _cache = cache;
         _logger = logger;
     }
 
@@ -93,7 +98,7 @@ public class AuthManager : IAuthService
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
-            return ServiceResult<LoginResultDto>.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult<LoginResultDto>.Fail(ErrorMessages.UserNotFound);
 
         // Google ile oluşturulmuş ve henüz şifre belirlememiş hesaplarda PasswordEncrypted boştur.
         if (string.IsNullOrEmpty(user.PasswordEncrypted))
@@ -170,17 +175,21 @@ public class AuthManager : IAuthService
     }
 
     // Adım 1:
-    // Email kayıtlıysa 6 haneli bir kod üretip 10 dakika geçerlilikle DB'ye yazıyoruz ve mailliyoruz
+    // Email kayıtlıysa 6 haneli bir kod üretip 10 dakika geçerlilikle Redis'e yazıyoruz ve mailliyoruz.
+    // Redis'e yazmamızın sebebi: bu kod tamamen geçici bir veri, 10 dakika sonra anlamsızlaşıyor —
+    // SQL Server'da kalıcı bir kolonda tutup elle "süresi geçti mi" kontrolü yapmak yerine,
+    // Redis'in TTL (time to live) özelliğiyle süre dolunca kendiliğinden silinmesini sağlıyoruz.
     public async Task<ServiceResult> RequestPasswordResetCodeAsync(string email)
     {
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
-            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
         var code = Random.Shared.Next(100000, 1000000).ToString();
-        user.PasswordResetCode = code;
-        user.PasswordResetCodeExpiresAt = DateTime.Now.AddMinutes(10);
-        await _userRepository.UpdateAsync(user);
+        await _cache.SetStringAsync(
+            ResetCodeCacheKey(email),
+            code,
+            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) });
 
         try
         {
@@ -204,9 +213,9 @@ public class AuthManager : IAuthService
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
-            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
-        if (!IsResetCodeValid(user, dto.Code))
+        if (!await IsResetCodeValidAsync(dto.Email, dto.Code))
             return ServiceResult.Fail("Kod hatalı ya da süresi dolmuş.");
 
         return ServiceResult.Ok("Kod doğrulandı.");
@@ -218,9 +227,9 @@ public class AuthManager : IAuthService
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
-            return ServiceResult.Fail("Kullanıcı bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
-        if (!IsResetCodeValid(user, dto.Code))
+        if (!await IsResetCodeValidAsync(dto.Email, dto.Code))
             return ServiceResult.Fail("Kod hatalı ya da süresi dolmuş.");
 
         if (!AuthBusinessRules.IsValidPassword(dto.NewPassword))
@@ -230,10 +239,9 @@ public class AuthManager : IAuthService
             return ServiceResult.Fail("Şifreler eşleşmiyor.");
 
         user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword);
-        // Kod tek kullanımlık — başarılı sıfırlamadan sonra geçersizleştiriyoruz.
-        user.PasswordResetCode = null;
-        user.PasswordResetCodeExpiresAt = null;
         await _userRepository.UpdateAsync(user);
+        // Kod tek kullanımlık — başarılı sıfırlamadan sonra Redis'ten siliyoruz.
+        await _cache.RemoveAsync(ResetCodeCacheKey(dto.Email));
 
         try
         {
@@ -250,15 +258,13 @@ public class AuthManager : IAuthService
         return ServiceResult.Ok("Şifre güncellendi.");
     }
 
-    // Kodun geçerliliğini kontrol eder
-    private static bool IsResetCodeValid(User user, string code)
+    // Kodun geçerliliğini Redis'ten kontrol eder — süresi dolmuşsa Redis anahtarı zaten
+    // kendiliğinden silinmiş olur, GetStringAsync null döner, elle süre kontrolü gerekmez.
+    private async Task<bool> IsResetCodeValidAsync(string email, string code)
     {
-        if (string.IsNullOrEmpty(user.PasswordResetCode) || user.PasswordResetCodeExpiresAt == null)
-            return false;
-
-        if (user.PasswordResetCodeExpiresAt < DateTime.Now)
-            return false;
-
-        return user.PasswordResetCode == code;
+        var storedCode = await _cache.GetStringAsync(ResetCodeCacheKey(email));
+        return storedCode != null && storedCode == code;
     }
+
+    private static string ResetCodeCacheKey(string email) => $"password-reset:{email}";
 }

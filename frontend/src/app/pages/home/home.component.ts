@@ -18,10 +18,11 @@ import { StatusDetailModalComponent } from '../../shared/status-detail-modal/sta
 import { CalendarViewComponent } from '../../shared/calendar-view/calendar-view.component';
 import { WillpowerHistoryModalComponent } from '../../shared/willpower-history-modal/willpower-history-modal.component';
 import { formatTurkishDate, formatTurkishDateTime } from '../../shared/turkish-date';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-home',
-  imports: [FormsModule, NavbarComponent, StatusDetailModalComponent, CalendarViewComponent, WillpowerHistoryModalComponent],
+  imports: [FormsModule, NavbarComponent, StatusDetailModalComponent, CalendarViewComponent, WillpowerHistoryModalComponent, TranslocoPipe],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })

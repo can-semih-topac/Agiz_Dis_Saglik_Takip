@@ -6,4 +6,6 @@ namespace AgizDisSaglikTakip.Business.Abstract;
 public interface ILogService
 {
     Task<ServiceResult<List<LogDto>>> GetRecentAsync();
+    Task<ServiceResult<List<LogDto>>> SearchAsync(string keyword);
+    Task<ServiceResult> ReindexAsync();
 }

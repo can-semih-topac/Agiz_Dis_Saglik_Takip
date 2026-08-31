@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ThemeService } from './core/services/theme.service';
+import { NetworkStatusBannerComponent } from './shared/network-status-banner/network-status-banner.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, NetworkStatusBannerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

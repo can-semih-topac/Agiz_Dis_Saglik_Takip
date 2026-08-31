@@ -1,33 +1,33 @@
 <div class="auth-page">
 <app-auth-navbar></app-auth-navbar>
 <div class="auth-content">
-<h2>Giriş Yap</h2>
+<h2>{{ 'login.title' | transloco }}</h2>
 
 <div class="demo-callout">
-  <p>Hesap oluşturmadan önce, örnek verilerle dolu bir hesap üzerinden uygulamayı inceleyebilirsiniz.</p>
+  <p>{{ 'login.demoIntro' | transloco }}</p>
   <button type="button" class="demo-btn" (click)="enterDemo()" [disabled]="isEnteringDemo">
-    {{ isEnteringDemo ? 'Hazırlanıyor...' : 'Tanıtımı Göster' }}
+    {{ isEnteringDemo ? ('login.demoPreparing' | transloco) : ('login.demoButton' | transloco) }}
   </button>
 </div>
 
 <form [formGroup]="form" (ngSubmit)="submit()">
   <div>
-    <label for="email">E-posta</label>
+    <label for="email">{{ 'common.emailLabel' | transloco }}</label>
     <input id="email" type="text" formControlName="email" />
     @if (form.get('email')?.invalid && submitted) {
-      <span class="error">Geçerli bir e-posta gir.</span>
+      <span class="error">{{ 'common.emailError' | transloco }}</span>
     }
   </div>
 
   <div>
-    <label for="password">Şifre</label>
+    <label for="password">{{ 'common.passwordLabel' | transloco }}</label>
     <div class="password-field-wrapper">
       <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" />
       <button
         type="button"
         class="password-visibility-btn"
         (click)="showPassword = !showPassword"
-        [attr.aria-label]="showPassword ? 'Şifreyi gizle' : 'Şifreyi göster'">
+        [attr.aria-label]="(showPassword ? 'common.hidePassword' : 'common.showPassword') | transloco">
         @if (showPassword) {
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" />
@@ -43,16 +43,16 @@
       </button>
     </div>
     @if (form.get('password')?.invalid && submitted) {
-      <span class="error">Şifre gerekli.</span>
+      <span class="error">{{ 'login.passwordError' | transloco }}</span>
     }
   </div>
 
   <button type="submit" [disabled]="isSubmitting">
-    {{ isSubmitting ? 'Gönderiliyor...' : 'Giriş Yap' }}
+    {{ isSubmitting ? ('common.submitting' | transloco) : ('login.submit' | transloco) }}
   </button>
 
   @if (submitted && form.invalid) {
-    <p class="error">Lütfen zorunlu alanları doldurun.</p>
+    <p class="error">{{ 'common.fillRequiredFields' | transloco }}</p>
   }
 
   @if (errorMessage) {
@@ -64,10 +64,10 @@
   }
 </form>
 
-<div class="divider"><span>veya</span></div>
+<div class="divider"><span>{{ 'login.or' | transloco }}</span></div>
 <div id="google-signin-button" class="google-signin-button"></div>
 
-<p><a routerLink="/register">Kayıt Ol</a></p>
-<p><a routerLink="/forgot-password">Şifremi Unuttum</a></p>
+<p><a routerLink="/register">{{ 'login.registerLink' | transloco }}</a></p>
+<p><a routerLink="/forgot-password">{{ 'login.forgotPasswordLink' | transloco }}</a></p>
 </div>
 </div>

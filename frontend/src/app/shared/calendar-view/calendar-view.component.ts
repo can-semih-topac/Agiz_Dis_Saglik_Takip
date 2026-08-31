@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 interface CalendarDay {
   date: string;
@@ -9,7 +10,7 @@ interface CalendarDay {
 
 @Component({
   selector: 'app-calendar-view',
-  imports: [],
+  imports: [TranslocoPipe],
   templateUrl: './calendar-view.component.html',
   styleUrl: './calendar-view.component.css'
 })
@@ -23,10 +24,11 @@ export class CalendarViewComponent implements OnInit, OnChanges {
   viewYear = this.today.getFullYear();
   viewMonth = this.today.getMonth();
 
-  readonly dayHeaders = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  // Metinler burada değil, çeviri anahtarı olarak tutuluyor — gerçek metin şablonda transloco pipe'ıyla çözülüyor.
+  readonly dayHeaders = ['calendarView.mon', 'calendarView.tue', 'calendarView.wed', 'calendarView.thu', 'calendarView.fri', 'calendarView.sat', 'calendarView.sun'];
   readonly monthNames = [
-    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+    'calendarView.jan', 'calendarView.feb', 'calendarView.mar', 'calendarView.apr', 'calendarView.may', 'calendarView.jun',
+    'calendarView.jul', 'calendarView.aug', 'calendarView.sep', 'calendarView.oct', 'calendarView.nov', 'calendarView.dec'
   ];
 
   weeks: (CalendarDay | null)[][] = [];
@@ -37,10 +39,6 @@ export class CalendarViewComponent implements OnInit, OnChanges {
 
   ngOnChanges(): void {
     this.buildCalendar();
-  }
-
-  get monthLabel(): string {
-    return `${this.monthNames[this.viewMonth]} ${this.viewYear}`;
   }
 
   prevMonth(): void {

@@ -31,6 +31,33 @@
   display: block;
 }
 
+.log-search-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.log-search-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.log-search-row button {
+  flex: none;
+}
+
+.log-reindex-btn {
+  margin-bottom: 0.9rem;
+  font-size: 0.85rem;
+}
+
+.log-reindex-message {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: -0.5rem;
+  margin-bottom: 0.9rem;
+}
+
 .message-subtabs {
   display: flex;
   gap: 0.5rem;
@@ -353,6 +380,14 @@
 
 .delete-confirm-btn:hover:not(:disabled) {
   background: var(--danger-hover);
+}
+
+/* p-dialog kendi içeriğini sarmalamıyor — vazgeç/sil butonlarını sağa yaslı, yan yana dizmek için. */
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 
 .modal-cancel {

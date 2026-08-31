@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { environment } from '../../../environments/environment';
 import { ContactService } from '../../core/services/contact.service';
 import { ContactMessageDto, ContactMessageStatus } from '../../core/models/contact.models';
@@ -13,12 +14,15 @@ import { AdminActionLogDto } from '../../core/models/admin-action-log.models';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
 import { AddUserModalComponent } from '../../shared/add-user-modal/add-user-modal.component';
 import { formatTurkishDate, formatTurkishDateTime } from '../../shared/turkish-date';
+import { TableModule } from 'primeng/table';
+import { DialogModule } from 'primeng/dialog';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 type AdminTab = 'messages' | 'logs' | 'adminActions' | 'users';
 
 @Component({
   selector: 'app-admin',
-  imports: [NavbarComponent, AddUserModalComponent],
+  imports: [NavbarComponent, AddUserModalComponent, TableModule, DialogModule, TranslocoPipe, FormsModule],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.css'
 })
@@ -50,6 +54,16 @@ export class AdminComponent implements OnInit {
   logs: LogDto[] = [];
   logsLoading = true;
   logsError = '';
+
+  // ElasticSearch üzerinden tam metin arama — arama aktifken listede sonuçlar,
+  // kutu boşaltılınca son 200 kayda geri dönülür.
+  logSearchTerm = '';
+  logSearchResults: LogDto[] | null = null;
+  logSearchLoading = false;
+  logSearchError = '';
+
+  logReindexing = false;
+  logReindexMessage = '';
 
   adminActions: AdminActionLogDto[] = [];
   adminActionsLoading = true;
@@ -155,6 +169,60 @@ export class AdminComponent implements OnInit {
       error: (err: HttpErrorResponse) => {
         this.reviewingMessageId = null;
         this.reviewErrorMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
+  }
+
+  get displayedLogs(): LogDto[] {
+    return this.logSearchResults ?? this.logs;
+  }
+
+  searchLogs(): void {
+    const term = this.logSearchTerm.trim();
+    if (!term) {
+      this.clearLogSearch();
+      return;
+    }
+
+    this.logSearchLoading = true;
+    this.logSearchError = '';
+
+    this.logService.search(term).subscribe({
+      next: (result) => {
+        this.logSearchLoading = false;
+        if (result.success) {
+          this.logSearchResults = result.data;
+        } else {
+          this.logSearchError = result.message ?? 'Arama yapılamadı.';
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.logSearchLoading = false;
+        this.logSearchError = err.error?.message ?? 'Sunucuya ulaşılamadı.';
+      }
+    });
+  }
+
+  clearLogSearch(): void {
+    this.logSearchTerm = '';
+    this.logSearchResults = null;
+    this.logSearchError = '';
+  }
+
+  // ElasticSearch bir süre erişilemez olmuşsa SQL'deki loglarla arasında fark oluşabilir —
+  // bu buton SQL'deki tüm logları ElasticSearch'e yeniden yazıp aradaki farkı kapatıyor.
+  reindexLogs(): void {
+    this.logReindexing = true;
+    this.logReindexMessage = '';
+
+    this.logService.reindex().subscribe({
+      next: (result) => {
+        this.logReindexing = false;
+        this.logReindexMessage = result.message ?? '';
+      },
+      error: (err: HttpErrorResponse) => {
+        this.logReindexing = false;
+        this.logReindexMessage = err.error?.message ?? 'Sunucuya ulaşılamadı.';
       }
     });
   }

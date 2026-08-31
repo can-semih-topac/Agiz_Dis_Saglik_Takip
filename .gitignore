@@ -3,6 +3,10 @@ bin/
 obj/
 *.user
 *.suo
+ci-build/
+
+# SonarQube tarayıcısının oluşturduğu geçici çalışma klasörü
+.sonarqube/
 
 # Visual Studio / Rider / VS Code
 .vs/
@@ -27,10 +31,8 @@ uploads/
 Thumbs.db
 .DS_Store
 
-# Yerel çalışma/yedekleme yardımcı dosyaları (repoya girmemeli)
-dotnet-watch.log
-backend_watch.log
-frontend-static-serve.log
-cloudflared.log
-cloudflared-err.log
+# Yerel çalışma/yedekleme yardımcı dosyaları (repoya girmemeli) — tek tek dosya adı
+# eklemek yerine genel kural: kökteki her .log dosyası (yeni bir servis başlatınca
+# tekrar tekrar bu listeye eklemeyi unutmayalım diye).
+*.log
 örnek fotolar/

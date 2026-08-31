@@ -1,0 +1,16 @@
+.lang-switch {
+  flex: none;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 6px;
+  color: #fff;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 0;
+}
+
+.lang-switch:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.28);
+}

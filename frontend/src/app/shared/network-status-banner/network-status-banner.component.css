@@ -1,0 +1,16 @@
+.network-banner {
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+}
+
+.network-banner.is-offline {
+  background: #ea580c;
+}
+
+.network-banner.is-online {
+  background: #15803d;
+}
