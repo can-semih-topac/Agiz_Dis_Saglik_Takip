@@ -28,7 +28,26 @@ pipeline {
                     // "ng serve" arka planda başlatılıyor — dev sunucusu doğrudan
                     // localhost:5299'a konuşuyor (bkz. environment.development.ts).
                     bat 'start /B npx ng serve --port 4200 > ng-serve-ci.log 2>&1'
-                    powershell 'Start-Sleep -Seconds 30'
+                    // Sabit bir süre beklemek yerine (bazen yetmiyor, bazen gereksiz uzun
+                    // sürüyor) port cevap verene kadar birkaç saniyede bir kontrol ediyoruz.
+                    powershell '''
+                        $timeout = 150
+                        $elapsed = 0
+                        $up = $false
+                        while ($elapsed -lt $timeout) {
+                            try {
+                                $response = Invoke-WebRequest -Uri "http://localhost:4200/" -UseBasicParsing -TimeoutSec 3
+                                if ($response.StatusCode -eq 200) { $up = $true; break }
+                            } catch {}
+                            Start-Sleep -Seconds 3
+                            $elapsed += 3
+                        }
+                        if (-not $up) {
+                            Write-Error "Frontend test sunucusu $timeout saniyede ayaga kalkmadi."
+                            exit 1
+                        }
+                        Write-Host "Frontend test sunucusu $elapsed saniyede ayaga kalkti."
+                    '''
                 }
             }
         }
