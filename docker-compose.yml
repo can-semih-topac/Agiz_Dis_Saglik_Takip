@@ -1,6 +1,6 @@
-# Faz 1: sadece backend + frontend container'da. MSSQL, Redis, ElasticSearch, SonarQube,
+# Faz 2: Redis ve ElasticSearch de container'da (Faz 1: backend + frontend). MSSQL, SonarQube,
 # Jenkins, cloudflared şimdilik host'ta (makinede) doğrudan çalışmaya devam ediyor —
-# "host.docker.internal" host makineye bu container'lardan erişmek için kullanılıyor.
+# "host.docker.internal" host makineye kalan bu servislere erişmek için kullanılıyor.
 #
 # "name" sabitlenmezse Docker Compose proje adını klasör adından türetiyor — benim kendi
 # checkout'um ("agiz_dis_saglik_takip") ile Jenkins'in workspace'i ("agiz-dis-saglik-takip")
@@ -17,8 +17,10 @@ services:
       - "${BACKEND_PORT:-5299}:8080"
     environment:
       - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
-      - Redis__Configuration=host.docker.internal:6379
-      - Elasticsearch__Uri=http://host.docker.internal:9200
+      # "redis"/"elasticsearch" — host.docker.internal değil, çünkü artık ikisi de bu compose
+      # ağının içinde, kendi servis adlarıyla doğrudan erişilebiliyor.
+      - Redis__Configuration=redis:6379
+      - Elasticsearch__Uri=http://elasticsearch:9200
       - Jwt__Issuer=AgizDisSaglikTakip
       - Jwt__Audience=AgizDisSaglikTakipClient
       - Jwt__ExpirationMinutes=60
@@ -37,8 +39,11 @@ services:
       - backend-uploads:/app/wwwroot
     extra_hosts:
       # Docker Desktop, kendi ürettiği bu compose ağında "host.docker.internal"ı otomatik çözmüyor
-      # — bu satır olmadan container, host'taki SQL/Redis/ElasticSearch'e hiç ulaşamıyor.
+      # — bu satır olmadan container, host'taki (henüz container'lanmamış) SQL'e hiç ulaşamıyor.
       - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+      - elasticsearch
     restart: always
 
   frontend:
@@ -48,5 +53,29 @@ services:
       - "${FRONTEND_PORT:-4300}:80"
     restart: always
 
+  redis:
+    image: redis:alpine
+    volumes:
+      - redis-data:/data
+    restart: always
+
+  elasticsearch:
+    # Yerel kurulumla (8.19.19) aynı sürüm — istemci kütüphanesiyle (Elastic.Clients.Elasticsearch
+    # 8.19.24) uyumluluk için sürümleri yakın tutmak önemli.
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.19
+    environment:
+      # Tek node, kümeleme yok — kişisel proje için gereksiz karmaşıklık olurdu.
+      - discovery.type=single-node
+      # Yerel kurulumda da güvenlik/parola yoktu (ElasticsearchClient hiç kimlik bilgisi
+      # göndermiyor) — container'da da aynı basit kurulumu koruyoruz.
+      - xpack.security.enabled=false
+      # Varsayılan JVM heap boyutu çok büyük olurdu — kişisel projenin log hacmi için 512MB yeterli.
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    restart: always
+
 volumes:
   backend-uploads:
+  redis-data:
+  elasticsearch-data:
