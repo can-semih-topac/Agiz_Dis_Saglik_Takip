@@ -4,3 +4,8 @@
 **/obj/
 ci-build/
 .vs/
+
+# Gerçek kullanıcı yüklemeleri (durum notu fotoğrafları vb.) — bunlar image'a değil,
+# docker-compose.yml'deki "backend-uploads" volume'üne ait. Buraya girerse her image
+# derlemesinde o an host'ta ne varsa image'ın içine donmuş halde gömülür.
+src/AgizDisSaglikTakip.WebAPI/wwwroot/uploads/

@@ -1,6 +1,14 @@
 # Faz 1: sadece backend + frontend container'da. MSSQL, Redis, ElasticSearch, SonarQube,
 # Jenkins, cloudflared şimdilik host'ta (makinede) doğrudan çalışmaya devam ediyor —
 # "host.docker.internal" host makineye bu container'lardan erişmek için kullanılıyor.
+#
+# "name" sabitlenmezse Docker Compose proje adını klasör adından türetiyor — benim kendi
+# checkout'um ("agiz_dis_saglik_takip") ile Jenkins'in workspace'i ("agiz-dis-saglik-takip")
+# FARKLI klasör adlarına sahip, yani sabitlemezsek ikisi ayrı birer "proje" sayılıp aynı
+# canlı portlarda (5299/4300) çakışıyor. Sabitleyince nereden çalıştırılırsa çalıştırılsın
+# hep AYNI, tek bir canlı dağıtım olarak tanınıyor.
+name: ads-takip
+
 services:
   backend:
     build:
