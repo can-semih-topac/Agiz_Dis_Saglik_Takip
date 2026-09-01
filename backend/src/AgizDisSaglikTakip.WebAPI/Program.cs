@@ -1,9 +1,13 @@
 using System.Text;
 using AgizDisSaglikTakip.Business;
+using AgizDisSaglikTakip.Business.Seed;
 using AgizDisSaglikTakip.Core;
+using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
 using AgizDisSaglikTakip.DataAccess;
+using AgizDisSaglikTakip.DataAccess.Contexts;
 using Elastic.Clients.Elasticsearch;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 
@@ -88,6 +92,19 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Migration'lar EF Core'un kendi __EFMigrationsHistory tablosuyla takip ediliyor — zaten
+// uygulanmışsa bu çağrı hiçbir şey yapmaz (milisaniyeler sürer), boş bir veritabanında
+// (taze "docker compose up" gibi) ise şemayı sıfırdan kurar. Demo şablon verisi de aynı
+// mantıkla idempotent: sadece daha önce hiç oluşturulmamışsa ekleniyor (bkz. DemoDataSeeder).
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
+
+    var encryptionService = scope.ServiceProvider.GetRequiredService<IEncryptionService>();
+    await DemoDataSeeder.SeedAsync(dbContext, encryptionService);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
