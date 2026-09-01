@@ -2,14 +2,13 @@
 // gömülü değil, repo'nun bir parçası, yani Source Control'den takip edilebiliyor.
 //
 // "Selenium E2E Testi" adımı, localhost:5299'daki backend'in zaten ayakta olmasını
-// bekliyor (standart 3'lü canlı yığının parçası) — Jenkins onu başlatmıyor.
+// bekliyor (canlı yığının parçası) — Jenkins onu başlatmıyor, sadece test için kullanıyor.
 //
-// Son adım Docker image'larını derleyip ayağa kaldırıyor — ama 5299/4300 (canlı yığının
-// portları) DEĞİL, BACKEND_PORT/FRONTEND_PORT ortam değişkenleriyle 5301/4301'e alınıyor
-// (docker-compose.yml'deki "${BACKEND_PORT:-5299}" gibi tanımlar sayesinde). Yani bu adım
-// canlıya hiç dokunmuyor, sadece "image doğru derleniyor mu, container doğru ayağa kalkıyor
-// mu"yu her push'ta otomatik doğruluyor. Container'ların canlıdaki gerçek 5299/4300'ü
-// devralması (dotnet watch/npx serve'ün emekliye ayrılması) ayrı, bilinçli bir adım olarak kalacak.
+// Son adım Docker image'larını derleyip GERÇEK canlı portlarda (5299/4300, docker-compose.yml'in
+// varsayılanları) ayağa kaldırıyor — yani her push, testler geçtiği sürece, canlı siteyi
+// otomatik günceller (dotnet watch/npx serve emekliye ayrıldı, canlı artık tamamen Docker
+// container'larından oluşuyor). Testler başarısız olursa pipeline bu adıma hiç gelmez,
+// canlı olduğu gibi kalır — bu yüzden Selenium adımı burada bir güvenlik freni işlevi görüyor.
 pipeline {
     agent any
 
@@ -80,15 +79,9 @@ pipeline {
                 // .env, git'e hiç girmiyor (gizli anahtarlar içeriyor) — Jenkins'in temiz
                 // checkout'unda bulunmaz, bu yüzden repo dışındaki sabit bir kopyadan alınıyor.
                 bat 'copy /Y "C:\\Users\\canse\\Jenkins\\secrets\\.env" .env'
-                // BACKEND_PORT/FRONTEND_PORT burada set edilip AYNI bat bloğunda kullanılıyor —
-                // Jenkins'te her "bat" adımı ayrı bir cmd.exe olduğu için "set" bir sonrakine miras kalmaz.
-                // Docker Desktop, Jenkins başlatıldıktan SONRA kurulduğu için "docker" PATH'te yok,
-                // tam yol kullanmak Jenkins'i yeniden başlatma ihtiyacını ortadan kaldırıyor.
-                bat '''
-                    set BACKEND_PORT=5301
-                    set FRONTEND_PORT=4301
-                    "C:\\Users\\canse\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" compose up -d --build
-                '''
+                // BACKEND_PORT/FRONTEND_PORT vermiyoruz — docker-compose.yml'in varsayılanı
+                // (5299/4300) devreye giriyor, yani doğrudan CANLI portlara deploy ediyor.
+                bat 'docker compose up -d --build'
             }
         }
     }
