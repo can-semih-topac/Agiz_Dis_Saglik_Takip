@@ -67,6 +67,22 @@ services:
       - redis-data:/data
     restart: always
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      # Asıl gizli olan tünel kimlik bilgisi dosyası repo'da değil — makineye özel yolu
+      # .env'den okunuyor (bkz. .env.example).
+      - ${CLOUDFLARED_CREDENTIALS_PATH}:/etc/cloudflared/bcd1f346-d1e4-46fb-9420-5221f8dbd536.json:ro
+    extra_hosts:
+      # Jenkins henüz container'lanmadı, host'ta çalışıyor.
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - backend
+      - frontend
+    restart: always
+
   elasticsearch:
     # Yerel kurulumla (8.19.19) aynı sürüm — istemci kütüphanesiyle (Elastic.Clients.Elasticsearch
     # 8.19.24) uyumluluk için sürümleri yakın tutmak önemli.

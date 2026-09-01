@@ -1,0 +1,18 @@
+# Cloudflare Tünelinin container içindeki hâli — burada sır yok (tünel kimliği zaten Cloudflare
+# panelinde görünür), asıl gizli olan credentials dosyası (.json) burada değil, repo dışında
+# duruyor ve docker-compose.yml içinden ayrıca mount ediliyor.
+#
+# "backend"/"frontend" — host.docker.internal ya da localhost değil, çünkü bu container artık
+# aynı compose ağının içinde, diğer servislere kendi adlarıyla doğrudan ulaşabiliyor.
+tunnel: bcd1f346-d1e4-46fb-9420-5221f8dbd536
+credentials-file: /etc/cloudflared/bcd1f346-d1e4-46fb-9420-5221f8dbd536.json
+
+ingress:
+  - hostname: api.cansemihtopac.com
+    service: http://backend:8080
+  - hostname: ads.cansemihtopac.com
+    service: http://frontend:80
+  # Jenkins henüz container'lanmadı (Faz 3'ün bir sonraki adımı) — o yüzden hâlâ host'a bakıyor.
+  - hostname: jenkins.cansemihtopac.com
+    service: http://host.docker.internal:8080
+  - service: http_status:404
