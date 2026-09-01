@@ -1,11 +1,14 @@
 // Jenkins'in çalıştıracağı pipeline — "Pipeline as Code": bu betik Jenkins arayüzüne
 // gömülü değil, repo'nun bir parçası, yani Source Control'den takip edilebiliyor.
 //
-// Şimdilik sadece derleme + test (deploy adımı YOK — canlıdaki backend/frontend
-// süreçlerine bilerek dokunmuyoruz, bu ayrı ve daha dikkatli ele alınması gereken bir adım).
-//
 // "Selenium E2E Testi" adımı, localhost:5299'daki backend'in zaten ayakta olmasını
-// bekliyor (standart 3'lü canlı yığının parçası) — Jenkins onu başlatmıyor.
+// bekliyor (canlı yığının parçası) — Jenkins onu başlatmıyor, sadece test için kullanıyor.
+//
+// Son adım Docker image'larını derleyip GERÇEK canlı portlarda (5299/4300, docker-compose.yml'in
+// varsayılanları) ayağa kaldırıyor — yani her push, testler geçtiği sürece, canlı siteyi
+// otomatik günceller (dotnet watch/npx serve emekliye ayrıldı, canlı artık tamamen Docker
+// container'larından oluşuyor). Testler başarısız olursa pipeline bu adıma hiç gelmez,
+// canlı olduğu gibi kalır — bu yüzden Selenium adımı burada bir güvenlik freni işlevi görüyor.
 pipeline {
     agent any
 
@@ -18,6 +21,17 @@ pipeline {
                     // çalışırsa her seferinde çakışır. Ayrı bir klasöre derleyerek bunu
                     // tamamen önlüyoruz, canlı sürece hiç dokunmuyoruz.
                     bat 'dotnet build -o ci-build'
+                }
+            }
+        }
+
+        stage('Frontend Bağımlılıklarını Kur') {
+            steps {
+                dir('frontend') {
+                    // Jenkins'in çalışma klasörü .git'ten temiz bir checkout — node_modules
+                    // hiç yok (zaten .gitignore'da, olması da gerekmiyor). "npm ci",
+                    // package-lock.json'a birebir uyan, CI için önerilen kurulum komutu.
+                    bat 'npm ci'
                 }
             }
         }
@@ -57,6 +71,17 @@ pipeline {
                 dir('test/AgizDisSaglikTakip.E2ETests') {
                     bat 'dotnet test'
                 }
+            }
+        }
+
+        stage('Docker Image\'larını Derle ve Ayağa Kaldır') {
+            steps {
+                // .env, git'e hiç girmiyor (gizli anahtarlar içeriyor) — Jenkins'in temiz
+                // checkout'unda bulunmaz, bu yüzden repo dışındaki sabit bir kopyadan alınıyor.
+                bat 'copy /Y "C:\\Users\\canse\\Jenkins\\secrets\\.env" .env'
+                // BACKEND_PORT/FRONTEND_PORT vermiyoruz — docker-compose.yml'in varsayılanı
+                // (5299/4300) devreye giriyor, yani doğrudan CANLI portlara deploy ediyor.
+                bat 'docker compose up -d --build'
             }
         }
     }

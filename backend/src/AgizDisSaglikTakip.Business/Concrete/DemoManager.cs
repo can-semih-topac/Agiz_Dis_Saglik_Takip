@@ -114,6 +114,24 @@ public class DemoManager : IDemoService
         // az sonra notları eklerken StatusNote.GoalStatus buradaki (artık gerçek Id'si olan) nesneleri referans alacak.
         await _goalRepository.AddRangeAsync(clonedGoals);
 
+        // Yukarıdaki kaydırma "bugün"ü bilerek boş bırakıyor (ziyaretçi ilk kaydı kendi eklesin diye).
+        // Ama hem "Bugün Yapılanlar" hem "Yapılması Gerekenler" ilk açılışta örnekli görünsün istendiği
+        // için "Gargara Kullanma"ya bugünden tek bir kayıt ekliyoruz: frekansı (3) doldurmuyor, yani
+        // hem bugün yapılan bir örnek olarak görünüyor hem de hâlâ "yapılması gereken" listesinde kalıp
+        // ziyaretçinin hızlı ekleme özelliğini denemesine imkan tanıyor. Diğer günlük hedefler bugün
+        // hiç işlenmediği için zaten "Yapılması Gerekenler"de örnek olarak duruyor.
+        var gargaraGoal = clonedGoals.FirstOrDefault(g => g.Title == "Gargara Kulllanma");
+        if (gargaraGoal != null)
+        {
+            await _goalStatusRepository.AddAsync(new GoalStatus
+            {
+                GoalId = gargaraGoal.Id,
+                ActivityDate = DateOnly.FromDateTime(DateTime.Today),
+                ActivityTime = new TimeOnly(8, 0),
+                CreatedAt = DateTime.Now
+            });
+        }
+
         var clonedNotes = new List<StatusNote>();
         foreach (var note in templateNotes)
         {
