@@ -99,8 +99,24 @@ services:
       - elasticsearch-data:/usr/share/elasticsearch/data
     restart: always
 
+  sonarqube:
+    image: sonarqube:community
+    ports:
+      - "9000:9000"
+    volumes:
+      # Not: eski native kurulumdaki tarama geçmişi buraya taşınmadı — bilinçli bir tercih,
+      # kod kalitesi geçmişini kaybetmenin (fonksiyonelliği etkilemeyen, sadece grafik) bedeli,
+      # H2 gömülü veritabanını elle taşımanın riskine değmezdi. Yeni taramalardan itibaren birikir.
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+    restart: always
+
 volumes:
   backend-uploads:
   redis-data:
   elasticsearch-data:
   mssql-data:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:
