@@ -1,0 +1,6 @@
+# Yerel Windows derlemesinden kalan klasörler container'a kopyalanmasın — içlerinde
+# Windows'a özel mutlak yollar barındıran NuGet önbelleği var, container'da restore'u bozuyor.
+**/bin/
+**/obj/
+ci-build/
+.vs/

@@ -1,0 +1,5 @@
+# Yerel bağımlılıklar ve build çıktısı container'a kopyalanmasın — image içinde "npm ci"
+# ve "ng build" ile sıfırdan üretiliyorlar, yerel kopyaları taşımak hem gereksiz hem yavaş.
+node_modules/
+dist/
+.angular/

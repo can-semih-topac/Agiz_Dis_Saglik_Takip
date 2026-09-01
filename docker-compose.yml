@@ -1,0 +1,40 @@
+# Faz 1: sadece backend + frontend container'da. MSSQL, Redis, ElasticSearch, SonarQube,
+# Jenkins, cloudflared şimdilik host'ta (makinede) doğrudan çalışmaya devam ediyor —
+# "host.docker.internal" host makineye bu container'lardan erişmek için kullanılıyor.
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "${BACKEND_PORT:-5299}:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+      - Redis__Configuration=host.docker.internal:6379
+      - Elasticsearch__Uri=http://host.docker.internal:9200
+      - Jwt__Issuer=AgizDisSaglikTakip
+      - Jwt__Audience=AgizDisSaglikTakipClient
+      - Jwt__ExpirationMinutes=60
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Encryption__AesKey=${ENCRYPTION_AES_KEY}
+      - Email__SmtpHost=smtp.gmail.com
+      - Email__SmtpPort=587
+      - Email__SenderEmail=can.semih.topac18@gmail.com
+      - Email__SenderName=Agiz ve Dis Sagligi Takip
+      - Email__SenderPassword=${EMAIL_SENDER_PASSWORD}
+      - Google__ClientId=453760525742-al563c48uhhb3b3886mp75f8fniadi1t.apps.googleusercontent.com
+      - Sentry__Dsn=${SENTRY_DSN}
+    volumes:
+      # Kullanıcıların yüklediği görseller (profil fotoğrafı, durum notu resmi) container
+      # yeniden oluşturulduğunda kaybolmasın diye kalıcı bir volume'de tutuluyor.
+      - backend-uploads:/app/wwwroot
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "${FRONTEND_PORT:-4300}:80"
+    restart: always
+
+volumes:
+  backend-uploads:
