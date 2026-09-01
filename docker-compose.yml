@@ -1,5 +1,9 @@
-# Faz 2 tamamlandı: backend + frontend + Redis + ElasticSearch + MSSQL hepsi container'da.
-# SonarQube, Jenkins, cloudflared şimdilik host'ta (makinede) doğrudan çalışmaya devam ediyor.
+# Faz 3 tamamlandı: backend + frontend + Redis + ElasticSearch + MSSQL + cloudflared +
+# SonarQube hepsi container'da. Sadece Jenkins host'ta (makinede) doğrudan çalışmaya devam
+# ediyor — bilinçli bir tercih: Jenkins'i container'lamanın maliyeti (Jenkinsfile'ın tamamını
+# Linux'a çevirmek, özel bir image, mevcut kurulumu taşımak) bu tek-makinelik, tek-kişilik proje
+# için sağladığı faydayı (asıl amaç "elle başlatmaya gerek kalmasın" — Jenkins zaten tek komutla
+# hızlıca yeniden ayağa kalkıyor) karşılamıyor.
 #
 # MSSQL verisi native SQL Server'dan BACKUP/RESTORE ile taşındı (bkz. proje geçmişi) — native
 # SQL Server kurulumu bilerek KAPATILMADI, güvenlik ağı olarak bir süre daha ayakta kalacak.

@@ -25,8 +25,8 @@ Kullanıcıların diş fırçalama, diş ipi kullanımı, diş hekimi kontrolü 
 - **Açık / Koyu / Otomatik tema** — CSS değişkenleriyle uçtan uca tema desteği
 
 ### DevOps & Kalite
-- **Docker & Docker Compose** — backend, frontend, MSSQL, Redis, ElasticSearch container'larda; tek komutla (`docker compose up`) tüm sistem ayağa kalkıyor
-- **Jenkins (CI/CD)** — GitHub push'unda webhook ile otomatik tetiklenen pipeline: derleme → E2E test → **testler geçerse canlıyı otomatik günceller**
+- **Docker & Docker Compose** — backend, frontend, MSSQL, Redis, ElasticSearch, SonarQube, Cloudflare Tunnel container'larda; tek komutla (`docker compose up`) tüm sistem ayağa kalkıyor
+- **Jenkins (CI/CD)** — GitHub push'unda webhook ile otomatik tetiklenen pipeline: derleme → E2E test → **testler geçerse canlıyı otomatik günceller** (bilinçli olarak container'lanmadı — tek makinelik bir kurulumda taşınabilirlik faydası sağlamıyor, gereksiz karmaşıklık olurdu)
 - **Selenium** — kullanıcı arayüzü üzerinden uçtan uca (E2E) test otomasyonu
 - **SonarQube** — statik kod analizi (güvenlik açığı ve kod kokusu taraması)
 - **Cloudflare Tunnel** — yerel geliştirme makinesinin güvenli şekilde herkese açık bir adrese (bu repodaki demo linki) yayınlanması
@@ -39,7 +39,7 @@ Kullanıcıların diş fırçalama, diş ipi kullanımı, diş hekimi kontrolü 
 GitHub push
     │
     ▼
-Jenkins (webhook ile tetiklenir)
+Jenkins (host'ta, webhook ile tetiklenir)
     │  derle → Selenium E2E testi
     ▼  (testler geçerse)
 docker compose up -d --build
@@ -48,7 +48,9 @@ docker compose up -d --build
     ├── frontend (Angular, Nginx ile sunulur)
     ├── db (MSSQL)
     ├── redis
-    └── elasticsearch
+    ├── elasticsearch
+    ├── sonarqube
+    └── cloudflared (herkese açık demo linkini yayınlar)
 ```
 
 Her servis kendi container'ında izole çalışıyor; `restart: always` sayesinde makine ya da Docker yeniden başlasa bile elle müdahale gerekmeden ayağa kalkıyor.
