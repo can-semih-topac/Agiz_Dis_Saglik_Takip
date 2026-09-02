@@ -1,5 +1,9 @@
-# Faz 2 tamamlandı: backend + frontend + Redis + ElasticSearch + MSSQL hepsi container'da.
-# SonarQube, Jenkins, cloudflared şimdilik host'ta (makinede) doğrudan çalışmaya devam ediyor.
+# Faz 3 tamamlandı: backend + frontend + Redis + ElasticSearch + MSSQL + cloudflared +
+# SonarQube hepsi container'da. Sadece Jenkins host'ta (makinede) doğrudan çalışmaya devam
+# ediyor — bilinçli bir tercih: Jenkins'i container'lamanın maliyeti (Jenkinsfile'ın tamamını
+# Linux'a çevirmek, özel bir image, mevcut kurulumu taşımak) bu tek-makinelik, tek-kişilik proje
+# için sağladığı faydayı (asıl amaç "elle başlatmaya gerek kalmasın" — Jenkins zaten tek komutla
+# hızlıca yeniden ayağa kalkıyor) karşılamıyor.
 #
 # MSSQL verisi native SQL Server'dan BACKUP/RESTORE ile taşındı (bkz. proje geçmişi) — native
 # SQL Server kurulumu bilerek KAPATILMADI, güvenlik ağı olarak bir süre daha ayakta kalacak.
@@ -67,6 +71,22 @@ services:
       - redis-data:/data
     restart: always
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      # Asıl gizli olan tünel kimlik bilgisi dosyası repo'da değil — makineye özel yolu
+      # .env'den okunuyor (bkz. .env.example).
+      - ${CLOUDFLARED_CREDENTIALS_PATH}:/etc/cloudflared/bcd1f346-d1e4-46fb-9420-5221f8dbd536.json:ro
+    extra_hosts:
+      # Jenkins henüz container'lanmadı, host'ta çalışıyor.
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - backend
+      - frontend
+    restart: always
+
   elasticsearch:
     # Yerel kurulumla (8.19.19) aynı sürüm — istemci kütüphanesiyle (Elastic.Clients.Elasticsearch
     # 8.19.24) uyumluluk için sürümleri yakın tutmak önemli.
@@ -83,8 +103,24 @@ services:
       - elasticsearch-data:/usr/share/elasticsearch/data
     restart: always
 
+  sonarqube:
+    image: sonarqube:community
+    ports:
+      - "9000:9000"
+    volumes:
+      # Not: eski native kurulumdaki tarama geçmişi buraya taşınmadı — bilinçli bir tercih,
+      # kod kalitesi geçmişini kaybetmenin (fonksiyonelliği etkilemeyen, sadece grafik) bedeli,
+      # H2 gömülü veritabanını elle taşımanın riskine değmezdi. Yeni taramalardan itibaren birikir.
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+      - sonarqube-logs:/opt/sonarqube/logs
+    restart: always
+
 volumes:
   backend-uploads:
   redis-data:
   elasticsearch-data:
   mssql-data:
+  sonarqube-data:
+  sonarqube-extensions:
+  sonarqube-logs:
