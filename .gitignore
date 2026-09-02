@@ -36,3 +36,7 @@ Thumbs.db
 # tekrar tekrar bu listeye eklemeyi unutmayalım diye).
 *.log
 örnek fotolar/
+
+# Bu makineye özel, kişisel başlatma betiği (Windows yolları hardcoded) — başka bir
+# bilgisayarda/Mac'te işe yaramaz, repo'nun geneline ait değil.
+baslat.ps1
