@@ -44,3 +44,19 @@ gerçek DB'ye karşı uçtan uca doğrulandı (login → refresh → rotasyon �
 reddi/tüm-oturum-iptali → logout → iptal edilen tokenın reddi), test kullanıcısı temizlendi.
 Frontend tarafı `ng build` ile tip/derleme hatasız doğrulandı; tarayıcı üzerinde interaktif
 401→refresh akışı test EDİLEMEDİ (bu ortamda tarayıcı aracı yok) — kullanıcıya ayrıca belirtildi.
+
+## 2026-09-04 11:58
+SonarQube taraması Jenkins pipeline'ına entegre edildi. "Backend Derle" adımı
+"Backend Derle ve SonarQube Analizi" olarak genişletildi (dotnet-sonarscanner begin/end
+derlemeyi sarmalıyor, zaten kurulu olan dotnet-sonarscanner global tool'u kullanıyor),
+ardından yeni bir "Kalite Kapısı Kontrolü" adımı ekledim — SonarQube plugin'i Jenkins'e
+kurmadan (sistem ayarlarına dokunmamak icin bilinçli tercih), SonarQube'ün Web API'sini
+PowerShell ile polluyor, Kalite Kapısı "OK" değilse pipeline'ı Selenium testiyle aynı
+mantıkla durdurup Docker deploy adımına hiç geçmiyor. CI için ayrı bir SonarQube token'ı
+üretip (admin/admin ile, ki bunun hâlâ varsayılan olduğunu kullanıcıya ayrıca flagledim)
+repo dışına (C:\Users\canse\Jenkins\secrets\sonar-token.txt) kaydettim. Tüm zinciri
+(begin → build → end → Kalite Kapısı polling) hem Bash hem PowerShell ile yerel olarak
+uçtan uca test ettim, ikisi de "ANALYSIS SUCCESSFUL" ve "Kalite Kapisi durumu: OK" ile
+sonuçlandı. Jenkinsfile'ı gerçek Jenkins linter'ıyla doğrulayamadım (kimlik doğrulama
+gerektiriyor) — sözdizimini elle inceleyip aynı script'i PowerShell'de birebir çalıştırarak
+doğruladım, gerçek doğrulama Jenkins'in bir sonraki push'ta otomatik tetiklenen build'i ile yapılacak.
