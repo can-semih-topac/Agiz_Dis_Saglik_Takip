@@ -88,3 +88,22 @@ olmadığı için bu her build'de otomatik FAIL ederdi. Coverage şartı olmayan
 ("CI-Gate-No-Coverage") oluşturup projeye atadım; coverage entegrasyonu ayrı, gelecekteki
 bir iş. Tarama sonrası: 0 bug, 0 vulnerability, sadece 3 won't-fix code smell kaldı,
 Kalite Kapısı "OK".
+
+## 2026-09-04 17:01
+Backend'e birim (unit) test eklendi. Yeni proje: test/AgizDisSaglikTakip.UnitTests
+(xUnit + Moq, E2E test projesiyle aynı konvansiyon). En riskli/karmaşık iş mantığı
+hedeflendi: AuthBusinessRules (e-posta/telefon/şifre doğrulama), StreakCalculator (seri
+hesaplama, duraklatma köprüleme), WillpowerManager (irade puanı motoru — bugün refactor
+edilen ComputeScoreAsOf/ComputeGoalContribution'ın davranışı bozulmadığı kanıtlandı) ve
+AuthManager (giriş kilidi, refresh token rotasyonu/çalıntı tespiti, şifre sıfırlama kod
+deneme sınırı — bu oturumda eklenen tüm güvenlik mekanizmaları). AuthManager testlerinde
+IDistributedCache için mock yerine gerçek (Redis'siz, bellek içi) MemoryDistributedCache,
+hash/token üretimi için gerçek BCryptPasswordHasher/JwtTokenService kullanıldı — sahte
+repository'ler (FakeUserRepository, FakeRefreshTokenRepository) da elle yazıldı çünkü
+rotasyon senaryoları çok adımlı/durum bağımlı, Moq ile taklit etmek kırılgan olurdu.
+56 testten ilk çalıştırmada 1'i GERÇEK bir bug buldu: AuthBusinessRules.IsValidEmailFormat
+boş e-postayla çağrılınca (FormatException değil) yakalanmamış bir ArgumentException
+fırlatıp backend'i çökertiyordu — düzeltildi (erken boş/whitespace kontrolü eklendi).
+Jenkinsfile'a "Birim Testleri" adımı eklendi (Kalite Kapısı'ndan sonra, Selenium'dan önce
+— hızlı başarısız olsun diye). Backend hem normal build hem test run ile doğrulandı,
+56/56 test geçiyor.

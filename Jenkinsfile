@@ -84,6 +84,14 @@ pipeline {
             }
         }
 
+        stage('Birim Testleri') {
+            steps {
+                dir('test/AgizDisSaglikTakip.UnitTests') {
+                    bat 'dotnet test'
+                }
+            }
+        }
+
         stage('Frontend Bağımlılıklarını Kur') {
             steps {
                 dir('frontend') {

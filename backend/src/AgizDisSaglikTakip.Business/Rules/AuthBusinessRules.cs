@@ -13,6 +13,12 @@ public static class AuthBusinessRules
 
     public static bool IsValidEmailFormat(string email)
     {
+        // MailAddress, boş/whitespace metinle çağrılınca FormatException değil ArgumentException
+        // fırlatıyor — bu erken kontrol olmadan boş e-postayla kayıt denemesi backend'i
+        // yakalanmamış bir exception ile çökertirdi (bkz. birim testi).
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
         try
         {
             var address = new MailAddress(email);
