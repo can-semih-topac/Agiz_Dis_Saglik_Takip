@@ -25,6 +25,19 @@ public class AuthManager : IAuthService
     private readonly IDistributedCache _cache;
     private readonly ILogger<AuthManager> _logger;
 
+    // Giriş kilitleme: art arda yanlış şifreyle şifreyi zorla kırmaya çalışmayı (brute-force)
+    // engellemek için. Eşiğe ulaşınca hesap bir süre kilitleniyor; kullanıcı isterse
+    // beklemek yerine "Şifremi Unuttum" ile şifresini sıfırlayıp kilidi anında kaldırabilir
+    // (bkz. ResetPasswordAsync).
+    private const int MaxLoginAttempts = 5;
+    private static readonly TimeSpan LoginLockoutDuration = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan LoginFailWindow = TimeSpan.FromMinutes(15);
+
+    // Şifre sıfırlama kodu deneme sınırı: 6 haneli kod 900.000 ihtimalden oluşuyor, deneme
+    // sınırı olmadan 10 dakikalık geçerlilik süresi içinde otomatik denemeyle (brute-force)
+    // kırılabilir. Eşiğe ulaşınca kod geçersiz kılınır, kullanıcı yeni kod istemek zorunda kalır.
+    private const int MaxResetCodeAttempts = 5;
+
     public AuthManager(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
@@ -96,6 +109,11 @@ public class AuthManager : IAuthService
     //Giriş yapma
     public async Task<ServiceResult<LoginResultDto>> LoginAsync(LoginDto dto)
     {
+        var lockoutRemaining = await GetLoginLockoutRemainingMinutesAsync(dto.Email);
+        if (lockoutRemaining.HasValue)
+            return ServiceResult<LoginResultDto>.Fail(
+                $"Çok fazla başarısız giriş denemesi. Hesabınız {lockoutRemaining.Value} dakika daha kilitli. Hemen giriş yapmak isterseniz 'Şifremi Unuttum' ile şifrenizi sıfırlayabilirsiniz.");
+
         var user = await _userRepository.GetByEmailAsync(dto.Email);
         if (user == null)
             return ServiceResult<LoginResultDto>.Fail(ErrorMessages.UserNotFound);
@@ -105,7 +123,16 @@ public class AuthManager : IAuthService
             return ServiceResult<LoginResultDto>.Fail("Bu hesap Google ile oluşturulmuş. Google ile giriş yapabilir ya da 'Şifremi Unuttum' ile bir şifre belirleyebilirsiniz.");
 
         if (!_passwordHasher.Verify(dto.Password, user.PasswordHash))
-            return ServiceResult<LoginResultDto>.Fail("Şifre yanlış.");
+        {
+            var (justLocked, remainingAttempts) = await RegisterFailedLoginAttemptAsync(dto.Email);
+            if (justLocked)
+                return ServiceResult<LoginResultDto>.Fail(
+                    $"Şifrenizi {MaxLoginAttempts} kez yanlış girdiniz. Hesabınız {LoginLockoutDuration.TotalMinutes:0} dakika kilitlendi. Hemen giriş yapmak isterseniz 'Şifremi Unuttum' ile şifrenizi sıfırlayabilirsiniz.");
+
+            return ServiceResult<LoginResultDto>.Fail($"Şifre yanlış. Kalan deneme hakkı: {remainingAttempts}.");
+        }
+
+        await _cache.RemoveAsync(LoginFailCountCacheKey(dto.Email));
 
         var token = _tokenService.CreateToken(user.Id, user.Email, user.Role.ToString());
 
@@ -189,6 +216,8 @@ public class AuthManager : IAuthService
             ResetCodeCacheKey(email),
             code,
             new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) });
+        // Yeni kod = yeni bir deneme hakkı seti. Önceki kodun yanlış denemelerinden kalan sayaç sıfırlanır.
+        await _cache.RemoveAsync(ResetAttemptsCacheKey(email));
 
         try
         {
@@ -214,7 +243,10 @@ public class AuthManager : IAuthService
         if (user == null)
             return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
-        if (!await IsResetCodeValidAsync(dto.Email, dto.Code))
+        var checkResult = await CheckResetCodeAsync(dto.Email, dto.Code);
+        if (checkResult == ResetCodeCheckResult.TooManyAttempts)
+            return ServiceResult.Fail("Çok fazla yanlış deneme yapıldı. Lütfen yeni bir kod isteyin.");
+        if (checkResult == ResetCodeCheckResult.Invalid)
             return ServiceResult.Fail("Kod hatalı ya da süresi dolmuş.");
 
         return ServiceResult.Ok("Kod doğrulandı.");
@@ -228,7 +260,10 @@ public class AuthManager : IAuthService
         if (user == null)
             return ServiceResult.Fail(ErrorMessages.UserNotFound);
 
-        if (!await IsResetCodeValidAsync(dto.Email, dto.Code))
+        var checkResult = await CheckResetCodeAsync(dto.Email, dto.Code);
+        if (checkResult == ResetCodeCheckResult.TooManyAttempts)
+            return ServiceResult.Fail("Çok fazla yanlış deneme yapıldı. Lütfen yeni bir kod isteyin.");
+        if (checkResult == ResetCodeCheckResult.Invalid)
             return ServiceResult.Fail("Kod hatalı ya da süresi dolmuş.");
 
         if (!AuthBusinessRules.IsValidPassword(dto.NewPassword))
@@ -241,6 +276,10 @@ public class AuthManager : IAuthService
         await _userRepository.UpdateAsync(user);
         // Kod tek kullanımlık — başarılı sıfırlamadan sonra Redis'ten siliyoruz.
         await _cache.RemoveAsync(ResetCodeCacheKey(dto.Email));
+        // Şifresini sıfırlayan kullanıcı, giriş denemelerinden dolayı kilitli kalmış olsa bile
+        // yeni şifresiyle hemen giriş yapabilmeli — kilidi burada da kaldırıyoruz.
+        await _cache.RemoveAsync(LoginFailCountCacheKey(dto.Email));
+        await _cache.RemoveAsync(LoginLockoutCacheKey(dto.Email));
 
         try
         {
@@ -257,13 +296,101 @@ public class AuthManager : IAuthService
         return ServiceResult.Ok("Şifre güncellendi.");
     }
 
+    private enum ResetCodeCheckResult { Valid, Invalid, TooManyAttempts }
+
     // Kodun geçerliliğini Redis'ten kontrol eder — süresi dolmuşsa Redis anahtarı zaten
     // kendiliğinden silinmiş olur, GetStringAsync null döner, elle süre kontrolü gerekmez.
-    private async Task<bool> IsResetCodeValidAsync(string email, string code)
+    // Yanlış her denemede sayaç artar; MaxResetCodeAttempts'e ulaşınca kod geçersiz kılınır
+    // (Redis'ten silinir) ki 6 haneli kod otomatik denemeyle (brute-force) kırılamasın.
+    private async Task<ResetCodeCheckResult> CheckResetCodeAsync(string email, string code)
     {
+        var attemptsRaw = await _cache.GetStringAsync(ResetAttemptsCacheKey(email));
+        var attempts = attemptsRaw == null ? 0 : int.Parse(attemptsRaw);
+        if (attempts >= MaxResetCodeAttempts)
+            return ResetCodeCheckResult.TooManyAttempts;
+
         var storedCode = await _cache.GetStringAsync(ResetCodeCacheKey(email));
-        return storedCode != null && storedCode == code;
+        if (storedCode == null)
+            return ResetCodeCheckResult.Invalid;
+
+        if (storedCode == code)
+        {
+            await _cache.RemoveAsync(ResetAttemptsCacheKey(email));
+            return ResetCodeCheckResult.Valid;
+        }
+
+        attempts++;
+        if (attempts >= MaxResetCodeAttempts)
+        {
+            // Deneme hakkı bitti: kodu da geçersiz kılıyoruz, kullanıcı yeni kod istemek zorunda.
+            await _cache.RemoveAsync(ResetCodeCacheKey(email));
+            await _cache.RemoveAsync(ResetAttemptsCacheKey(email));
+            return ResetCodeCheckResult.TooManyAttempts;
+        }
+
+        await _cache.SetStringAsync(
+            ResetAttemptsCacheKey(email),
+            attempts.ToString(),
+            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10) });
+
+        return ResetCodeCheckResult.Invalid;
+    }
+
+    // Yanlış şifre denemesini sayar; eşiğe ulaşınca hesabı LoginLockoutDuration süreyle kilitler.
+    // Döndürdüğü (justLocked, remainingAttempts): justLocked=true ise bu deneme hesabı AZ ÖNCE
+    // kilitledi (LoginAsync farklı bir mesaj göstermek için kullanır); değilse kaç deneme hakkı kaldığını taşır.
+    private async Task<(bool JustLocked, int RemainingAttempts)> RegisterFailedLoginAttemptAsync(string email)
+    {
+        var countRaw = await _cache.GetStringAsync(LoginFailCountCacheKey(email));
+        var count = (countRaw == null ? 0 : int.Parse(countRaw)) + 1;
+
+        if (count >= MaxLoginAttempts)
+        {
+            var lockoutEnd = DateTime.UtcNow.Add(LoginLockoutDuration);
+            await _cache.SetStringAsync(
+                LoginLockoutCacheKey(email),
+                lockoutEnd.ToString("O"),
+                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = LoginLockoutDuration });
+            await _cache.RemoveAsync(LoginFailCountCacheKey(email));
+
+            _logger.LogWarning(
+                "Hesap kilitlendi: {Email} - {Count} basarisiz giris denemesi sonrasi {Dakika} dakika kilitlendi.",
+                email, count, LoginLockoutDuration.TotalMinutes);
+
+            return (true, 0);
+        }
+
+        await _cache.SetStringAsync(
+            LoginFailCountCacheKey(email),
+            count.ToString(),
+            new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = LoginFailWindow });
+
+        return (false, MaxLoginAttempts - count);
+    }
+
+    // Hesap kilitliyse kalan süreyi dakika olarak döner, değilse null.
+    private async Task<int?> GetLoginLockoutRemainingMinutesAsync(string email)
+    {
+        var lockoutRaw = await _cache.GetStringAsync(LoginLockoutCacheKey(email));
+        if (lockoutRaw == null)
+            return null;
+
+        if (!DateTime.TryParse(
+                lockoutRaw,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.RoundtripKind,
+                out var lockoutEnd))
+            return null;
+
+        var remaining = lockoutEnd - DateTime.UtcNow;
+        if (remaining <= TimeSpan.Zero)
+            return null;
+
+        return (int)Math.Ceiling(remaining.TotalMinutes);
     }
 
     private static string ResetCodeCacheKey(string email) => $"password-reset:{email}";
+    private static string ResetAttemptsCacheKey(string email) => $"password-reset-attempts:{email}";
+    private static string LoginFailCountCacheKey(string email) => $"login-fail-count:{email}";
+    private static string LoginLockoutCacheKey(string email) => $"login-lockout:{email}";
 }
