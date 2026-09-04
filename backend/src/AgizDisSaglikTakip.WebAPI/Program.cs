@@ -3,6 +3,7 @@ using AgizDisSaglikTakip.Business;
 using AgizDisSaglikTakip.Business.Seed;
 using AgizDisSaglikTakip.Core;
 using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
+using AgizDisSaglikTakip.Core.Utilities.Security.Hashing;
 using AgizDisSaglikTakip.DataAccess;
 using AgizDisSaglikTakip.DataAccess.Contexts;
 using Elastic.Clients.Elasticsearch;
@@ -102,8 +103,13 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     dbContext.Database.Migrate();
 
+    var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+
+    // Eski AES şifreli kayıtları BCrypt hash'ine taşır (idempotent) — bkz. LegacyPasswordMigrator.
     var encryptionService = scope.ServiceProvider.GetRequiredService<IEncryptionService>();
-    await DemoDataSeeder.SeedAsync(dbContext, encryptionService);
+    await LegacyPasswordMigrator.MigrateAsync(dbContext, encryptionService, passwordHasher);
+
+    await DemoDataSeeder.SeedAsync(dbContext, passwordHasher);
 }
 
 // Configure the HTTP request pipeline.

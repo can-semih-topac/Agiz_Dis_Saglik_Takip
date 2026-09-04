@@ -27,7 +27,7 @@ public class AppDbContext : DbContext
             // Filtreli: sadece silinmemiş kayıtlar arasında tekil — yumuşak silinen bir hesabın
             // e-postası aksi halde bir daha hiç kayıt/davet için kullanılamazdı.
             entity.HasIndex(u => u.Email).IsUnique().HasFilter("[IsDeleted] = 0");
-            entity.Property(u => u.PasswordEncrypted).IsRequired(false);
+            entity.Property(u => u.PasswordHash).IsRequired(false);
             entity.Property(u => u.FullName).HasMaxLength(150).IsRequired();
             // Mevcut kayıtlarda (migration öncesi) bu alan yoktu, boş metin varsayılanıyla dolduruluyor.
             entity.Property(u => u.PhoneNumber).HasMaxLength(15).IsRequired().HasDefaultValue(string.Empty);

@@ -2,7 +2,7 @@ using AgizDisSaglikTakip.Business.Abstract;
 using AgizDisSaglikTakip.Business.Constants;
 using AgizDisSaglikTakip.Business.DTOs.Auth;
 using AgizDisSaglikTakip.Core.Utilities.Results;
-using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
+using AgizDisSaglikTakip.Core.Utilities.Security.Hashing;
 using AgizDisSaglikTakip.Core.Utilities.Security.Jwt;
 using AgizDisSaglikTakip.DataAccess.Abstract;
 using AgizDisSaglikTakip.Entities;
@@ -17,7 +17,7 @@ public class DemoManager : IDemoService
     private readonly IGoalStatusRepository _goalStatusRepository;
     private readonly IStatusNoteRepository _statusNoteRepository;
     private readonly ITokenService _tokenService;
-    private readonly IEncryptionService _encryptionService;
+    private readonly IPasswordHasher _passwordHasher;
 
     public DemoManager(
         IUserRepository userRepository,
@@ -25,14 +25,14 @@ public class DemoManager : IDemoService
         IGoalStatusRepository goalStatusRepository,
         IStatusNoteRepository statusNoteRepository,
         ITokenService tokenService,
-        IEncryptionService encryptionService)
+        IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
         _goalRepository = goalRepository;
         _goalStatusRepository = goalStatusRepository;
         _statusNoteRepository = statusNoteRepository;
         _tokenService = tokenService;
-        _encryptionService = encryptionService;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<ServiceResult<LoginResultDto>> EnterDemoAsync()
@@ -49,7 +49,7 @@ public class DemoManager : IDemoService
         demoUser.BirthDate = template.BirthDate;
         // Şifre boş bırakılırsa "güvenliğiniz için şifre belirleyin" bildirimi çıkıyor — demoda
         // anlamsız olduğu için hiç kimsenin bilmediği rastgele bir şifre atayıp bildirimi engelliyoruz.
-        demoUser.PasswordEncrypted = _encryptionService.Encrypt(Guid.NewGuid().ToString("N"));
+        demoUser.PasswordHash = _passwordHasher.Hash(Guid.NewGuid().ToString("N"));
         demoUser.MustChangePassword = false;
         await _userRepository.UpdateAsync(demoUser);
 
