@@ -18,6 +18,8 @@ public class DemoManager : IDemoService
     private readonly IStatusNoteRepository _statusNoteRepository;
     private readonly ITokenService _tokenService;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly JwtSettings _jwtSettings;
 
     public DemoManager(
         IUserRepository userRepository,
@@ -25,7 +27,9 @@ public class DemoManager : IDemoService
         IGoalStatusRepository goalStatusRepository,
         IStatusNoteRepository statusNoteRepository,
         ITokenService tokenService,
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher,
+        IRefreshTokenRepository refreshTokenRepository,
+        JwtSettings jwtSettings)
     {
         _userRepository = userRepository;
         _goalRepository = goalRepository;
@@ -33,6 +37,8 @@ public class DemoManager : IDemoService
         _statusNoteRepository = statusNoteRepository;
         _tokenService = tokenService;
         _passwordHasher = passwordHasher;
+        _refreshTokenRepository = refreshTokenRepository;
+        _jwtSettings = jwtSettings;
     }
 
     public async Task<ServiceResult<LoginResultDto>> EnterDemoAsync()
@@ -153,15 +159,37 @@ public class DemoManager : IDemoService
             await _statusNoteRepository.AddRangeAsync(clonedNotes);
 
         var token = _tokenService.CreateToken(demoUser.Id, demoUser.Email, demoUser.Role.ToString());
+        var refreshToken = await IssueRefreshTokenAsync(demoUser.Id);
         var result = new LoginResultDto
         {
             Token = token,
+            RefreshToken = refreshToken,
             Email = demoUser.Email,
             FullName = demoUser.FullName,
             IsAdmin = demoUser.Role == Role.Admin
         };
 
         return ServiceResult<LoginResultDto>.Ok(result, "Demo hesabına giriş yapıldı.");
+    }
+
+    // AuthManager.IssueRefreshTokenAsync ile aynı mantık — demo hesabı da (kısa ömürlü access
+    // token'la tutarlı olsun diye) bir refresh token alır, aksi halde 15 dakikada bir sayfayı
+    // yenileyen ziyaretçi oturumdan atılırdı.
+    private async Task<string> IssueRefreshTokenAsync(int userId)
+    {
+        await _refreshTokenRepository.DeleteExpiredForUserAsync(userId);
+
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        await _refreshTokenRepository.AddAsync(new RefreshToken
+        {
+            UserId = userId,
+            TokenHash = _tokenService.HashRefreshToken(refreshToken),
+            ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+            CreatedAt = DateTime.UtcNow
+        });
+
+        return refreshToken;
     }
 
     // Şablondaki en güncel kaydı "dün"e taşıyacak kayma miktarını hesaplar — böylece demo, ne zaman

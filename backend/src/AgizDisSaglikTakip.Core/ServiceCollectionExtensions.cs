@@ -18,7 +18,8 @@ public static class ServiceCollectionExtensions
             SecretKey = configuration["Jwt:SecretKey"]!,
             Issuer = configuration["Jwt:Issuer"]!,
             Audience = configuration["Jwt:Audience"]!,
-            ExpirationMinutes = int.Parse(configuration["Jwt:ExpirationMinutes"]!)
+            ExpirationMinutes = int.Parse(configuration["Jwt:ExpirationMinutes"]!),
+            RefreshTokenExpirationDays = int.Parse(configuration["Jwt:RefreshTokenExpirationDays"]!)
         };
         services.AddSingleton(jwtSettings);
         services.AddSingleton<ITokenService, JwtTokenService>();

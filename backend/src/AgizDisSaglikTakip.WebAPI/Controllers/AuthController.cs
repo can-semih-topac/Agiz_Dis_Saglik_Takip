@@ -59,6 +59,20 @@ public class AuthController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh(RefreshTokenDto dto)
+    {
+        var result = await _authService.RefreshTokenAsync(dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(RefreshTokenDto dto)
+    {
+        var result = await _authService.LogoutAsync(dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
     [HttpPost("demo")]
     public async Task<IActionResult> EnterDemo()
     {

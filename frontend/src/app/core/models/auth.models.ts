@@ -22,6 +22,7 @@ export interface GoogleLoginDto {
 // Backend'deki LoginResultDto'nun karşılığı.
 export interface LoginResultDto {
   token: string;
+  refreshToken: string;
   email: string;
   fullName: string;
   isAdmin: boolean;
@@ -30,9 +31,15 @@ export interface LoginResultDto {
 // localStorage'a bu şekilde kaydedeceğiz — token + ekranlarda göstereceğimiz kullanıcı bilgisi bir arada.
 export interface AuthSession {
   token: string;
+  refreshToken: string;
   email: string;
   fullName: string;
   isAdmin: boolean;
+}
+
+// Backend'deki RefreshTokenDto'nun karşılığı — hem /auth/refresh hem /auth/logout'ta kullanılıyor.
+export interface RefreshTokenDto {
+  refreshToken: string;
 }
 
 export interface VerifyEmailDto {

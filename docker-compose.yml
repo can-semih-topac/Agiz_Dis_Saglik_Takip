@@ -29,7 +29,11 @@ services:
       - Elasticsearch__Uri=http://elasticsearch:9200
       - Jwt__Issuer=AgizDisSaglikTakip
       - Jwt__Audience=AgizDisSaglikTakipClient
-      - Jwt__ExpirationMinutes=60
+      # Access token kısa ömürlü tutulup (15 dk) refresh token ile sessizce yenileniyor
+      # (bkz. AuthManager.RefreshTokenAsync) — çalınmış bir access token'ın kullanılabilir
+      # kalma süresini kısaltmak için.
+      - Jwt__ExpirationMinutes=15
+      - Jwt__RefreshTokenExpirationDays=7
       - Jwt__SecretKey=${JWT_SECRET_KEY}
       - Encryption__AesKey=${ENCRYPTION_AES_KEY}
       - Email__SmtpHost=smtp.gmail.com

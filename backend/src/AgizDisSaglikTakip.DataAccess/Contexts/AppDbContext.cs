@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<Log> Logs => Set<Log>();
     public DbSet<AdminActionLog> AdminActionLogs => Set<AdminActionLog>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -91,6 +92,24 @@ public class AppDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(sn => sn.GoalStatusId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.Property(rt => rt.TokenHash).HasMaxLength(88).IsRequired();
+            // Her refresh isteğinde hash'e göre tekil arama yapılıyor (bkz. AuthManager) — index olmadan
+            // tablo büyüdükçe bu sorgu yavaşlar; unique olması da hash çakışması ihtimaline karşı ek güvence.
+            entity.HasIndex(rt => rt.TokenHash).IsUnique();
+            // User zaten filtreli (soft-delete) — RefreshToken'ın gerekli (required) tarafı
+            // olduğu için burada da eşleşen bir filtre tanımlamazsak EF Core uyarı veriyor.
+            // Ek bir güvenlik katmanı da sağlıyor: silinmiş bir kullanıcının token'ları
+            // RefreshTokens sorgularından da otomatik gizlenmiş olur.
+            entity.HasQueryFilter(rt => !rt.User.IsDeleted);
+
+            entity.HasOne(rt => rt.User)
+                  .WithMany()
+                  .HasForeignKey(rt => rt.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ContactMessage>(entity =>

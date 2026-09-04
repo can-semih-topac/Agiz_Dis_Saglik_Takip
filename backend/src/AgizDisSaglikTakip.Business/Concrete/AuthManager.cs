@@ -18,8 +18,10 @@ namespace AgizDisSaglikTakip.Business.Concrete;
 public class AuthManager : IAuthService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
+    private readonly JwtSettings _jwtSettings;
     private readonly IEmailService _emailService;
     private readonly IGoogleAuthValidator _googleAuthValidator;
     private readonly IDistributedCache _cache;
@@ -40,16 +42,20 @@ public class AuthManager : IAuthService
 
     public AuthManager(
         IUserRepository userRepository,
+        IRefreshTokenRepository refreshTokenRepository,
         IPasswordHasher passwordHasher,
         ITokenService tokenService,
+        JwtSettings jwtSettings,
         IEmailService emailService,
         IGoogleAuthValidator googleAuthValidator,
         IDistributedCache cache,
         ILogger<AuthManager> logger)
     {
         _userRepository = userRepository;
+        _refreshTokenRepository = refreshTokenRepository;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
+        _jwtSettings = jwtSettings;
         _emailService = emailService;
         _googleAuthValidator = googleAuthValidator;
         _cache = cache;
@@ -135,10 +141,12 @@ public class AuthManager : IAuthService
         await _cache.RemoveAsync(LoginFailCountCacheKey(dto.Email));
 
         var token = _tokenService.CreateToken(user.Id, user.Email, user.Role.ToString());
+        var refreshToken = await IssueRefreshTokenAsync(user.Id);
 
         var result = new LoginResultDto
         {
             Token = token,
+            RefreshToken = refreshToken,
             Email = user.Email,
             FullName = user.FullName,
             IsAdmin = user.Role == Role.Admin
@@ -188,10 +196,12 @@ public class AuthManager : IAuthService
         }
 
         var token = _tokenService.CreateToken(user.Id, user.Email, user.Role.ToString());
+        var refreshToken = await IssueRefreshTokenAsync(user.Id);
 
         var result = new LoginResultDto
         {
             Token = token,
+            RefreshToken = refreshToken,
             Email = user.Email,
             FullName = user.FullName,
             IsAdmin = user.Role == Role.Admin
@@ -294,6 +304,91 @@ public class AuthManager : IAuthService
         }
 
         return ServiceResult.Ok("Şifre güncellendi.");
+    }
+
+    // Access token (15 dk) süresi dolunca frontend kullanıcıyı hiç fark ettirmeden bunu
+    // çağırır. Rotasyonlu: kullanılan refresh token hemen iptal edilip yerine yenisi verilir —
+    // bir refresh token en fazla BİR KEZ kullanılabilir, bu da çalıntı bir token'ın sessizce
+    // sonsuza kadar kullanılabilmesinin önüne geçer (aşağıdaki tekrar-kullanım kontrolüne bkz.).
+    public async Task<ServiceResult<LoginResultDto>> RefreshTokenAsync(RefreshTokenDto dto)
+    {
+        var tokenHash = _tokenService.HashRefreshToken(dto.RefreshToken);
+        var storedToken = await _refreshTokenRepository.GetByTokenHashAsync(tokenHash);
+
+        if (storedToken == null || storedToken.ExpiresAt <= DateTime.UtcNow)
+            return ServiceResult<LoginResultDto>.Fail("Oturum süresi doldu. Lütfen tekrar giriş yapın.");
+
+        if (storedToken.RevokedAt != null)
+        {
+            // Daha önce rotasyonla iptal edilmiş bir token tekrar kullanılmaya çalışılıyor —
+            // normal akışta bu asla olmaz, bu yüzden token'ın çalınmış olabileceğinin
+            // işareti sayılır. Önlem olarak kullanıcının TÜM oturumlarını kapatıyoruz.
+            await _refreshTokenRepository.RevokeAllActiveForUserAsync(storedToken.UserId);
+            _logger.LogWarning(
+                "Iptal edilmis bir refresh token tekrar kullanilmaya calisildi (olasi calinti). UserId: {UserId}",
+                storedToken.UserId);
+            return ServiceResult<LoginResultDto>.Fail("Oturum güvenlik nedeniyle sonlandırıldı. Lütfen tekrar giriş yapın.");
+        }
+
+        var user = await _userRepository.GetAsync(u => u.Id == storedToken.UserId);
+        if (user == null)
+            return ServiceResult<LoginResultDto>.Fail(ErrorMessages.UserNotFound);
+
+        storedToken.RevokedAt = DateTime.UtcNow;
+        await _refreshTokenRepository.UpdateAsync(storedToken);
+
+        var newAccessToken = _tokenService.CreateToken(user.Id, user.Email, user.Role.ToString());
+        var newRefreshToken = await IssueRefreshTokenAsync(user.Id);
+
+        var result = new LoginResultDto
+        {
+            Token = newAccessToken,
+            RefreshToken = newRefreshToken,
+            Email = user.Email,
+            FullName = user.FullName,
+            IsAdmin = user.Role == Role.Admin
+        };
+
+        return ServiceResult<LoginResultDto>.Ok(result, "Oturum yenilendi.");
+    }
+
+    // Frontend "çıkış yap"ta bunu çağırır — sadece localStorage'ı temizlemek (eski davranış)
+    // refresh token'ı süresi dolana (7 gün) kadar geçerli bırakırdı, bu da onu sunucu
+    // tarafında da geçersiz kılıyor. Token bulunamasa/zaten iptalse de aynı sonucu (Ok)
+    // döneriz — kullanıcı için tek anlamlı sonuç zaten "artık çıkış yapılmış olması".
+    public async Task<ServiceResult> LogoutAsync(RefreshTokenDto dto)
+    {
+        var tokenHash = _tokenService.HashRefreshToken(dto.RefreshToken);
+        var storedToken = await _refreshTokenRepository.GetByTokenHashAsync(tokenHash);
+
+        if (storedToken != null && storedToken.RevokedAt == null)
+        {
+            storedToken.RevokedAt = DateTime.UtcNow;
+            await _refreshTokenRepository.UpdateAsync(storedToken);
+        }
+
+        return ServiceResult.Ok("Çıkış yapıldı.");
+    }
+
+    // Yeni bir refresh token üretip hash'ini DB'ye kaydeder, ham (hash'lenmemiş) halini döner
+    // — bu, sadece BURADA, üretildiği an görülür; DB'de bir daha asla düz metin olarak bulunmaz.
+    private async Task<string> IssueRefreshTokenAsync(int userId)
+    {
+        // Tabloyu şişirmemek için: her yeni token verilişinde bu kullanıcının artık süresi
+        // geçmiş eski kayıtlarını temizliyoruz (aktif/rotasyonla iptal edilmiş olanlara dokunmuyor).
+        await _refreshTokenRepository.DeleteExpiredForUserAsync(userId);
+
+        var refreshToken = _tokenService.GenerateRefreshToken();
+
+        await _refreshTokenRepository.AddAsync(new RefreshToken
+        {
+            UserId = userId,
+            TokenHash = _tokenService.HashRefreshToken(refreshToken),
+            ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+            CreatedAt = DateTime.UtcNow
+        });
+
+        return refreshToken;
     }
 
     private enum ResetCodeCheckResult { Valid, Invalid, TooManyAttempts }
