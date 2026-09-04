@@ -1,4 +1,5 @@
 using AgizDisSaglikTakip.Business.Abstract;
+using AgizDisSaglikTakip.Business.Constants;
 using AgizDisSaglikTakip.Business.DTOs.Goal;
 using AgizDisSaglikTakip.Core.Utilities.Results;
 using AgizDisSaglikTakip.DataAccess.Abstract;
@@ -59,7 +60,7 @@ public class GoalManager : IGoalService
     {
         var goal = await _goalRepository.GetAsync(g => g.Id == goalId && g.UserId == userId);
         if (goal == null)
-            return ServiceResult.Fail("Hedef bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.GoalNotFound);
 
         if (string.IsNullOrWhiteSpace(dto.Reason))
             return ServiceResult.Fail("Duraklatma sebebi yazılmalı.");
@@ -86,7 +87,7 @@ public class GoalManager : IGoalService
     {
         var goal = await _goalRepository.GetAsync(g => g.Id == goalId && g.UserId == userId);
         if (goal == null)
-            return ServiceResult.Fail("Hedef bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.GoalNotFound);
 
         var activePause = await _goalPauseRepository.GetActivePauseAsync(goalId);
         if (activePause == null)
@@ -128,7 +129,7 @@ public class GoalManager : IGoalService
     {
         var goal = await _goalRepository.GetAsync(g => g.Id == goalId && g.UserId == userId);
         if (goal == null)
-            return ServiceResult.Fail("Hedef bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.GoalNotFound);
 
         var validationError = ValidateGoalFields(dto.Title, dto.Description, dto.PeriodFrequency, dto.PeriodUnit, dto.Importance, dto.TrackingType);
         if (validationError != null)
@@ -174,7 +175,7 @@ public class GoalManager : IGoalService
     {
         var goal = await _goalRepository.GetAsync(g => g.Id == goalId && g.UserId == userId);
         if (goal == null)
-            return ServiceResult<bool>.Fail("Hedef bulunamadı.");
+            return ServiceResult<bool>.Fail(ErrorMessages.GoalNotFound);
 
         var statusRecords = await _goalStatusRepository.GetByGoalIdAsync(goalId);
         if (statusRecords.Count > 0 && !confirmed)

@@ -123,3 +123,13 @@ ettim: güncelleme başarılı, başka kullanıcının hedefini düzenleme denem
 bulunamadı" ile reddedildi (sahiplik kontrolü çalışıyor), boş başlıkla validasyon
 doğru çalıştı. Frontend `ng build` ile tip hatasız derlendi; tarayıcı aracı bu ortamda
 olmadığı için UI'ı görsel olarak deneyemedim.
+
+## 2026-09-04 17:24
+Push sonrası Jenkins build #32 Kalite Kapısı'nda FAIL etti (Birim Testleri adımına hiç
+gelinmedi) — sebep: yeni eklediğim UpdateGoalAsync, GoalManager.cs içinde "Hedef
+bulunamadı." literalini 4. kez tekrarladı, SonarQube'ün S1192 kuralı ("aynı string
+3+ kez varsa sabit yap") tetiklendi. ErrorMessages.cs'e GoalNotFound sabiti eklendi,
+GoalManager.cs (4 yer) ve tutarlılık için GoalStatusManager.cs'deki (2 yer) aynı
+literal de bu sabite taşındı. Yerel taramayla doğrulandı: uyarı gitti, Kalite Kapısı
+tekrar "OK". Bu, Jenkinsfile'a eklediğim Kalite Kapısı'nın gerçekten işe yaradığının
+kanıtı — deploy'a gelmeden hatayı yakaladı.

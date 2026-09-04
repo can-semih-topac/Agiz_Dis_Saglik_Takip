@@ -1,4 +1,5 @@
 using AgizDisSaglikTakip.Business.Abstract;
+using AgizDisSaglikTakip.Business.Constants;
 using AgizDisSaglikTakip.Business.DTOs.GoalStatus;
 using AgizDisSaglikTakip.Business.Utilities;
 using AgizDisSaglikTakip.Core.Utilities.Results;
@@ -31,7 +32,7 @@ public class GoalStatusManager : IGoalStatusService
     {
         var goal = await _goalRepository.GetAsync(g => g.Id == dto.GoalId && g.UserId == userId);
         if (goal == null)
-            return ServiceResult<int>.Fail("Hedef bulunamadı.");
+            return ServiceResult<int>.Fail(ErrorMessages.GoalNotFound);
 
         if (dto.ActivityDate > DateOnly.FromDateTime(DateTime.Today))
             return ServiceResult<int>.Fail("Tarih gelecekte olamaz.");
@@ -150,7 +151,7 @@ public class GoalStatusManager : IGoalStatusService
 
         var goal = await _goalRepository.GetAsync(g => g.Id == goalStatus.GoalId);
         if (goal == null)
-            return ServiceResult.Fail("Hedef bulunamadı.");
+            return ServiceResult.Fail(ErrorMessages.GoalNotFound);
 
         int? durationMinutes;
         if (goal.TrackingType == TrackingType.Sureli)
