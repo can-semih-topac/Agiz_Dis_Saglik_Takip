@@ -41,6 +41,15 @@ export interface CreateGoalDto {
   trackingType: TrackingType;
 }
 
+export interface UpdateGoalDto {
+  title: string;
+  description: string;
+  periodUnit: PeriodUnit;
+  periodFrequency: number;
+  importance: Importance;
+  trackingType: TrackingType;
+}
+
 export interface StartGoalPauseDto {
   reason: string;
 }

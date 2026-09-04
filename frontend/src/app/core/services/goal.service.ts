@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateGoalDto, GoalDto, StartGoalPauseDto } from '../models/goal.models';
+import { CreateGoalDto, GoalDto, StartGoalPauseDto, UpdateGoalDto } from '../models/goal.models';
 import { ServiceResult } from '../models/service-result';
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +16,10 @@ export class GoalService {
 
   createGoal(dto: CreateGoalDto): Observable<ServiceResult> {
     return this.http.post<ServiceResult>(this.baseUrl, dto);
+  }
+
+  updateGoal(id: number, dto: UpdateGoalDto): Observable<ServiceResult> {
+    return this.http.put<ServiceResult>(`${this.baseUrl}/${id}`, dto);
   }
 
   deleteGoal(id: number, confirmed: boolean): Observable<ServiceResult<boolean>> {

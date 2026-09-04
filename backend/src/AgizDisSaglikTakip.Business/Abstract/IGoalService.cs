@@ -7,6 +7,7 @@ public interface IGoalService
 {
     Task<ServiceResult<List<GoalDto>>> GetGoalsAsync(int userId);
     Task<ServiceResult> CreateGoalAsync(int userId, CreateGoalDto dto);
+    Task<ServiceResult> UpdateGoalAsync(int userId, int goalId, UpdateGoalDto dto);
 
     // confirmed=false iken hedefin durum kaydı varsa silme yapılmaz, onay istenir (Data=true döner).
     Task<ServiceResult<bool>> DeleteGoalAsync(int userId, int goalId, bool confirmed);

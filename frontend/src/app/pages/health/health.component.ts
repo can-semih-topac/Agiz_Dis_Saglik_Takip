@@ -7,7 +7,7 @@ import { GoalService } from '../../core/services/goal.service';
 import { GoalStatusService } from '../../core/services/goal-status.service';
 import { StatusNoteService } from '../../core/services/status-note.service';
 import { SuggestionService } from '../../core/services/suggestion.service';
-import { GoalDto, PeriodUnit, Importance, TrackingType, CreateGoalDto } from '../../core/models/goal.models';
+import { GoalDto, PeriodUnit, Importance, TrackingType, CreateGoalDto, UpdateGoalDto } from '../../core/models/goal.models';
 import { GoalStatusDto, CreateGoalStatusDto } from '../../core/models/goal-status.models';
 import { StatusNoteDto } from '../../core/models/status-note.models';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
@@ -61,6 +61,9 @@ export class HealthComponent implements OnInit {
   // Tarayıcının çirkin confirm() penceresi yerine kendi modalımızı gösteriyoruz.
   pendingDeleteGoal: GoalDto | null = null;
   confirmMessage = '';
+
+  // Doluysa form "düzenleme" modunda: submitGoal() create yerine update çağırır.
+  editingGoal: GoalDto | null = null;
 
   pendingPauseGoal: GoalDto | null = null;
   pauseReasonInput = '';
@@ -181,7 +184,7 @@ export class HealthComponent implements OnInit {
     });
   }
 
-  createGoal(): void {
+  submitGoal(): void {
     if (this.goalForm.invalid) {
       this.goalForm.markAllAsTouched();
       return;
@@ -189,7 +192,7 @@ export class HealthComponent implements OnInit {
     this.goalError = '';
     this.goalSuccess = '';
 
-    const dto: CreateGoalDto = {
+    const dto: CreateGoalDto | UpdateGoalDto = {
       title: this.goalForm.value.title!,
       description: this.goalForm.value.description!,
       periodUnit: this.goalForm.value.periodUnit!,
@@ -198,20 +201,44 @@ export class HealthComponent implements OnInit {
       trackingType: this.goalForm.value.trackingType!
     };
 
-    this.goalService.createGoal(dto).subscribe({
+    const request = this.editingGoal
+      ? this.goalService.updateGoal(this.editingGoal.id, dto)
+      : this.goalService.createGoal(dto);
+
+    request.subscribe({
       next: (result) => {
         if (result.success) {
-          this.goalSuccess = result.message ?? 'Hedef oluşturuldu.';
-          this.goalForm.reset({ periodUnit: PeriodUnit.Gun, periodFrequency: 1, importance: Importance.Orta, trackingType: TrackingType.Sureli });
+          this.goalSuccess = result.message ?? (this.editingGoal ? 'Hedef güncellendi.' : 'Hedef oluşturuldu.');
+          this.cancelEditGoal();
           this.loadGoals();
         } else {
-          this.goalError = result.message ?? 'Hedef oluşturulamadı.';
+          this.goalError = result.message ?? (this.editingGoal ? 'Hedef güncellenemedi.' : 'Hedef oluşturulamadı.');
         }
       },
       error: (err: HttpErrorResponse) => {
         this.goalError = err.error?.message ?? 'Sunucuya ulaşılamadı.';
       }
     });
+  }
+
+  // "Düzenle"ye tıklanınca formu seçilen hedefin mevcut değerleriyle dolduruyoruz.
+  startEditGoal(goal: GoalDto): void {
+    this.editingGoal = goal;
+    this.goalError = '';
+    this.goalSuccess = '';
+    this.goalForm.setValue({
+      title: goal.title,
+      description: goal.description,
+      periodUnit: goal.periodUnit,
+      periodFrequency: goal.periodFrequency,
+      importance: goal.importance,
+      trackingType: goal.trackingType
+    });
+  }
+
+  cancelEditGoal(): void {
+    this.editingGoal = null;
+    this.goalForm.reset({ periodUnit: PeriodUnit.Gun, periodFrequency: 1, importance: Importance.Orta, trackingType: TrackingType.Sureli });
   }
 
   // Backend, durum kaydı olan bir hedefi ilk denemede silmiyor, onay istiyor (data:true döner).

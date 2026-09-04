@@ -121,6 +121,7 @@
               } @else {
                 <button (click)="requestPauseGoal(g)">{{ 'health.pauseButton' | transloco }}</button>
               }
+              <button (click)="startEditGoal(g)">{{ 'common.edit' | transloco }}</button>
               <button (click)="deleteGoal(g)">{{ 'health.deleteButton' | transloco }}</button>
             </li>
           }
@@ -129,8 +130,8 @@
     </section>
 
     <section class="col-form">
-      <h3>{{ 'health.newGoalHeading' | transloco }}</h3>
-      <form [formGroup]="goalForm" (ngSubmit)="createGoal()">
+      <h3>{{ (editingGoal ? 'health.editGoalHeading' : 'health.newGoalHeading') | transloco }}</h3>
+      <form [formGroup]="goalForm" (ngSubmit)="submitGoal()">
         <div>
           <label for="title">{{ 'health.titleLabel' | transloco }}</label>
           <input id="title" type="text" formControlName="title" />
@@ -167,7 +168,10 @@
             }
           </select>
         </div>
-        <button type="submit">{{ 'health.addButton' | transloco }}</button>
+        <button type="submit">{{ (editingGoal ? 'common.save' : 'health.addButton') | transloco }}</button>
+        @if (editingGoal) {
+          <button type="button" (click)="cancelEditGoal()">{{ 'common.cancel' | transloco }}</button>
+        }
         @if (goalError) { <p class="error">{{ goalError }}</p> }
         @if (goalSuccess) { <p class="success">{{ goalSuccess }}</p> }
       </form>

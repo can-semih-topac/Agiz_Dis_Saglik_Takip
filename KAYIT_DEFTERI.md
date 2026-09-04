@@ -107,3 +107,19 @@ fırlatıp backend'i çökertiyordu — düzeltildi (erken boş/whitespace kontr
 Jenkinsfile'a "Birim Testleri" adımı eklendi (Kalite Kapısı'ndan sonra, Selenium'dan önce
 — hızlı başarısız olsun diye). Backend hem normal build hem test run ile doğrulandı,
 56/56 test geçiyor.
+
+## 2026-09-04 17:20
+"Kayıtları düzenleme özelliği ekle" maddesi tamamlandı — inceleyince günlük kayıtların
+(GoalStatus) ve notların (StatusNote) zaten düzenlenebildiği, düzenlenemeyen tek şeyin
+hedeflerin kendisi (Goal) olduğu ortaya çıktı; kullanıcıya sorup "hedef düzenleme"
+olduğunu netleştirdim. Backend: UpdateGoalDto + IGoalService.UpdateGoalAsync +
+GoalController PUT /api/goal/{id} eklendi, sahiplik kontrolü (userId eşleşmesi) ve
+CreateGoalAsync ile aynı doğrulama kuralları (ortak ValidateGoalFields yardımcı
+metoduna çıkarıldı, tekrar önlendi). Frontend: health sayfasındaki "Yeni Hedef" formu
+"düzenleme moduna" da girebiliyor artık — hedef listesindeki "Düzenle" butonuna
+basınca form mevcut değerlerle doluyor, kaydedince create yerine update çağrılıyor,
+"Vazgeç" ile iptal edilebiliyor. Backend'i gerçek HTTP istekleriyle uçtan uca test
+ettim: güncelleme başarılı, başka kullanıcının hedefini düzenleme denemesi "Hedef
+bulunamadı" ile reddedildi (sahiplik kontrolü çalışıyor), boş başlıkla validasyon
+doğru çalıştı. Frontend `ng build` ile tip hatasız derlendi; tarayıcı aracı bu ortamda
+olmadığı için UI'ı görsel olarak deneyemedim.

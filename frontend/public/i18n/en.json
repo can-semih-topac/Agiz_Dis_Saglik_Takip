@@ -165,6 +165,7 @@
     "pauseButton": "Pause",
     "deleteButton": "Delete",
     "newGoalHeading": "New Goal",
+    "editGoalHeading": "Edit Goal",
     "titleLabel": "Title",
     "periodUnitLabel": "Period Unit",
     "frequencyLabel": "Frequency",

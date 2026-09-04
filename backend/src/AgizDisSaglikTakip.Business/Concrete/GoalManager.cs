@@ -100,23 +100,9 @@ public class GoalManager : IGoalService
 
     public async Task<ServiceResult> CreateGoalAsync(int userId, CreateGoalDto dto) // yeni hedef oluşturma
     {
-        if (string.IsNullOrWhiteSpace(dto.Title))
-            return ServiceResult.Fail("Başlık boş olamaz.");
-
-        if (string.IsNullOrWhiteSpace(dto.Description))
-            return ServiceResult.Fail("Açıklama boş olamaz.");
-
-        if (dto.PeriodFrequency <= 0)
-            return ServiceResult.Fail("Sıklık 0'dan büyük olmalı.");
-
-        if (!Enum.IsDefined(typeof(PeriodUnit), dto.PeriodUnit))
-            return ServiceResult.Fail("Geçersiz periyot birimi.");
-
-        if (!Enum.IsDefined(typeof(Importance), dto.Importance))
-            return ServiceResult.Fail("Geçersiz önem derecesi.");
-
-        if (!Enum.IsDefined(typeof(TrackingType), dto.TrackingType))
-            return ServiceResult.Fail("Geçersiz takip türü.");
+        var validationError = ValidateGoalFields(dto.Title, dto.Description, dto.PeriodFrequency, dto.PeriodUnit, dto.Importance, dto.TrackingType);
+        if (validationError != null)
+            return ServiceResult.Fail(validationError);
 
         var goal = new Goal
         {
@@ -133,6 +119,55 @@ public class GoalManager : IGoalService
         await _goalRepository.AddAsync(goal);
 
         return ServiceResult.Ok("Hedef oluşturuldu.");
+    }
+
+    // Hedefin kendisi (başlık/açıklama/periyot/önem/takip türü) sonradan değiştirilebiliyor —
+    // buna bağlı GoalStatus kayıtlarına dokunulmuyor, ör. TrackingType değişse bile geçmiş
+    // kayıtlardaki DurationMinutes olduğu gibi kalıyor (zaten nullable, sorun çıkarmıyor).
+    public async Task<ServiceResult> UpdateGoalAsync(int userId, int goalId, UpdateGoalDto dto)
+    {
+        var goal = await _goalRepository.GetAsync(g => g.Id == goalId && g.UserId == userId);
+        if (goal == null)
+            return ServiceResult.Fail("Hedef bulunamadı.");
+
+        var validationError = ValidateGoalFields(dto.Title, dto.Description, dto.PeriodFrequency, dto.PeriodUnit, dto.Importance, dto.TrackingType);
+        if (validationError != null)
+            return ServiceResult.Fail(validationError);
+
+        goal.Title = dto.Title;
+        goal.Description = dto.Description;
+        goal.PeriodUnit = dto.PeriodUnit;
+        goal.PeriodFrequency = dto.PeriodFrequency;
+        goal.Importance = dto.Importance;
+        goal.TrackingType = dto.TrackingType;
+
+        await _goalRepository.UpdateAsync(goal);
+
+        return ServiceResult.Ok("Hedef güncellendi.");
+    }
+
+    private static string? ValidateGoalFields(
+        string title, string description, int periodFrequency, PeriodUnit periodUnit, Importance importance, TrackingType trackingType)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            return "Başlık boş olamaz.";
+
+        if (string.IsNullOrWhiteSpace(description))
+            return "Açıklama boş olamaz.";
+
+        if (periodFrequency <= 0)
+            return "Sıklık 0'dan büyük olmalı.";
+
+        if (!Enum.IsDefined(typeof(PeriodUnit), periodUnit))
+            return "Geçersiz periyot birimi.";
+
+        if (!Enum.IsDefined(typeof(Importance), importance))
+            return "Geçersiz önem derecesi.";
+
+        if (!Enum.IsDefined(typeof(TrackingType), trackingType))
+            return "Geçersiz takip türü.";
+
+        return null;
     }
 
     public async Task<ServiceResult<bool>> DeleteGoalAsync(int userId, int goalId, bool confirmed) // hedef silme (durum kayıtları varsa onay istenir)

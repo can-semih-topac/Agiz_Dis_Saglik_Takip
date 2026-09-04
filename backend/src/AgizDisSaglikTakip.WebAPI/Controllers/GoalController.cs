@@ -32,6 +32,13 @@ public class GoalController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateGoal(int id, UpdateGoalDto dto) // hedefi düzenle
+    {
+        var result = await _goalService.UpdateGoalAsync(this.GetUserId(), id, dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteGoal(int id, [FromQuery] bool confirmed = false) // hedef sil
     {
