@@ -9,5 +9,5 @@ public class UpdateStatusNoteDto
     public string? ImageExtension { get; set; }
 
     // Yeni görsel yüklenmeden bu true gelirse mevcut görsel kaldırılır.
-    public bool RemoveImage { get; set; }
+    public bool? RemoveImage { get; set; }
 }

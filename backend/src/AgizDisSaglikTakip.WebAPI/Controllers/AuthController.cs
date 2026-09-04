@@ -9,12 +9,10 @@ namespace AgizDisSaglikTakip.WebAPI.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-    private readonly IDemoService _demoService;
 
-    public AuthController(IAuthService authService, IDemoService demoService)
+    public AuthController(IAuthService authService)
     {
         _authService = authService;
-        _demoService = demoService;
     }
 
     [HttpPost("register")]
@@ -38,27 +36,6 @@ public class AuthController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
-    [HttpPost("forgot-password/request-code")]
-    public async Task<IActionResult> RequestResetCode(VerifyEmailDto dto)
-    {
-        var result = await _authService.RequestPasswordResetCodeAsync(dto.Email);
-        return result.Success ? Ok(result) : BadRequest(result);
-    }
-
-    [HttpPost("forgot-password/verify-code")]
-    public async Task<IActionResult> VerifyResetCode(VerifyResetCodeDto dto)
-    {
-        var result = await _authService.VerifyPasswordResetCodeAsync(dto);
-        return result.Success ? Ok(result) : BadRequest(result);
-    }
-
-    [HttpPost("forgot-password/reset")]
-    public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
-    {
-        var result = await _authService.ResetPasswordAsync(dto);
-        return result.Success ? Ok(result) : BadRequest(result);
-    }
-
     [HttpPost("refresh")]
     public async Task<IActionResult> Refresh(RefreshTokenDto dto)
     {
@@ -70,13 +47,6 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Logout(RefreshTokenDto dto)
     {
         var result = await _authService.LogoutAsync(dto);
-        return result.Success ? Ok(result) : BadRequest(result);
-    }
-
-    [HttpPost("demo")]
-    public async Task<IActionResult> EnterDemo()
-    {
-        var result = await _demoService.EnterDemoAsync();
         return result.Success ? Ok(result) : BadRequest(result);
     }
 }

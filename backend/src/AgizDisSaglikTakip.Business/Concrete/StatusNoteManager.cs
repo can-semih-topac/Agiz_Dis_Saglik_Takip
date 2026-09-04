@@ -76,7 +76,7 @@ public class StatusNoteManager : IStatusNoteService
             // Eski dosya diskte kalır (projede zaten hiçbir yüklenen dosya silinmiyor), sadece yeni yol kaydedilir.
             note.ImagePath = await _fileStorageService.SaveFileAsync(dto.ImageStream, extension);
         }
-        else if (dto.RemoveImage)
+        else if (dto.RemoveImage == true)
         {
             note.ImagePath = null;
         }

@@ -116,7 +116,7 @@ public class DemoManager : IDemoService
             statusIdMap[gs.Id] = clonedStatus;
         }
 
-        // Goal ve GoalStatus'lar aynı grafın parçası olduğu için tek SaveChanges ile ekleniyor;
+        // Goal ve GoalStatus'lar aynı grafın parçası olduğu için tek SaveChanges ile ekleniyor —
         // az sonra notları eklerken StatusNote.GoalStatus buradaki (artık gerçek Id'si olan) nesneleri referans alacak.
         await _goalRepository.AddRangeAsync(clonedGoals);
 

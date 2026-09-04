@@ -11,6 +11,7 @@ public class LogManager : ILogService
 {
     private const int MaxRecords = 200;
     private const string LogsIndex = "logs";
+    private static readonly string[] SearchFields = { "message", "exception", "category" };
 
     private readonly ILogRepository _logRepository;
     private readonly ElasticsearchClient _esClient;
@@ -48,7 +49,7 @@ public class LogManager : ILogService
             .Query(q => q
                 .MultiMatch(m => m
                     .Query(keyword)
-                    .Fields(new[] { "message", "exception", "category" })
+                    .Fields(SearchFields)
                 )
             )
             .Sort(so => so.Field(f => f.CreatedAt, o => o.Order(SortOrder.Desc)))

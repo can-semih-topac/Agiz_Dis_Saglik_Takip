@@ -33,8 +33,10 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 // ElasticSearch: admin panelindeki loglarda tam metin arama yapabilmek için (bkz. LogManager).
 // ElasticsearchClient thread-safe ve oluşturulması maliyetli — tek bir örnek (singleton) yeterli.
+// Varsayılan adres kodda değil appsettings.json'da (yerel geliştirme) — üretimde
+// docker-compose.yml'deki Elasticsearch__Uri env değişkeni bunu zaten geçersiz kılıyor.
 builder.Services.AddSingleton(new ElasticsearchClient(
-    new Uri(builder.Configuration["Elasticsearch:Uri"] ?? "http://127.0.0.1:9200")));
+    new Uri(builder.Configuration["Elasticsearch:Uri"]!)));
 
 // Add services to the container.
 
@@ -43,7 +45,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Web API şablonunda MVC'nin aksine varsayılan olarak wwwroot klasörü oluşturulmuyor;
+// Web API şablonunda MVC'nin aksine varsayılan olarak wwwroot klasörü oluşturulmuyor —
 // WebRootPath boş gelirse elle hesaplayıp klasörü oluşturuyoruz.
 if (string.IsNullOrEmpty(builder.Environment.WebRootPath))
 {
@@ -101,7 +103,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.Migrate();
+    await dbContext.Database.MigrateAsync();
 
     var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
@@ -132,4 +134,4 @@ app.UseAuthorization();
 app.MapGet("/", () => Results.Content("<h1>Backend çalışıyor</h1>", "text/html; charset=utf-8"));
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

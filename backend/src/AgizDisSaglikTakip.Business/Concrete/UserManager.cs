@@ -112,11 +112,8 @@ public class UserManager : IUserService
         // doğrudan yeni şifreyi kaydediyoruz (ilk kez şifre belirleme).
         var hasExistingPassword = !string.IsNullOrEmpty(user.PasswordHash);
 
-        if (hasExistingPassword)
-        {
-            if (!_passwordHasher.Verify(dto.OldPassword, user.PasswordHash!))
-                return ServiceResult.Fail("Mevcut şifre yanlış.");
-        }
+        if (hasExistingPassword && !_passwordHasher.Verify(dto.OldPassword, user.PasswordHash!))
+            return ServiceResult.Fail("Mevcut şifre yanlış.");
 
         if (!AuthBusinessRules.IsValidPassword(dto.NewPassword))
             return ServiceResult.Fail("Şifre en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");

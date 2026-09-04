@@ -24,4 +24,9 @@ COPY --from=build /app .
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
+# Container'ı root yerine aspnet:8.0 imajına gömülü "app" kullanıcısıyla (UID 1654) çalıştırıyoruz
+# (SonarQube S6471) — container bir şekilde ele geçirilirse root yetkisiyle host'a sızma riskini
+# azaltıyor. Kalıcı upload klasörü (backend-uploads volume'ü) bu kullanıcıya devredildi.
+USER app
+
 ENTRYPOINT ["dotnet", "AgizDisSaglikTakip.WebAPI.dll"]

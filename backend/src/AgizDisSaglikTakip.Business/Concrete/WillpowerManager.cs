@@ -114,47 +114,64 @@ public class WillpowerManager : IWillpowerService
         foreach (var goal in goals)
         {
             var pausedDates = pausedDatesByGoal.GetValueOrDefault(goal.Id);
-            var isPausedOnReferenceDate = pausedDates != null && pausedDates.Contains(referenceDate);
-
-            var goalStatuses = allStatus
-                .Where(gs => gs.GoalId == goal.Id && gs.ActivityDate <= referenceDate)
-                .ToList();
-            var weight = (int)goal.Importance + 1; // Dusuk=0->1, Orta=1->2, Yuksek=2->3
-
-            if (goalStatuses.Count > 0 || isPausedOnReferenceDate)
-            {
-                var dateSet = new HashSet<DateOnly>(goalStatuses.Select(gs => gs.ActivityDate));
-
-                // O gün henüz bitmediği için o günde kayıt yoksa bir önceki günün serisiyle devam
-                // ediyoruz (1 günlük tolerans); duraklatılmışsa "donmuş" seriyi geriye doğru bulmak
-                // için referans günü yine bugün kabul ediliyor (StreakCalculator duraklatılan
-                // günleri atlayarak son gerçek kayda kadar geri yürüyor).
-                DateOnly? reference = dateSet.Contains(referenceDate) ? referenceDate
-                    : dateSet.Contains(previousDate) ? previousDate
-                    : isPausedOnReferenceDate ? referenceDate
-                    : null;
-
-                if (reference != null)
-                {
-                    var streak = StreakCalculator.ComputeStreakAt(dateSet, reference.Value, pausedDates);
-                    rawPoints += weight * streak;
-                }
-            }
-
-            // Sadece günlük hedeflerde "o gün" anlamlı — haftalık/aylık hedefler her gün cezalandırılmaz.
-            // Hedef o gün duraklatılmışsa da ceza uygulanmaz — beklenti zaten yok.
-            if (goal.PeriodUnit == PeriodUnit.Gun && !isPausedOnReferenceDate)
-            {
-                var doneOnDate = goalStatuses.Count(gs => gs.ActivityDate == referenceDate);
-                var missing = Math.Max(0, goal.PeriodFrequency - doneOnDate);
-                rawPoints -= weight * missing;
-            }
+            rawPoints += ComputeGoalContribution(goal, allStatus, pausedDates, referenceDate, previousDate);
         }
 
         rawPoints = Math.Max(0, rawPoints);
         var (score, label) = MapToTieredScore(rawPoints);
 
         return (score, label, rawPoints);
+    }
+
+    // Tek bir hedefin toplam ham puana katkısını hesaplar (seriden gelen artı, günlük eksikten gelen eksi).
+    private static double ComputeGoalContribution(
+        Goal goal, List<GoalStatus> allStatus, HashSet<DateOnly>? pausedDates, DateOnly referenceDate, DateOnly previousDate)
+    {
+        var isPausedOnReferenceDate = pausedDates != null && pausedDates.Contains(referenceDate);
+        var goalStatuses = allStatus
+            .Where(gs => gs.GoalId == goal.Id && gs.ActivityDate <= referenceDate)
+            .ToList();
+        var weight = (int)goal.Importance + 1; // Dusuk=0->1, Orta=1->2, Yuksek=2->3
+        double points = 0;
+
+        if (goalStatuses.Count > 0 || isPausedOnReferenceDate)
+        {
+            var dateSet = new HashSet<DateOnly>(goalStatuses.Select(gs => gs.ActivityDate));
+            var reference = ResolveStreakReferenceDate(dateSet, referenceDate, previousDate, isPausedOnReferenceDate);
+
+            if (reference != null)
+            {
+                var streak = StreakCalculator.ComputeStreakAt(dateSet, reference.Value, pausedDates);
+                points += weight * streak;
+            }
+        }
+
+        // Sadece günlük hedeflerde "o gün" anlamlı — haftalık/aylık hedefler her gün cezalandırılmaz.
+        // Hedef o gün duraklatılmışsa da ceza uygulanmaz — beklenti zaten yok.
+        if (goal.PeriodUnit == PeriodUnit.Gun && !isPausedOnReferenceDate)
+        {
+            var doneOnDate = goalStatuses.Count(gs => gs.ActivityDate == referenceDate);
+            var missing = Math.Max(0, goal.PeriodFrequency - doneOnDate);
+            points -= weight * missing;
+        }
+
+        return points;
+    }
+
+    // O gün henüz bitmediği için o günde kayıt yoksa bir önceki günün serisiyle devam ediyoruz
+    // (1 günlük tolerans); duraklatılmışsa "donmuş" seriyi geriye doğru bulmak için referans günü
+    // yine bugün kabul ediliyor (StreakCalculator duraklatılan günleri atlayarak son gerçek kayda
+    // kadar geri yürüyor).
+    private static DateOnly? ResolveStreakReferenceDate(
+        HashSet<DateOnly> dateSet, DateOnly referenceDate, DateOnly previousDate, bool isPausedOnReferenceDate)
+    {
+        if (dateSet.Contains(referenceDate))
+            return referenceDate;
+        if (dateSet.Contains(previousDate))
+            return previousDate;
+        if (isPausedOnReferenceDate)
+            return referenceDate;
+        return null;
     }
 
     private static (int Score, string Label) MapToTieredScore(double rawPoints)
