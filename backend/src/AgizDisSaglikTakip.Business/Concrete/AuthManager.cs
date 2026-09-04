@@ -4,8 +4,8 @@ using AgizDisSaglikTakip.Business.DTOs.Auth;
 using AgizDisSaglikTakip.Business.Rules;
 using AgizDisSaglikTakip.Core.Utilities.Email;
 using AgizDisSaglikTakip.Core.Utilities.Results;
-using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
 using AgizDisSaglikTakip.Core.Utilities.Security.Google;
+using AgizDisSaglikTakip.Core.Utilities.Security.Hashing;
 using AgizDisSaglikTakip.Core.Utilities.Security.Jwt;
 using AgizDisSaglikTakip.DataAccess.Abstract;
 using AgizDisSaglikTakip.Entities;
@@ -18,7 +18,7 @@ namespace AgizDisSaglikTakip.Business.Concrete;
 public class AuthManager : IAuthService
 {
     private readonly IUserRepository _userRepository;
-    private readonly IEncryptionService _encryptionService;
+    private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
     private readonly IEmailService _emailService;
     private readonly IGoogleAuthValidator _googleAuthValidator;
@@ -27,7 +27,7 @@ public class AuthManager : IAuthService
 
     public AuthManager(
         IUserRepository userRepository,
-        IEncryptionService encryptionService,
+        IPasswordHasher passwordHasher,
         ITokenService tokenService,
         IEmailService emailService,
         IGoogleAuthValidator googleAuthValidator,
@@ -35,7 +35,7 @@ public class AuthManager : IAuthService
         ILogger<AuthManager> logger)
     {
         _userRepository = userRepository;
-        _encryptionService = encryptionService;
+        _passwordHasher = passwordHasher;
         _tokenService = tokenService;
         _emailService = emailService;
         _googleAuthValidator = googleAuthValidator;
@@ -68,7 +68,7 @@ public class AuthManager : IAuthService
         var user = new User
         {
             Email = dto.Email,
-            PasswordEncrypted = _encryptionService.Encrypt(dto.Password),
+            PasswordHash = _passwordHasher.Hash(dto.Password),
             FullName = dto.FullName,
             BirthDate = dto.BirthDate,
             PhoneNumber = dto.PhoneNumber,
@@ -100,12 +100,11 @@ public class AuthManager : IAuthService
         if (user == null)
             return ServiceResult<LoginResultDto>.Fail(ErrorMessages.UserNotFound);
 
-        // Google ile oluşturulmuş ve henüz şifre belirlememiş hesaplarda PasswordEncrypted boştur.
-        if (string.IsNullOrEmpty(user.PasswordEncrypted))
+        // Google ile oluşturulmuş ve henüz şifre belirlememiş hesaplarda PasswordHash boştur.
+        if (string.IsNullOrEmpty(user.PasswordHash))
             return ServiceResult<LoginResultDto>.Fail("Bu hesap Google ile oluşturulmuş. Google ile giriş yapabilir ya da 'Şifremi Unuttum' ile bir şifre belirleyebilirsiniz.");
 
-        var decryptedPassword = _encryptionService.Decrypt(user.PasswordEncrypted);
-        if (decryptedPassword != dto.Password)
+        if (!_passwordHasher.Verify(dto.Password, user.PasswordHash))
             return ServiceResult<LoginResultDto>.Fail("Şifre yanlış.");
 
         var token = _tokenService.CreateToken(user.Id, user.Email, user.Role.ToString());
@@ -142,7 +141,7 @@ public class AuthManager : IAuthService
                 FullName = googleUser.FullName,
                 PhoneNumber = string.Empty,
                 BirthDate = null,
-                PasswordEncrypted = null,
+                PasswordHash = null,
                 CreatedAt = DateTime.Now
             };
 
@@ -238,7 +237,7 @@ public class AuthManager : IAuthService
         if (dto.NewPassword != dto.NewPasswordConfirm)
             return ServiceResult.Fail("Şifreler eşleşmiyor.");
 
-        user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword);
+        user.PasswordHash = _passwordHasher.Hash(dto.NewPassword);
         await _userRepository.UpdateAsync(user);
         // Kod tek kullanımlık — başarılı sıfırlamadan sonra Redis'ten siliyoruz.
         await _cache.RemoveAsync(ResetCodeCacheKey(dto.Email));

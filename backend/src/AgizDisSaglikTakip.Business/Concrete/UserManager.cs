@@ -4,7 +4,7 @@ using AgizDisSaglikTakip.Business.DTOs.User;
 using AgizDisSaglikTakip.Business.Rules;
 using AgizDisSaglikTakip.Core.Utilities.Email;
 using AgizDisSaglikTakip.Core.Utilities.Results;
-using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
+using AgizDisSaglikTakip.Core.Utilities.Security.Hashing;
 using AgizDisSaglikTakip.DataAccess.Abstract;
 using AgizDisSaglikTakip.Entities;
 using AgizDisSaglikTakip.Entities.Enums;
@@ -21,7 +21,7 @@ public class UserManager : IUserService
     private readonly IGoalRepository _goalRepository;
     private readonly IGoalStatusRepository _goalStatusRepository;
     private readonly IStatusNoteRepository _statusNoteRepository;
-    private readonly IEncryptionService _encryptionService;
+    private readonly IPasswordHasher _passwordHasher;
     private readonly IEmailService _emailService;
     private readonly IWillpowerService _willpowerService;
     private readonly IAdminActionLogService _adminActionLogService;
@@ -32,7 +32,7 @@ public class UserManager : IUserService
         IGoalRepository goalRepository,
         IGoalStatusRepository goalStatusRepository,
         IStatusNoteRepository statusNoteRepository,
-        IEncryptionService encryptionService,
+        IPasswordHasher passwordHasher,
         IEmailService emailService,
         IWillpowerService willpowerService,
         IAdminActionLogService adminActionLogService,
@@ -42,7 +42,7 @@ public class UserManager : IUserService
         _goalRepository = goalRepository;
         _goalStatusRepository = goalStatusRepository;
         _statusNoteRepository = statusNoteRepository;
-        _encryptionService = encryptionService;
+        _passwordHasher = passwordHasher;
         _emailService = emailService;
         _willpowerService = willpowerService;
         _adminActionLogService = adminActionLogService;
@@ -61,7 +61,7 @@ public class UserManager : IUserService
             FullName = user.FullName,
             BirthDate = user.BirthDate,
             PhoneNumber = user.PhoneNumber,
-            HasPassword = !string.IsNullOrEmpty(user.PasswordEncrypted),
+            HasPassword = !string.IsNullOrEmpty(user.PasswordHash),
             MustChangePassword = user.MustChangePassword
         };
 
@@ -110,12 +110,11 @@ public class UserManager : IUserService
 
         // Google ile oluşturulmuş hesaplarda henüz şifre yok — bu durumda eski şifre istemeden
         // doğrudan yeni şifreyi kaydediyoruz (ilk kez şifre belirleme).
-        var hasExistingPassword = !string.IsNullOrEmpty(user.PasswordEncrypted);
+        var hasExistingPassword = !string.IsNullOrEmpty(user.PasswordHash);
 
         if (hasExistingPassword)
         {
-            var currentPassword = _encryptionService.Decrypt(user.PasswordEncrypted!);
-            if (currentPassword != dto.OldPassword)
+            if (!_passwordHasher.Verify(dto.OldPassword, user.PasswordHash!))
                 return ServiceResult.Fail("Mevcut şifre yanlış.");
         }
 
@@ -125,7 +124,7 @@ public class UserManager : IUserService
         if (dto.NewPassword != dto.NewPasswordConfirm)
             return ServiceResult.Fail("Şifreler eşleşmiyor.");
 
-        user.PasswordEncrypted = _encryptionService.Encrypt(dto.NewPassword);
+        user.PasswordHash = _passwordHasher.Hash(dto.NewPassword);
         // Admin panelinden geçici şifreyle oluşturulmuşsa, ilk (gerçek) şifre değişikliğiyle bu uyarı kalkar.
         user.MustChangePassword = false;
         await _userRepository.UpdateAsync(user);
@@ -245,7 +244,7 @@ public class UserManager : IUserService
             if (!AuthBusinessRules.IsValidPassword(dto.TemporaryPassword))
                 return ServiceResult.Fail("Geçici şifre en az 8 karakter olmalı ve büyük harf, küçük harf ile rakam içermeli.");
 
-            user.PasswordEncrypted = _encryptionService.Encrypt(dto.TemporaryPassword);
+            user.PasswordHash = _passwordHasher.Hash(dto.TemporaryPassword);
             user.MustChangePassword = true;
 
             await _userRepository.AddAsync(user);
@@ -257,7 +256,7 @@ public class UserManager : IUserService
             return ServiceResult.Ok(message);
         }
 
-        user.PasswordEncrypted = null;
+        user.PasswordHash = null;
         await _userRepository.AddAsync(user);
         await _adminActionLogService.RecordAsync(admin?.Email ?? "?", "Kullanıcı Oluşturuldu", user.Email);
 

@@ -2,6 +2,7 @@ using AgizDisSaglikTakip.Core.Utilities.Email;
 using AgizDisSaglikTakip.Core.Utilities.FileStorage;
 using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
 using AgizDisSaglikTakip.Core.Utilities.Security.Google;
+using AgizDisSaglikTakip.Core.Utilities.Security.Hashing;
 using AgizDisSaglikTakip.Core.Utilities.Security.Jwt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,11 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(jwtSettings);
         services.AddSingleton<ITokenService, JwtTokenService>();
 
+        services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+
+        // Artık şifreler için kullanılmıyor (bkz. IPasswordHasher) — sadece LegacyPasswordMigrator'ın
+        // native SQL Server'daki (güvenlik ağı) hâlâ eski formattaki kopyayı, oradan bir gün geri
+        // yüklenirse otomatik taşıyabilmesi için kalıcı olarak burada tutuluyor.
         var aesKey = configuration["Encryption:AesKey"]!;
         services.AddSingleton<IEncryptionService>(new AesEncryptionService(aesKey));
 

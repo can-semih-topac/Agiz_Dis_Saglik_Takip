@@ -1,5 +1,5 @@
 using AgizDisSaglikTakip.Business.Constants;
-using AgizDisSaglikTakip.Core.Utilities.Security.Encryption;
+using AgizDisSaglikTakip.Core.Utilities.Security.Hashing;
 using AgizDisSaglikTakip.DataAccess.Contexts;
 using AgizDisSaglikTakip.Entities;
 using AgizDisSaglikTakip.Entities.Enums;
@@ -13,7 +13,7 @@ namespace AgizDisSaglikTakip.Business.Seed;
 // yüklendiğinde olduğu gibi) hiçbir şey yapmadan çıkar.
 public static class DemoDataSeeder
 {
-    public static async Task SeedAsync(AppDbContext context, IEncryptionService encryptionService)
+    public static async Task SeedAsync(AppDbContext context, IPasswordHasher passwordHasher)
     {
         if (await context.Users.AnyAsync(u => u.Email == DemoAccountConstants.TemplateEmail))
             return;
@@ -21,13 +21,13 @@ public static class DemoDataSeeder
         var now = DateTime.Now;
         // Kimsenin bilmediği rastgele bir şifre — demo hesabına giriş zaten şifreyle değil,
         // "Tanıtımı Göster" butonuyla yapılıyor (bkz. DemoManager).
-        var placeholderPassword = encryptionService.Encrypt(Guid.NewGuid().ToString("N"));
+        var placeholderPassword = passwordHasher.Hash(Guid.NewGuid().ToString("N"));
 
         var template = new User
         {
             Email = DemoAccountConstants.TemplateEmail,
             FullName = "Canan Dinçel",
-            PasswordEncrypted = placeholderPassword,
+            PasswordHash = placeholderPassword,
             PhoneNumber = "5000000000",
             BirthDate = new DateOnly(1995, 4, 12),
             CreatedAt = now
@@ -36,7 +36,7 @@ public static class DemoDataSeeder
         {
             Email = DemoAccountConstants.DemoEmail,
             FullName = "Canan Dinçel",
-            PasswordEncrypted = placeholderPassword,
+            PasswordHash = placeholderPassword,
             IsDemo = true,
             PhoneNumber = "5000000000",
             CreatedAt = now

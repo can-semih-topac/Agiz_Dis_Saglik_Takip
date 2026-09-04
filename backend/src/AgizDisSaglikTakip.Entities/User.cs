@@ -8,7 +8,8 @@ public class User
     public string Email { get; set; } = string.Empty;
     public Role Role { get; set; } = Role.User;
     // Google ile oluşturulan hesaplarda kullanıcı henüz kendi şifresini belirlemediği için boş olabilir.
-    public string? PasswordEncrypted { get; set; }
+    // Geri döndürülemez (one-way) BCrypt hash'i — bkz. IPasswordHasher.
+    public string? PasswordHash { get; set; }
     // Admin panelinden geçici şifreyle oluşturulan admin hesaplarında true olur, şifre değiştirilince false'a döner.
     public bool MustChangePassword { get; set; }
     // "Tanıtımı Göster" ile giriş yapılan tek canlı demo hesabında true — her girişte verileri sıfırlanır.
